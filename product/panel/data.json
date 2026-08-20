@@ -1,0 +1,195 @@
+{
+  "updated_at": "骨架模板",
+  "data_source": "AidaPulse 看板数据源。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。本文件为骨架空模板，新项目复制后在 current/backlog/sprints/burnout/events 中填入项目数据。",
+  "current": {
+    "sprint": "未启动",
+    "stage": "项目准备",
+    "stage_main": "项目准备",
+    "status": "Not Started",
+    "next": "",
+    "blocked": "无"
+  },
+  "checklist": {
+    "项目准备阶段": {
+      "input": [
+        "PO 项目意图",
+        "初始资料收集"
+      ],
+      "action": [
+        "接收项目意图",
+        "辅助 PO 形成初始 PCB 和 Backlog 雏形"
+      ],
+      "output": [
+        "初始 PCB",
+        "初始 Backlog"
+      ],
+      "transition": "可进入 Backlog Grooming"
+    },
+    "Backlog Grooming": {
+      "input": [
+        "PCB",
+        "Backlog",
+        "白皮书",
+        "会议治理规则"
+      ],
+      "action": [
+        "读取 PCB 和 Backlog，建立全局理解",
+        "辅助 PO 整理子任务，以结构化文档/指令集输出",
+        "给出评估反馈，PO 负责澄清模糊点",
+        "记录未决事项"
+      ],
+      "output": [
+        "更新后的 Backlog",
+        "未决议题记录",
+        "更新后的 manifest（PCB 成型后同步记忆）"
+      ],
+      "transition": "PCB + Backlog + 未决议题齐备后进入 Planning"
+    },
+    "Planning": {
+      "input": [
+        "Backlog",
+        "未决议题",
+        "上一轮 Retrospective 纪要（如有）",
+        "会议治理规则、会议纪要模板"
+      ],
+      "action": [
+        "开场与范围确认（先咨询未决议题进度，短 Sprint 无视）",
+        "从 Backlog、反思结论、候补项池拉取候选",
+        "三级收敛：范围确认 → DoD 检查 → 锁定正式输入/候补/暂缓",
+        "执行顺序确认（Aida 建议，PO 确认）",
+        "产出 Sprint 启动收口文档",
+        "回写资产（Backlog、manifest、state）"
+      ],
+      "output": [
+        "Sprint 启动收口文档",
+        "更新后的 Backlog",
+        "更新后的 manifest 和 state"
+      ],
+      "transition": "可进入 Sprint In Progress（或项目交付）"
+    },
+    "Sprint In Progress": {
+      "input": [
+        "Sprint 启动收口文档",
+        "Backlog、manifest、state",
+        "Aida SKILL 执行载体"
+      ],
+      "action": [
+        "长 Sprint：Aida 与 PO 共同决定负责人/agent，并行执行并追踪进度；agent 自动获取，人类通过输入与交付物推进到待检查，Aida 做 DoD 关闭",
+        "短 Sprint：Aida 自行将任务交给 agent，按依赖关系并行/串行执行并追踪进度",
+        "每个任务完结后立即做 DoD 检查（不等阶段 5）→ 广播",
+        "从 manifest 找到 in_progress 任务继续，或启动下一个 pending 项",
+        "推进任务执行 → 产生异步广播事件",
+        "完成一个任务后先回核主事实源，再启动下一个 → 广播",
+        "调用 AI 本身或其他专项 Agent 自动执行 SIS → 广播"
+      ],
+      "output": [
+        "任务交付物",
+        "更新后的 state.md",
+        "审计轨迹",
+        "异步广播事件日志"
+      ],
+      "transition": "所有任务完成后进入 Sprint Completed"
+    },
+    "Sprint Completed": {
+      "input": [
+        "Sprint 启动收口文档（对照 DoD 定义）",
+        "state.md 状态快照",
+        "所有任务的交付物"
+      ],
+      "action": [
+        "检查交付完整性",
+        "读取启动文档中的 DoD 定义",
+        "对全部任务做一次总体 DoD 复查（每任务已单独 DoD）",
+        "逐项对照实际产出做通过/不通过判断",
+        "形成 DoD 对照表",
+        "对未通过项给出处理建议",
+        "自动发起 Review"
+      ],
+      "output": [
+        "DoD 对照表",
+        "Review 发起通知"
+      ],
+      "transition": "可进入 Review"
+    },
+    "Review": {
+      "input": [
+        "Sprint 启动收口文档（对照承诺）",
+        "DoD 对照表",
+        "所有交付物、审计轨迹",
+        "会议纪要模板"
+      ],
+      "action": [
+        "开场与范围确认",
+        "回顾 Sprint 原始承诺",
+        "Aida 汇报完成情况",
+        "审查式清单：目标 / 交付物 / Aida 表现 / 一致性 / 风险",
+        "PO 反馈与认可判断（必须由 PO 给出正式判断）",
+        "Backlog 与状态处理",
+        "决定下一阶段（检查 Backlog 池是否空，空则询问 PO 是否交付项目）"
+      ],
+      "output": [
+        "Review 报告（含 DoD 对照表和审查结论）",
+        "更新后的 Backlog（关闭完成项，未通过项回流）"
+      ],
+      "transition": "Passed/With Observation → Retrospective 判断；Failed → 回流 Sprint In Progress"
+    },
+    "Retrospective": {
+      "input": [
+        "Review 报告、审计轨迹",
+        "Sprint 中的异步广播事件日志",
+        "会议纪要模板"
+      ],
+      "action": [
+        "开场与范围确认",
+        "汇报过程数据（风险、阻塞、未通过项、关键事件）",
+        "团队回顾（PO 反馈：做得好 / 做得不好）",
+        "识别瓶颈（流程 / 协作 / 工具 / 质量）",
+        "形成改进项（方向、责任人、优先级）",
+        "判断回流方向（回流规则 / 新增 Backlog / 仅记录）",
+        "产出反思纪要"
+      ],
+      "output": [
+        "反思纪要",
+        "改进项清单",
+        "回流规则或新增 Backlog 项"
+      ],
+      "transition": "可进入 Planning Input Ready"
+    },
+    "Planning Input Ready": {
+      "input": [
+        "Review 报告",
+        "反思纪要（可选，如有）",
+        "Backlog（检查剩余项）"
+      ],
+      "action": [
+        "从反思结论中提取候选项（如有反思纪要）",
+        "整理为 Planning 输入候选清单",
+        "检查 Backlog 是否还有剩余项"
+      ],
+      "output": [
+        "Planning 输入候选清单"
+      ],
+      "transition": "Backlog 燃尽 → 项目交付；有剩余 → 进入 Planning"
+    },
+    "项目交付": {
+      "input": [
+        "Backlog 已燃尽（无剩余项）"
+      ],
+      "action": [
+        "Aida 生成项目报告并询问 PO 意见",
+        "PO 否决 → 进入新 Planning；PO 同意 → 交付项目产品、项目报告、evolution_log 等项目资产"
+      ],
+      "output": [
+        "可交付的软件产品"
+      ],
+      "transition": "流程结束"
+    }
+  },
+  "backlog": [],
+  "sprints": [],
+  "burnout": {
+    "total": 0,
+    "points": []
+  },
+  "events": []
+}

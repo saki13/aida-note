@@ -1,0 +1,79 @@
+{
+  "updated_at": "2026-08-20",
+  "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
+  "current": {
+    "sprint": "Sprint 1",
+    "stage": "Sprint In Progress",
+    "stage_main": "Sprint In Progress",
+    "status": "Sprint 1 执行中（ENV-1 项目脚手架搭建，环境阻塞已解除）",
+    "next": "完成 ENV-1 -> ENV-2 -> ARCH-1/ARCH-2，每任务即做 DoD 检查",
+    "blocked": "无（Rust 1.97.1 已由 PO 装好并验证）"
+  },
+  "backlog": [
+    { "id": "ENV-1", "title": "项目脚手架搭建", "category": "工程基础", "priority": "P0", "status": "in_progress" },
+    { "id": "ENV-2", "title": "核心依赖接入", "category": "工程基础", "priority": "P0", "status": "pending" },
+    { "id": "ARCH-1", "title": "系统架构设计", "category": "架构设计", "priority": "P0", "status": "pending" },
+    { "id": "ARCH-2", "title": "文件与状态管理架构", "category": "架构设计", "priority": "P0", "status": "pending" },
+    { "id": "UI-1", "title": "界面布局设计", "category": "UI 设计", "priority": "P0", "status": "pending" },
+    { "id": "UI-2", "title": "交互设计", "category": "UI 设计", "priority": "P0", "status": "pending" },
+    { "id": "UI-3", "title": "视觉设计", "category": "UI 设计", "priority": "P1", "status": "pending" },
+    { "id": "FUNC-1", "title": "多标签文件编辑", "category": "功能实现", "priority": "P0", "status": "pending" },
+    { "id": "FUNC-2", "title": "多语法高亮", "category": "功能实现", "priority": "P0", "status": "pending" },
+    { "id": "FUNC-3", "title": "Markdown 同屏所见即所得", "category": "功能实现", "priority": "P0", "status": "pending" },
+    { "id": "FUNC-4", "title": "mermaid 编写 + 实时渲染", "category": "功能实现", "priority": "P0", "status": "pending" },
+    { "id": "FUNC-5", "title": "代码格式化（4 种语言，SQL 暂不支持）", "category": "功能实现", "priority": "P0", "status": "pending" },
+    { "id": "FUNC-6", "title": "文件对比（双栏 diff + 剪贴板对比）", "category": "功能实现", "priority": "P0", "status": "pending" },
+    { "id": "FUNC-7", "title": "搜索 / 替换", "category": "功能实现", "priority": "P0", "status": "pending" },
+    { "id": "FUNC-8", "title": "软换行展示", "category": "功能实现", "priority": "P0", "status": "pending" },
+    { "id": "FUNC-9", "title": "主题切换", "category": "功能实现", "priority": "P1", "status": "pending" },
+    { "id": "FUNC-10", "title": "自动保存 / 崩溃恢复草稿（临时目录，不留碎片）", "category": "功能实现", "priority": "P1", "status": "pending" },
+    { "id": "FUNC-11", "title": "最近文件列表", "category": "功能实现", "priority": "P1", "status": "pending" },
+    { "id": "AI-1", "title": "AI 接入（润色 / 问答 / mermaid 修复）", "category": "AI 接入", "priority": "P1", "status": "pending" }
+  ],
+  "sprints": [
+    { "id": "Sprint 1", "theme": "地基", "items": ["ENV-1", "ENV-2", "ARCH-1", "ARCH-2"] },
+    { "id": "Sprint 2", "theme": "核心", "items": ["UI-1", "UI-2", "UI-3", "FUNC-1", "FUNC-2"] },
+    { "id": "Sprint 3", "theme": "增强", "items": ["FUNC-3", "FUNC-4", "FUNC-5", "FUNC-6", "FUNC-7", "FUNC-8"] },
+    { "id": "Sprint 4", "theme": "体验/AI", "items": ["FUNC-9", "FUNC-10", "FUNC-11", "AI-1"] }
+  ],
+  "burnout": {
+    "total": 19,
+    "points": []
+  },
+  "events": [
+    {
+      "date": "2026-08-20",
+      "level": "P1",
+      "type": "授权接收",
+      "summary": "PO 授权 Aida 4 次短 Sprint（AS-8，decision-008）；附加要求：流程正义/记录过程资产/及时更新 Evolution Log",
+      "detail": "一次授权 = 一个完整 Sprint 闭环（阶段 3-8）；预计 4 次燃尽 Backlog 池；低风险变更可自批，中/高风险回 PO"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P1",
+      "type": "阶段切换",
+      "summary": "Planning -> Sprint In Progress（Sprint 1 工程地基启动，AS-8 授权模式下自主切换）",
+      "detail": "进入条件核对：Sprint 启动收口文档 ✓ / Backlog ✓ / manifest+state ✓ / SKILL 执行载体 ✓"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P2",
+      "type": "任务开始",
+      "summary": "ENV-1 项目脚手架搭建 开始执行（Tauri 2 + Vue 3 + TS + Vite -> app/）"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P1",
+      "type": "环境阻塞",
+      "summary": "ENV-1 遇环境阻塞：Rust 工具链未安装（Tauri 2 编译必需）；IDE 沙箱截断 rustup 下载进程",
+      "detail": "已就绪：Node v23.10.0 / npm 10.9.2 / VS 2022 BuildTools(含 MSVC) / rustup 本体；缺：stable-x86_64-pc-windows-msvc 工具链。PO 接手安装（用户级 rustup toolchain install）。环境类操作超出沙域能力属客观阻塞，非流程风险"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P1",
+      "type": "阻塞解除",
+      "summary": "Rust 1.97.1 + cargo 1.97.1 安装完成（PO 系统终端安装），WebView2 已确认存在，环境全齐",
+      "detail": "ENV-1 恢复执行"
+    }
+  ]
+}
