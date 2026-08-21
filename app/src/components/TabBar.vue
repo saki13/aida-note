@@ -7,10 +7,11 @@
  */
 
 import { ref } from "vue";
-import { NDropdown, type DropdownOption } from "naive-ui";
+import { NDropdown, useDialog, type DropdownOption } from "naive-ui";
 import { useTabsStore } from "../stores/tabsStore";
 
 const tabsStore = useTabsStore();
+const dialog = useDialog();
 
 const showMenu = ref(false);
 const menuX = ref(0);
@@ -36,10 +37,10 @@ async function onSelect(key: string): Promise<void> {
   const id = menuTabId.value;
   if (id === null) return;
   if (key === "close") {
-    await tabsStore.closeTab(id);
+    await tabsStore.closeTab(id, { dialog });
   } else if (key === "close-others") {
     for (const t of [...tabsStore.tabs]) {
-      if (t.id !== id) await tabsStore.closeTab(t.id);
+      if (t.id !== id) await tabsStore.closeTab(t.id, { dialog });
     }
   } else if (key === "save-as") {
     await tabsStore.saveTabAs(id);
@@ -47,7 +48,7 @@ async function onSelect(key: string): Promise<void> {
 }
 
 function onCloseClick(tabId: number): void {
-  void tabsStore.closeTab(tabId);
+  void tabsStore.closeTab(tabId, { dialog });
 }
 </script>
 

@@ -7,7 +7,7 @@
  */
 
 import { onMounted, onBeforeUnmount, provide, ref } from "vue";
-import { NDialogProvider, NMessageProvider } from "naive-ui";
+import { NDialogProvider, NMessageProvider, useDialog } from "naive-ui";
 import ToolBar from "../components/ToolBar.vue";
 import TabBar from "../components/TabBar.vue";
 import EditorPane from "../components/EditorPane.vue";
@@ -16,6 +16,7 @@ import { useTabsStore } from "../stores/tabsStore";
 import { readFile } from "../services/fileService";
 
 const tabsStore = useTabsStore();
+const dialog = useDialog();
 const cursor = ref({ line: 1, col: 1 });
 
 interface EditorApi {
@@ -55,8 +56,13 @@ async function setupTauriEvents(): Promise<void> {
 
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
     unlistenClose = await getCurrentWindow().onCloseRequested(async (event) => {
-      const ok = await tabsStore.confirmCloseAllDirty();
-      if (!ok) event.preventDefault();
+      try {
+        const ok = await tabsStore.confirmCloseAllDirty(dialog);
+        if (!ok) event.preventDefault();
+      } catch (e) {
+        // 确认流程异常时不阻止关闭（避免窗口无法关闭）
+        console.error("close confirm failed:", e);
+      }
     });
   } catch (e) {
     console.error("setup tauri events failed:", e);

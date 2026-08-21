@@ -9,7 +9,7 @@
 
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
-import { useDialog } from "naive-ui";
+import type { DialogApi } from "naive-ui";
 import type { EditorState } from "@codemirror/state";
 import {
   pickFiles,
@@ -196,9 +196,11 @@ export const useTabsStore = defineStore("tabs", () => {
     return opened;
   }
 
-  /** dirty 三选确认（ARCH-2 §2.2）。返回 'save' | 'discard' | 'cancel'。 */
-  function askSaveDiscardCancel(title: string): Promise<CloseAction> {
-    const dialog = useDialog();
+  /**
+   * dirty 三选确认（ARCH-2 §2.2）。返回 'save' | 'discard' | 'cancel'。
+   * dialog 实例由组件层注入（onCloseRequested 等非组件上下文拿不到 useDialog）。
+   */
+  function askSaveDiscardCancel(title: string, dialog: DialogApi): Promise<CloseAction> {
     return new Promise<CloseAction>((resolve) => {
       dialog.warning({
         title: "未保存的更改",
@@ -219,7 +221,7 @@ export const useTabsStore = defineStore("tabs", () => {
    */
   async function closeTab(
     tabId: number,
-    opts?: { force?: boolean }
+    opts?: { force?: boolean; dialog?: DialogApi }
   ): Promise<boolean> {
     const tab = findTabById(tabId);
     if (!tab) return true;
@@ -227,7 +229,15 @@ export const useTabsStore = defineStore("tabs", () => {
       removeTab(tabId);
       return true;
     }
-    const action = await askSaveDiscardCancel(tab.title);
+    if (!opts?.dialog) {
+      // 防御降级：无 dialog 实例时用原生 confirm（确定=不保存关闭，取消=保留）
+      if (window.confirm(`未保存的更改：${tab.title}。不保存并关闭？`)) {
+        removeTab(tabId);
+        return true;
+      }
+      return false;
+    }
+    const action = await askSaveDiscardCancel(tab.title, opts.dialog);
     if (action === "cancel") return false;
     if (action === "save") {
       const ok = await saveTab(tabId);
@@ -248,12 +258,12 @@ export const useTabsStore = defineStore("tabs", () => {
 
   /**
    * 窗口关闭前的合并确认（ARCH-2 §2.2 窗口关闭）：存在 dirty 标签时
-   * 弹合并提示三选（保存全部 / 不保存 / 取消）。
+   * 弹合并提示三选（保存全部 / 不保存 / 取消）。dialog 由组件层注入。
+   * 返回是否允许关闭（true=允许）。
    */
-  async function confirmCloseAllDirty(): Promise<boolean> {
+  async function confirmCloseAllDirty(dialog: DialogApi): Promise<boolean> {
     const dirtyTabs = tabs.value.filter((t) => t.dirty);
     if (dirtyTabs.length === 0) return true;
-    const dialog = useDialog();
     return new Promise<boolean>((resolve) => {
       dialog.warning({
         title: "未保存的更改",

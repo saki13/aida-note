@@ -9,11 +9,11 @@
     "dialog:default",
     "store:default",
     {
-      "identifier": "fs:read-text-file",
+      "identifier": "fs:allow-read-text-file",
       "allow": [{ "path": "**" }]
     },
     {
-      "identifier": "fs:write-text-file",
+      "identifier": "fs:allow-write-text-file",
       "allow": [{ "path": "**" }]
     }
   ]
