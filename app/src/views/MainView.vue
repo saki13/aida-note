@@ -58,11 +58,14 @@ async function setupTauriEvents(): Promise<void> {
     unlistenClose = await getCurrentWindow().onCloseRequested(async (event) => {
       const hasDirty = tabsStore.tabs.some((t) => t.dirty);
       if (!hasDirty) return; // 无 dirty：直接关闭
-      // Tauri 推荐模式：同步阻止本次关闭，确认后显式二次 close
+      // Tauri 拦截模式：同步阻止本次关闭；确认通过后用 destroy() 直接销毁窗口。
+      // 不能用 close()：close() 会再次触发 onCloseRequested，在首次拦截的时序下仍可能被
+      // 再次 preventDefault 导致关不掉。destroy() 不重新触发 close requested，是官方推荐
+      // 的「拦截后二次关闭」正确方式。
       event.preventDefault();
       try {
         const ok = await tabsStore.confirmCloseAllDirty(dialog);
-        if (ok) await getCurrentWindow().close(); // 二次请求关闭（dirty 已处理则直接通过）
+        if (ok) await getCurrentWindow().destroy();
       } catch (e) {
         console.error("close confirm failed:", e);
         await getCurrentWindow().destroy(); // 异常兜底：强制销毁，避免窗口无法关闭
