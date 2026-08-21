@@ -5,8 +5,8 @@
     "sprint": "Sprint 2",
     "stage": "Planning",
     "stage_main": "Sprint In Progress",
-    "status": "Sprint 2 执行中（启动收口完成，UI-1 界面布局设计进行中；AS-8 授权用量 2/4 将于收口时记入）",
-    "next": "UI-1（Naive UI 引入 + 四区布局）-> FUNC-1（Tauri 三插件 + 多标签）-> FUNC-2 -> UI-2 -> UI-3 -> Sprint 2 收口",
+    "status": "Sprint 2 执行中（UI-1 已完成，FUNC-1 多标签文件编辑进行中；AS-8 授权用量 2/4 将于收口时记入）",
+    "next": "FUNC-1（Tauri 三插件 + Naive UI + 多标签）-> FUNC-2 -> UI-2 -> UI-3 -> Sprint 2 收口",
     "blocked": "无"
   },
   "backlog": [
@@ -137,6 +137,20 @@
       "type": "任务开始",
       "summary": "UI-1 界面布局设计开始执行（标签栏 / 工具栏 / 侧栏 / 状态栏四区布局）",
       "detail": "首次引入 Naive UI（npm 源无截断史，风险低）；产出以 SIS-UI-1 验收标准为准"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "UI-1 完成（DoD 7/7 过）：界面布局设计文档 app/docs/ui-layout.md，commit 1169dc4",
+      "detail": "三段式+可折叠 AI 侧栏 / 三视图切换（无路由）/ 完整标签交互 / 工具栏 12 项功能映射无缺项 / 状态栏五槽位；与 ARCH-1/2 一致性核查通过"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P1",
+      "type": "环境阻塞",
+      "summary": "FUNC-1 前置环境阻塞：rustup 自动升级 stable 到 1.98.0，组件下载被沙箱截断，工具链被破坏（bin 下仅剩 cargo，manifest 缺失）",
+      "detail": "镜像方案部分验证成功：rsproxy sparse 源生效（cargo fetch 193 crates index 更新正常）；失败点为 rustup 组件分发（6 components ≈ 300MB+，RUSTUP_DIST_SERVER=rsproxy.cn 仍超沙箱时长限制）。rustup 半途恢复时已删除旧组件，工具链需完整重装。观察点 5（镜像方案有效性）命中，触发「沙箱长时命令执行规则」skill 立项评估。转交 PO 系统终端执行"
     }
   ]
 }
