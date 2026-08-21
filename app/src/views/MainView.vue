@@ -7,7 +7,7 @@
  */
 
 import { onMounted, onBeforeUnmount, provide, ref } from "vue";
-import { NDialogProvider, NMessageProvider, useDialog } from "naive-ui";
+import { useDialog } from "naive-ui";
 import ToolBar from "../components/ToolBar.vue";
 import TabBar from "../components/TabBar.vue";
 import EditorPane from "../components/EditorPane.vue";
@@ -98,18 +98,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <n-dialog-provider>
-    <n-message-provider>
-      <div class="main-view">
-        <ToolBar />
-        <TabBar />
-        <div class="editor-area">
-          <EditorPane @cursor="cursor = $event" @ready="editorApi.undo = $event.undo; editorApi.redo = $event.redo" />
-        </div>
-        <StatusBar :cursor="cursor" />
-      </div>
-    </n-message-provider>
-  </n-dialog-provider>
+  <div class="main-view">
+    <ToolBar />
+    <TabBar />
+    <div class="editor-area">
+      <EditorPane @cursor="cursor = $event" @ready="editorApi.undo = $event.undo; editorApi.redo = $event.redo" />
+    </div>
+    <StatusBar :cursor="cursor" />
+  </div>
 </template>
 
 <style scoped>

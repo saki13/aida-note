@@ -1,9 +1,14 @@
 <script setup lang="ts">
+import { NDialogProvider, NMessageProvider } from "naive-ui";
 import MainView from "./views/MainView.vue";
 </script>
 
 <template>
-  <MainView />
+  <n-dialog-provider>
+    <n-message-provider>
+      <MainView />
+    </n-message-provider>
+  </n-dialog-provider>
 </template>
 
 <style>
