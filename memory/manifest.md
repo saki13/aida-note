@@ -14,9 +14,9 @@
 | `current_sprint` | `Sprint 2（核心）` |
 | `current_stage` | `Sprint In Progress` |
 | `current_theme` | `核心（UI-1/2/3 + FUNC-1/2）` |
-| `current_task` | `UI-2 交互设计（FUNC-2 已闭环）` |
-| `task_status` | `pending_start` |
-| `task_progress` | `Sprint 1 已闭环（decision-011）；Sprint 2 执行中：UI-1/FUNC-1/FUNC-2 已完成（UI-1 commit 1169dc4；FUNC-1 commit 4648820 + 52494ea；FUNC-2 commit afb510d，markRaw 三重根因修复见 decision-013），前端自测资产 test:ui/test:multitab 就绪；剩 UI-2/UI-3 |
+| `current_task` | `Sprint 2 收口（阶段 4-8）` |
+| `task_status` | `in_progress` |
+| `task_progress` | `Sprint 1 已闭环；Sprint 2 全部 5 任务完成：UI-1（1169dc4）、FUNC-1（4648820+52494ea）、FUNC-2（afb510d，decision-013）、UI-2/UI-3（5658ab8，合并收口循 decision-011 先例，decision-014）；自测资产 test:ui/test:multitab 就绪 |
 
 ---
 

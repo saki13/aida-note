@@ -130,6 +130,17 @@
 - **依据**：SIS-FUNC-2 验收标准 7/7（2026-08-21）；diag22/27 实例一致性铁证；PO 指令（2026-08-21 自测能力建设 + 短 Sprint 自主决策授权）。
 - **影响范围**：app/src/components/EditorPane.vue、app/src/stores/tabsStore.ts、app/src/services/languageRegistry.ts、app/src/components/StatusBar.vue、app/scripts/（ui-smoke + multitab-smoke）、app/package.json；Backlog / data.json / state / manifest（四边同步）；evolution_log.md；后续全部前端组件的 store 编写方式。
 
+### decision-014 · 2026-08-21 · UI-2/UI-3 完成（交互设计 + 视觉设计，同型合并收口）
+
+- **背景**：FUNC-2 收口后 Sprint 2 剩 UI-2/UI-3 两项纯设计文档任务，PO 已授权短 Sprint 内自主决策（「这是短sprint 你自己决定就可以」）。两任务同型（纯文档）、同日连续完成、无中间阻塞与 PO 交互，符合 decision-011 确立的合并收口判定标准。
+- **决策**：
+  1. UI-2 收口：`app/docs/ui-interactions.md` 产出（四条交互链路：所见即所得块级双态 Typora 式 / mermaid 原位渲染 + 点击进编辑 + AI 修复入口 / AI 润色选区现场四动作 + diff 气泡接受撤销 + 问答侧栏回答插光标 / 对比双栏行映射滚动联动 + 差异跳转），SIS-UI-2 验收 7/7 过。
+  2. UI-3 收口：`app/docs/ui-visual.md` 产出（明暗双主题三态解析 light/dark/system / CM 主题复用 FUNC-2 themeCompartment 联动 / xicons 图标语义锁定含 UI-1 工具栏 12 项映射 / 系统字体栈 + 等宽代码栈 / 应用图标约定），SIS-UI-3 验收 6/6 过。
+  3. 两文档与 UI-1/ARCH-1/ARCH-2/FUNC-2 机制一致性核查通过；成为 FUNC-3/4/6/9 与 AI-1 的直接实现依据。
+  4. Sprint 2 全部 5 任务完成（UI-1/2/3 + FUNC-1/2），commit 5658ab8，进入 Sprint 2 收口（阶段 4-8）。
+- **依据**：SIS-UI-2 §5 验收 7/7、SIS-UI-3 §5 验收 6/6（2026-08-21）；decision-011 合并收口先例；PO 自主决策授权。
+- **影响范围**：app/docs/ui-interactions.md、app/docs/ui-visual.md；Backlog / data.json / state / manifest（四边同步）；FUNC-3/FUNC-4/FUNC-6/FUNC-9/AI-1 的实现依据。
+
 ---
 
 <!-- 后续在此追加，格式：

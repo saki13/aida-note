@@ -5,8 +5,8 @@
     "sprint": "Sprint 2",
     "stage": "Planning",
     "stage_main": "Sprint In Progress",
-    "status": "Sprint 2 执行中（UI-1/FUNC-1/FUNC-2 已完成，剩 UI-2/UI-3；前端自测能力已建立：test:ui/test:multitab）",
-    "next": "UI-2（交互设计）-> UI-3 -> Sprint 2 收口",
+    "status": "Sprint 2 全部 5 任务完成（UI-1/2/3 + FUNC-1/2），进入 Sprint 收口（DoD 复查 + Review）",
+    "next": "Sprint 2 收口（阶段 4-8 闭环）-> Sprint 3（增强：FUNC-3~8）",
     "blocked": "无"
   },
   "backlog": [
@@ -15,8 +15,8 @@
     { "id": "ARCH-1", "title": "系统架构设计", "category": "架构设计", "priority": "P0", "status": "done" },
     { "id": "ARCH-2", "title": "文件与状态管理架构", "category": "架构设计", "priority": "P0", "status": "done" },
     { "id": "UI-1", "title": "界面布局设计", "category": "UI 设计", "priority": "P0", "status": "done" },
-    { "id": "UI-2", "title": "交互设计", "category": "UI 设计", "priority": "P0", "status": "pending" },
-    { "id": "UI-3", "title": "视觉设计", "category": "UI 设计", "priority": "P1", "status": "pending" },
+    { "id": "UI-2", "title": "交互设计", "category": "UI 设计", "priority": "P0", "status": "done" },
+    { "id": "UI-3", "title": "视觉设计", "category": "UI 设计", "priority": "P1", "status": "done" },
     { "id": "FUNC-1", "title": "多标签文件编辑", "category": "功能实现", "priority": "P0", "status": "done" },
     { "id": "FUNC-2", "title": "多语法高亮", "category": "功能实现", "priority": "P0", "status": "done" },
     { "id": "FUNC-3", "title": "Markdown 同屏所见即所得", "category": "功能实现", "priority": "P0", "status": "pending" },
@@ -172,6 +172,13 @@
       "type": "任务完成",
       "summary": "FUNC-2 多语法高亮完成（DoD 7/7 过）：5 语言高亮/主题切换/多标签语言独立全验收通过，commit afb510d",
       "detail": "排障过程发现三重根因：①初始 state 未注册 Compartment 槽位（reconfigure 被 CM6 静默忽略）②watch 时序污染 cmState 缓存 ③决定性发现：EditorState 存入 Pinia reactive 被 Vue 深度代理破坏 Compartment 身份（=== 失败），markRaw() 修复。27 个渐进式诊断脚本定位「无报错但功能失效」类问题"
+    },
+    {
+      "date": "2026-08-21",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "UI-2 交互设计 + UI-3 视觉设计完成（DoD 7/7 + 6/6 过，合并收口循 decision-011 同型任务先例）：ui-interactions.md 四链路 + ui-visual.md 双主题，commit 5658ab8",
+      "detail": "UI-2：所见即所得块级双态（光标块源码/其余渲染）/mermaid 原位渲染+AI 修复入口/AI 润色选区现场四动作+diff 气泡/问答侧栏插光标/对比双栏行映射联动+差异跳转；UI-3：明暗双主题三态解析/CM 主题复用 FUNC-2 themeCompartment/xicons 图标语义锁定/系统字体栈。Sprint 2 全部 5 任务完成，进入收口"
     }
   ]
 }
