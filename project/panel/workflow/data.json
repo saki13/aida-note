@@ -2,18 +2,18 @@
   "updated_at": "2026-08-20",
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
-    "sprint": "Sprint 1",
-    "stage": "Sprint In Progress",
+    "sprint": "Sprint 2",
+    "stage": "Planning",
     "stage_main": "Sprint In Progress",
-    "status": "Sprint 1 执行中（ENV-1 项目脚手架搭建，环境阻塞已解除）",
-    "next": "完成 ENV-1 -> ENV-2 -> ARCH-1/ARCH-2，每任务即做 DoD 检查",
-    "blocked": "无（Rust 1.97.1 已由 PO 装好并验证）"
+    "status": "Sprint 1 已闭环（4/4 任务 DoD 通过，Review 结论 Passed With Observation，AS-8 授权用量 1/4）；Sprint 2 Planning 进行中",
+    "next": "Sprint 2 启动收口 -> UI-1（Naive UI 引入）-> FUNC-1（Tauri 三插件安装，镜像方案首考）-> FUNC-2 -> UI-2 -> UI-3",
+    "blocked": "无"
   },
   "backlog": [
-    { "id": "ENV-1", "title": "项目脚手架搭建", "category": "工程基础", "priority": "P0", "status": "in_progress" },
-    { "id": "ENV-2", "title": "核心依赖接入", "category": "工程基础", "priority": "P0", "status": "pending" },
-    { "id": "ARCH-1", "title": "系统架构设计", "category": "架构设计", "priority": "P0", "status": "pending" },
-    { "id": "ARCH-2", "title": "文件与状态管理架构", "category": "架构设计", "priority": "P0", "status": "pending" },
+    { "id": "ENV-1", "title": "项目脚手架搭建", "category": "工程基础", "priority": "P0", "status": "done" },
+    { "id": "ENV-2", "title": "核心依赖接入", "category": "工程基础", "priority": "P0", "status": "done" },
+    { "id": "ARCH-1", "title": "系统架构设计", "category": "架构设计", "priority": "P0", "status": "done" },
+    { "id": "ARCH-2", "title": "文件与状态管理架构", "category": "架构设计", "priority": "P0", "status": "done" },
     { "id": "UI-1", "title": "界面布局设计", "category": "UI 设计", "priority": "P0", "status": "pending" },
     { "id": "UI-2", "title": "交互设计", "category": "UI 设计", "priority": "P0", "status": "pending" },
     { "id": "UI-3", "title": "视觉设计", "category": "UI 设计", "priority": "P1", "status": "pending" },
@@ -74,6 +74,55 @@
       "type": "阻塞解除",
       "summary": "Rust 1.97.1 + cargo 1.97.1 安装完成（PO 系统终端安装），WebView2 已确认存在，环境全齐",
       "detail": "ENV-1 恢复执行"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P2",
+      "type": "任务进展",
+      "summary": "ENV-1 完成 5/6 验收项：脚手架/vue-ts 模板、功能分层目录、TS strict、ESLint+lint 通过、git 初始基线（commit d704a31）、前端 build+dev 通过",
+      "detail": "剩余 1 项：npm run tauri dev 弹出窗口需 cargo 首次编译下载 crates，IDE 沙箱截断（同 rustup 案例），待 PO 系统终端验证"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "ENV-1 完成（DoD 六项全过）：Tauri 窗口验证通过（PO 系统终端），git 基线 d704a31，进入 ENV-2",
+      "detail": "PO 反馈：短 Sprint 频繁转交下载类工作不明智。对策（decision-009）：配置 cargo 国内镜像（rsproxy.cn）压缩下载时间，后续编译类命令 Aida 沙箱内自主完成；skill 方案列观察项"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "ENV-2 完成（DoD 5/5 过）：核心依赖接入，commit 6d9ddfa",
+      "detail": "codemirror+5 语言包/mermaid 11/prettier 3/diff 9/pinia 4 全部就绪；沙箱内 npm install 15s 完成（无截断）；最小引用验证（Pinia 注册 + dependencies.ts）lint+build 双通过；进入 ARCH-1"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P1",
+      "type": "阶段切换",
+      "summary": "Sprint In Progress -> Sprint Completed（总体 DoD 复查 23/23 过）",
+      "detail": "DoD 对照表产出；ARCH-1（commit 762409d）/ ARCH-2（commit 6e8bc8a）完成"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P1",
+      "type": "阶段切换",
+      "summary": "Sprint Completed -> Review（AS-8 授权模式自主持有）",
+      "detail": "Review 报告产出；结论异步广播 PO，PO 保留翻案权"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P1",
+      "type": "阶段切换",
+      "summary": "Review -> Planning Input Ready（Retrospective 轻量并入 Evolution Log）",
+      "detail": "反思职能由 Evolution Log Sprint 1 收口回填承担"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P1",
+      "type": "Sprint 闭环",
+      "summary": "Sprint 1 闭环完成（阶段 3-8），授权用量 1/4，余 3 次",
+      "detail": "Backlog 剩余 15 项；Sprint 2 成员（UI-1/2/3、FUNC-1/2）为下一轮 Planning 输入候选"
     }
   ]
 }

@@ -33,13 +33,13 @@
 
 ### 类别 A：工程基础（ENV）
 
-- [ ] P0 ENV-1：项目脚手架搭建（Tauri 2 + Vue 3 + TypeScript + Vite，目录结构 / 构建 / 运行脚本）（执行中，SIS-ENV-1，Sprint 1）
-- [ ] P0 ENV-2：核心依赖接入（CodeMirror 6 / mermaid / Prettier / diff 库）（已排期，SIS-ENV-2）
+- [x] P0 ENV-1：项目脚手架搭建（Tauri 2 + Vue 3 + TypeScript + Vite，目录结构 / 构建 / 运行脚本）（已完成 2026-08-20，SIS-ENV-1，Sprint 1；commit d704a31）
+- [x] P0 ENV-2：核心依赖接入（CodeMirror 6 / mermaid / Prettier / diff 库）（已完成 2026-08-20，SIS-ENV-2，Sprint 1；commit 6d9ddfa）
 
 ### 类别 B：架构设计（ARCH）
 
-- [ ] P0 ARCH-1：系统架构设计（Tauri 主进程与前端职责划分、IPC 接口契约、模块分层）（已排期，SIS-ARCH-1）
-- [ ] P0 ARCH-2：文件与状态管理架构（文件读写、多标签状态、脏标记、设置持久化到 Tauri app config 目录 JSON）（已排期，SIS-ARCH-2）
+- [x] P0 ARCH-1：系统架构设计（Tauri 主进程与前端职责划分、IPC 接口契约、模块分层）（已完成 2026-08-20，SIS-ARCH-1，Sprint 1；commit 762409d）
+- [x] P0 ARCH-2：文件与状态管理架构（文件读写、多标签状态、脏标记、设置持久化到 Tauri app config 目录 JSON）（已完成 2026-08-20，SIS-ARCH-2，Sprint 1；commit 6e8bc8a）
 
 ### 类别 C：UI 设计（UI）
 

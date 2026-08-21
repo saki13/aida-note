@@ -77,6 +77,38 @@
 - **依据**：PO 文本授权（2026-08-20）："授权给aida4次短sprint，按照预定计划不出意外 4次将燃尽backlog池……一定要严格按照工作流程来工作，即便没有我的干预，也要坚持流程正义记录中间的过程资产……一定要及时更新 Evolution Log。看你的了 aida 加油"
 - **影响范围**：state / manifest / data.json（stage 切换至 Sprint In Progress、events[] 记录授权事件）；Sprint 1 执行全程；evolution_log.md；剩余 3 次授权余量。
 
+### decision-009 · 2026-08-20 · ENV-1 完成 + 沙箱下载对策（cargo 镜像加速方案）
+
+- **背景**：ENV-1 六项验收全部通过（脚手架/功能分层/TS strict/ESLint/git 基线 d704a31/Tauri 窗口弹出，窗口验证由 PO 系统终端完成）。期间两次撞 IDE 沙箱限制（rustup 工具链下载、cargo crates 下载），均由 PO 接手。PO 反馈：「短 sprint 经常把工作交给我不是明智之举，要么不用沙箱，要么做个 skill 通过真实环境做下载任务」。
+- **决策**：
+  1. ENV-1 收口（DoD 全过），进入 ENV-2。
+  2. 沙箱下载问题采用**镜像加速方案**：配置 cargo 国内镜像（rsproxy.cn，用户级 `~/.cargo/config.toml`）把 crates 下载时间压进沙箱可承受范围，后续编译类命令由 Aida 在沙箱内自主完成，不再转交 PO。该配置属低风险环境配置（不改项目代码、不影响 Sprint 目标），按 T3 5.1/6 自批。
+  3. skill 方案（AS 沙箱长时命令执行规则）列入 Evolution Log 观察项：若镜像方案在后续 Sprint 仍不够用，正式立项为 product/skills/ 新资产。
+- **依据**：PO 反馈（2026-08-20）+ 沙箱实测（cargo fetch 被截断，与 rustup 同型）。
+- **影响范围**：`~/.cargo/config.toml`（用户级，不入库）；ENV-2 起的执行方式；evolution_log.md。
+
+### decision-010 · 2026-08-20 · ENV-2 完成（核心依赖接入）
+
+- **背景**：ENV-1 收口后立即执行 ENV-2，npm 安装顺利（沙箱内 15 秒完成，npm 源无沙箱截断问题）。
+- **决策**：
+  1. 依赖清单锁定：codemirror ^6.0.2（+ @codemirror/state / @codemirror/view 显式声明）、5 语言包（lang-html/javascript/json/markdown/sql）、mermaid ^11.17.0、prettier ^3.9.6（移入 dependencies，FUNC-5 运行时用）、diff ^9.0.0、pinia ^4.0.3；无 vue-router。
+  2. 验证方式：main.ts 注册 Pinia + src/services/dependencies.ts 静态 import 验证（vue-tsc 全量类型检查覆盖），lint + build 双通过。
+  3. ESLint 补充 ignore：src-tauri/target/**（PO 编译产物误报）。
+- **依据**：SIS-ENV-2 验收标准 5/5 通过（2026-08-20）。
+- **影响范围**：app/package.json / package-lock.json（lockfile 入库实现版本锁定）；main.ts；services/dependencies.ts；eslint.config.js。
+
+### decision-011 · 2026-08-20 · Sprint 1 闭环（ARCH-1/2 完成 + Review 通过 + 授权用量 1/4）
+
+- **背景**：Sprint 1 四任务全部完成（ENV-1 d704a31 / ENV-2 6d9ddfa / ARCH-1 762409d / ARCH-2 6e8bc8a），逐任务 DoD 已过，进入阶段 4-8 闭环收口。ARCH-1/2 为同型纯文档任务、同日连续完成、无中间阻塞与 PO 交互，按 Evolution Log 经验合并为本条决策留痕（异型任务仍逐任务收口）。
+- **决策**：
+  1. ARCH-1 收口：`app/docs/architecture.md` 产出（Rust 最小化 + IPC 插件契约 + services/stores 分层 + 单向依赖规则），commit 762409d。
+  2. ARCH-2 收口：`app/docs/state-architecture.md` 产出（Tab 接口 / 脏标记派生态 / 关闭确认状态机 / UTF-8+BOM 契约 / 设置浅合并），commit 6e8bc8a。两文档成为 FUNC-1/2 与全部 UI 任务的实现蓝图。
+  3. Sprint 1 Review 结论：**Passed With Observation**（23/23 子检查项通过，2 观察项：沙箱转交史已对策化 / Tauri 插件延后属计划内）。Aida 按 AS-8 代行判定，PO 保留翻案权。
+  4. 阶段 7 轻量 Retrospective：反思并入 evolution_log.md（Sprint 1 收口回填记录），不开独立会议。阶段 8 产出 Sprint 2 候选清单（UI-1/2/3、FUNC-1/2）。
+  5. 授权用量：**1/4**，余 3 次。Backlog 未燃尽（4/19），按流程进入 Sprint 2 Planning。
+- **依据**：SIS-ARCH-1/ARCH-2 验收标准全过（2026-08-20）；Sprint_1_DoD对照表（23/23）；AS-8 阶段 3-8 闭环要求；Sprint_1_Review报告。
+- **影响范围**：app/docs/（两架构文档）；project/sprint/（DoD 对照表 / Review 报告 / Sprint 2 候选清单）；project/traces/（audit_trace_sprint1 + events_sprint1）；Backlog / data.json / state / manifest（四边同步收口）；evolution_log.md。
+
 ---
 
 <!-- 后续在此追加，格式：

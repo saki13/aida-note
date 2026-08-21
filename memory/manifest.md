@@ -11,12 +11,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| `current_sprint` | `Sprint 1（工程地基）` |
-| `current_stage` | `Sprint In Progress` |
-| `current_theme` | `工程地基（ENV-1/2 + ARCH-1/2）` |
-| `current_task` | `ENV-1 项目脚手架搭建（app/ 子目录）` |
+| `current_sprint` | `Sprint 2（核心）` |
+| `current_stage` | `Planning` |
+| `current_theme` | `核心（UI-1/2/3 + FUNC-1/2）` |
+| `current_task` | `Sprint 2 Planning（启动收口文档）` |
 | `task_status` | `in_progress` |
-| `task_progress` | `AS-8 授权生效（4 次短 Sprint，decision-008），Sprint 1 执行中：ENV-1 进行中 |
+| `task_progress` | `Sprint 1 已闭环（decision-011）：ENV-1（d704a31）/ ENV-2（6d9ddfa）/ ARCH-1（762409d）/ ARCH-2（6e8bc8a），Review = Passed With Observation，授权用量 1/4；阶段 8 候选清单已产出，Sprint 2 Planning 进行中` |
 
 ---
 
@@ -98,5 +98,5 @@
 
 ## 待完善 / 下一步
 
-- **当前阶段**：Sprint In Progress（AS-8 授权模式：4 次短 Sprint，decision-008）
-- 下一步：ENV-1（脚手架）-> ENV-2（核心依赖）-> ARCH-1/ARCH-2（架构文档）-> Sprint 1 收口（DoD + 四边同步 + Evolution Log）-> Sprint 2/3/4 依锁定顺序执行
+- **当前阶段**：Sprint 2 Planning（AS-8 授权模式：4 次短 Sprint，已用 1 次余 3 次）
+- 下一步：Sprint 2 启动收口 -> UI-1（界面布局，首次引入 Naive UI）-> FUNC-1（多标签，首次装 Tauri fs/dialog/store 三插件--镜像方案首考）-> FUNC-2 -> UI-2 -> UI-3 -> Sprint 2 收口 -> Sprint 3/4 依锁定顺序执行 -> 燃尽转项目交付
