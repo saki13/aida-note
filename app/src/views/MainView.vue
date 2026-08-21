@@ -56,12 +56,16 @@ async function setupTauriEvents(): Promise<void> {
 
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
     unlistenClose = await getCurrentWindow().onCloseRequested(async (event) => {
+      const hasDirty = tabsStore.tabs.some((t) => t.dirty);
+      if (!hasDirty) return; // 无 dirty：直接关闭
+      // Tauri 推荐模式：同步阻止本次关闭，确认后显式二次 close
+      event.preventDefault();
       try {
         const ok = await tabsStore.confirmCloseAllDirty(dialog);
-        if (!ok) event.preventDefault();
+        if (ok) await getCurrentWindow().close(); // 二次请求关闭（dirty 已处理则直接通过）
       } catch (e) {
-        // 确认流程异常时不阻止关闭（避免窗口无法关闭）
         console.error("close confirm failed:", e);
+        await getCurrentWindow().destroy(); // 异常兜底：强制销毁，避免窗口无法关闭
       }
     });
   } catch (e) {

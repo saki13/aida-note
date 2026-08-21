@@ -259,7 +259,8 @@ export const useTabsStore = defineStore("tabs", () => {
   /**
    * 窗口关闭前的合并确认（ARCH-2 §2.2 窗口关闭）：存在 dirty 标签时
    * 弹合并提示三选（保存全部 / 不保存 / 取消）。dialog 由组件层注入。
-   * 返回是否允许关闭（true=允许）。
+   * 返回是否允许关闭（true=允许）。「不保存」会丢弃全部 dirty 标签，
+   * 以便调用方（MainView）二次 close 时直接通过。
    */
   async function confirmCloseAllDirty(dialog: DialogApi): Promise<boolean> {
     const dirtyTabs = tabs.value.filter((t) => t.dirty);
@@ -274,7 +275,11 @@ export const useTabsStore = defineStore("tabs", () => {
           const ok = await saveAllTabs();
           resolve(ok);
         },
-        onNegativeClick: () => resolve(true),
+        onNegativeClick: () => {
+          // 不保存：丢弃全部 dirty 标签（内容丢弃语义）
+          for (const t of [...dirtyTabs]) removeTab(t.id);
+          resolve(true);
+        },
         onClose: () => resolve(false),
         onMaskClick: () => resolve(false),
       });
