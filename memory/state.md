@@ -11,20 +11,20 @@
 - `skill_version`：`v0.1.0`
 - `current_sprint`：`Sprint 2`
 - `current_theme`：`核心（UI-1/2/3 + FUNC-1/2）`
-- `current_stage`：`Planning`
-- `current_stage_flow_doc`：`product/agents/aida/stage_flows/03_Planning.md`
+- `current_stage`：`Sprint In Progress`
+- `current_stage_flow_doc`：`product/agents/aida/stage_flows/04_Sprint_In_Progress.md`
 - `last_run_at`：`2026-08-20`
-- `last_run_status`：`Sprint 1 闭环（4/4 任务 DoD 通过，Review = Passed With Observation，decision-011）`
-- `execution_mode`：`AS-8 短 Sprint 自主执行（授权 4 次，已用 1 次，余 3 次）`
+- `last_run_status`：`Sprint 2 启动（AS-8 第 2 次授权用量中），UI-1 执行开始`
+- `execution_mode`：`AS-8 短 Sprint 自主执行（授权 4 次，Sprint 1 已闭环记 1 次，Sprint 2 闭环时记 2 次）`
 
 ---
 
 ## 2. 当前任务追踪
 
-- `current_task`：`Sprint 2 Planning（产出启动收口文档，成员锁定 UI-1/2/3 + FUNC-1/2）`
+- `current_task`：`UI-1 界面布局设计（标签栏 / 工具栏 / 侧栏 / 状态栏四区布局，Naive UI 首次引入）`
 - `task_status`：`in_progress`
-- `task_progress`：`Sprint 1 全闭环：ENV-1（d704a31）/ ENV-2（6d9ddfa）/ ARCH-1（762409d）/ ARCH-2（6e8bc8a）；阶段 8 候选清单已产出`
-- `next_action`：`Sprint 2 启动收口 -> UI-1（Naive UI 引入）-> FUNC-1（Tauri 三插件，镜像首考）-> FUNC-2 -> UI-2 -> UI-3 -> Sprint 2 收口`
+- `task_progress`：`Sprint 2 已启动（启动收口完成）；UI-1 执行中`
+- `next_action`：`UI-1 -> FUNC-1（Tauri 三插件，镜像首考）-> FUNC-2 -> UI-2 -> UI-3 -> Sprint 2 收口`
 
 ---
 

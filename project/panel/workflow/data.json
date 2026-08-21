@@ -5,8 +5,8 @@
     "sprint": "Sprint 2",
     "stage": "Planning",
     "stage_main": "Sprint In Progress",
-    "status": "Sprint 1 已闭环（4/4 任务 DoD 通过，Review 结论 Passed With Observation，AS-8 授权用量 1/4）；Sprint 2 Planning 进行中",
-    "next": "Sprint 2 启动收口 -> UI-1（Naive UI 引入）-> FUNC-1（Tauri 三插件安装，镜像方案首考）-> FUNC-2 -> UI-2 -> UI-3",
+    "status": "Sprint 2 执行中（启动收口完成，UI-1 界面布局设计进行中；AS-8 授权用量 2/4 将于收口时记入）",
+    "next": "UI-1（Naive UI 引入 + 四区布局）-> FUNC-1（Tauri 三插件 + 多标签）-> FUNC-2 -> UI-2 -> UI-3 -> Sprint 2 收口",
     "blocked": "无"
   },
   "backlog": [
@@ -123,6 +123,20 @@
       "type": "Sprint 闭环",
       "summary": "Sprint 1 闭环完成（阶段 3-8），授权用量 1/4，余 3 次",
       "detail": "Backlog 剩余 15 项；Sprint 2 成员（UI-1/2/3、FUNC-1/2）为下一轮 Planning 输入候选"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P1",
+      "type": "阶段切换",
+      "summary": "Planning Input Ready -> Planning -> Sprint In Progress（Sprint 2 核心启动，AS-8 第 2 次授权）",
+      "detail": "Sprint 2 启动收口产出（成员 UI-1/2/3 + FUNC-1/2，执行顺序 UI-1 -> FUNC-1 -> FUNC-2 -> UI-2 -> UI-3）；风险卡点：FUNC-1 前置 Tauri 三插件安装 = cargo 镜像方案首次真实考验"
+    },
+    {
+      "date": "2026-08-20",
+      "level": "P2",
+      "type": "任务开始",
+      "summary": "UI-1 界面布局设计开始执行（标签栏 / 工具栏 / 侧栏 / 状态栏四区布局）",
+      "detail": "首次引入 Naive UI（npm 源无截断史，风险低）；产出以 SIS-UI-1 验收标准为准"
     }
   ]
 }

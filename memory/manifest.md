@@ -12,11 +12,11 @@
 | 字段 | 值 |
 |------|-----|
 | `current_sprint` | `Sprint 2（核心）` |
-| `current_stage` | `Planning` |
+| `current_stage` | `Sprint In Progress` |
 | `current_theme` | `核心（UI-1/2/3 + FUNC-1/2）` |
-| `current_task` | `Sprint 2 Planning（启动收口文档）` |
+| `current_task` | `UI-1 界面布局设计（Naive UI 首次引入）` |
 | `task_status` | `in_progress` |
-| `task_progress` | `Sprint 1 已闭环（decision-011）：ENV-1（d704a31）/ ENV-2（6d9ddfa）/ ARCH-1（762409d）/ ARCH-2（6e8bc8a），Review = Passed With Observation，授权用量 1/4；阶段 8 候选清单已产出，Sprint 2 Planning 进行中` |
+| `task_progress` | `Sprint 1 已闭环（decision-011）；Sprint 2 已启动（启动收口产出，执行顺序 UI-1 -> FUNC-1 -> FUNC-2 -> UI-2 -> UI-3），UI-1 执行中` |
 
 ---
 
