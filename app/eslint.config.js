@@ -10,7 +10,12 @@ export default [
 
   {
     name: "app/files-to-ignore",
-    ignores: ["**/dist/**", "**/dist-ssr/**", "**/coverage/**"],
+    ignores: [
+      "**/dist/**",
+      "**/dist-ssr/**",
+      "**/coverage/**",
+      "src-tauri/target/**",
+    ],
   },
 
   ...pluginVue.configs["flat/essential"],
