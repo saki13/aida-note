@@ -82,6 +82,34 @@
   1. 白屏/关闭类 Tauri 常见坑写入 app/docs/ 技术备忘（Sprint 2 收口时归并进 Review 报告）
   2. 「沙箱长时命令执行规则」skill 立项评估：触发条件两次命中，建议 Sprint 2 收口时正式决策
 
+### 2026-08-21 · 能力建设 · 前端自测能力建立：Playwright + 系统 Edge 链路（PO 指令响应，AS-8 自主执行模式升级）
+
+- **背景**：FUNC-2 排障期间 PO 明确指令："我们后边的功能都是前端的内容其实你完全可以自己测试吧 比如用browser-use或者playwright之类的。如果这些环境没好 我们也可以先解决嘛，大不了我们现在就手动做一个测试skill或者agent出来"。此前前端功能验证依赖 PO 手工操作（FUNC-1 关窗口验证即转交 PO），与 AS-8「自主执行」原则相悖。
+- **关联 decision**：decision-013（前端自测能力落地）
+- **影响范围**：app/scripts/ui-smoke.mjs、app/scripts/multitab-smoke.mjs、app/package.json（test:ui / test:multitab）；后续全部 Sprint（3/4 全是前端功能）的验证方式
+- **经验**：
+  1. **Playwright + 系统 Edge 是沙箱内最低成本自测链路**：`channel: "msedge"` 直接复用系统已装的 Edge，免下载 chromium（下载会被沙箱截断）；`npm run dev` 起 1420 + Playwright 连 localhost 即可全流程自动化
+  2. **断言设计要点（踩坑后修正）**：纯文本下不应断言高亮 token（本就不该有）；CM6 的 unicode 类名（ͼ 开头）CSS 选择器匹配不可靠，改用 `page.evaluate` 计数；light 主题断言须接受 `rgba(0,0,0,0)`（透明背景不是黑）
+  3. **沙箱吞 stdout 的解法**：长输出命令重定向到项目根目录文件再 Read（`node xx.mjs > out.log 2>&1`）
+  4. **自测建立后节奏变化**：FUNC-2 验证全程零转交 PO（对照 FUNC-1 的 3 次转交），符合 AS-8 自主原则
+- **改进项清单（回流方向）**：
+  1. 【观察项】前端自测 skill/agent 沉淀：test:ui/test:multitab 是雏形，Sprint 3（FUNC-3~8 全是前端功能）将高频复用；若模板化收益明确，Sprint 3 收口时正式立项 product/skills/ 新资产（PO 建议过"手动做一个测试skill"）
+
+### 2026-08-21 · 技术攻坚 · Vue reactive 深度代理破坏 CodeMirror Compartment 身份：「无报错但功能失效」类问题的三重根因排查（FUNC-2）
+
+- **背景**：FUNC-2（多语法高亮）代码实现后，语言高亮与主题切换**完全不生效但无任何报错/警告**。此类"静默失效"问题无法靠读报错定位，动用 27 个渐进式诊断脚本（独立复现 -> 对照实验 -> CM6 内部结构 dump -> 实例一致性检查）逐层剥离。
+- **关联 decision**：decision-013（markRaw 原则确立）
+- **影响范围**：app/src/components/EditorPane.vue、app/src/stores/tabsStore.ts；后续所有"Vue store 持有外部库对象"的场景
+- **经验与教训**：
+  1. **【架构级】markRaw 原则**：Vue reactive/Pinia 深度代理外部库复杂对象时，对象内部结构中的实例身份（Map key、`===` 比较）全部失真--本例 EditorState 的 `config.compartments` Map 的 key 被 proxy 化，与模块级原始 `Compartment` `===` 失败，`reconfigure()` 被 CM6 静默忽略。**存入 reactive store 的外部对象必须 `markRaw()`**（CodeMirror EditorState、任何携带实例身份语义的对象）
+  2. **Compartment 槽位注册原则**：CM6 的 Compartment reconfigure 只对"创建 state 时已注册槽位"的 state 生效；初始空 state（如无标签时的 `emptyState()`）也必须带上同一对 Compartment 实例，否则后续 reconfigure 找不到槽被静默忽略（诊断特征：`view.state.config.compartments.size === 0`）
+  3. **Vue watch 时序陷阱**：新建标签时 language watch 先于 activeTabId watch 触发，若在 language 回调里写 cmState 会把上一个（空）state 污染进新标签缓存。原则：**watch 回调只做 dispatch（作用于当前 view），不做 state 缓存写入；缓存写入只在 switchToTab/createState 单点发生**
+  4. **「无报错但失效」问题的排查方法论**：①先独立最小复现（脱离项目代码的纯 CM6 页面）确认库本身行为正常 ②对照实验（单标签 vs 多标签、新建 vs 恢复）锁定差异面 ③dump 库内部结构（`view.state.config.compartments`）比对 ④实例一致性检查（`===` 比较 + 遍历 Map key）。`window.__view`/`__comps` 暴露 + `__vue_app__` 取 pinia 是有效的运行时调试手段
+  5. **导入源细节**：`Compartment` 必须从 `@codemirror/state` 导入；`@codemirror/view` 不导出它（vite 预构建后运行时才报 SyntaxError，不是编译期）
+- **改进项清单（回流方向）**：
+  1. markRaw 原则 + Compartment 槽位原则 + watch 时序原则写入 app/docs/ 技术备忘（Sprint 2 收口时随 Review 报告归并）
+  2. 27 个诊断脚本的渐进式排查法可模板化（独立复现/对照/内部结构/一致性四步），候选进前端自测 skill
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要

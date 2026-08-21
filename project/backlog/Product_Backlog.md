@@ -50,7 +50,7 @@
 ### 类别 D：功能实现（FUNC）
 
 - [x] P0 FUNC-1：多标签文件编辑（打开 / 新建 / 保存 / 另存 / 脏标记）（已完成 2026-08-21，SIS-FUNC-1，Sprint 2；commit 4648820 + 52494ea）
-- [ ] P0 FUNC-2：多语法高亮（html / sql / js / json / markdown）（已排期，SIS-FUNC-2）
+- [x] P0 FUNC-2：多语法高亮（html / sql / js / json / markdown）（已完成 2026-08-21，SIS-FUNC-2，Sprint 2；commit afb510d）
 - [ ] P0 FUNC-3：Markdown 同屏所见即所得（Typora 式）（已排期，SIS-FUNC-3）
 - [ ] P0 FUNC-4：mermaid 编写 + 原位实时渲染（已排期，SIS-FUNC-4）
 - [ ] P0 FUNC-5：代码格式化（美化，4 种语言：html / js / json / markdown；SQL 格式化暂不支持）（已排期，SIS-FUNC-5）

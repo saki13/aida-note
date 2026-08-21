@@ -120,6 +120,16 @@
 - **依据**：PO 验证反馈（2026-08-21「ok 这回行了」）；Tauri 2 官方权限模型与 onCloseRequested/destroy 文档；SIS-FUNC-1 验收标准 9/9。
 - **影响范围**：app/src/views/MainView.vue、app/src/App.vue、app/src-tauri/capabilities/default.json；Backlog / data.json / state / manifest（四边同步）；evolution_log.md。
 
+### decision-013 · 2026-08-21 · FUNC-2 完成（多语法高亮）+ markRaw 原则确立 + 前端自测能力建立
+
+- **背景**：FUNC-2 实现后高亮/主题切换完全不生效但无任何报错。经 27 个渐进式诊断脚本定位出**三重根因**：①初始 view state 未注册 Compartment 槽位（`view.state.config.compartments.size === 0` 为证）-> reconfigure 被 CM6 静默忽略；②Ctrl+N 时 language watch 先于 activeTabId watch 触发，applyLanguage 把空 state 污染进新标签 cmState 缓存；③**决定性根因**：EditorState 存入 Pinia reactive 数组后被 Vue 深度代理，`config.compartments` Map 的 key 变 proxy 实例，与模块级原始 Compartment `===` 比较失败（diag22/27 铁证：多标签恢复后 sameLang=false、单标签 true）-> `markRaw()` 修复。同时 PO 明确要求建立前端自主测试能力（「后边的功能都是前端的内容你完全可以自己测试……大不了手动做一个测试 skill」），并授权 Aida 短 Sprint 内自主决策（「这是短sprint 你自己决定就可以」）。
+- **决策**：
+  1. FUNC-2 收口（DoD 7/7 过，commit afb510d），Sprint 2 剩 UI-2/UI-3。
+  2. **markRaw 原则确立（架构级）**：外部库复杂对象（EditorState/Compartment 实例等）存入 Vue reactive store 时必须 `markRaw()`，否则深度代理破坏对象内部身份比较（Map key/`===`），导致依赖实例身份的库机制静默失效。同理：所有创建的 CM6 state（含初始空 state）必须注册同一对 Compartment 实例。
+  3. **前端自测能力落地**：Playwright + 系统 Edge（`channel: "msedge"`，免下载 chromium）链路跑通，产出 `test:ui`（单标签 9 项）/ `test:multitab`（多标签 3 组）两个可复用 npm scripts 作为正式测试资产；后续前端功能验证由 Aida 自主完成，不再转交 PO。测试 skill 沉淀列 Evolution Log 观察项（test:ui/test:multitab 已是雏形）。
+- **依据**：SIS-FUNC-2 验收标准 7/7（2026-08-21）；diag22/27 实例一致性铁证；PO 指令（2026-08-21 自测能力建设 + 短 Sprint 自主决策授权）。
+- **影响范围**：app/src/components/EditorPane.vue、app/src/stores/tabsStore.ts、app/src/services/languageRegistry.ts、app/src/components/StatusBar.vue、app/scripts/（ui-smoke + multitab-smoke）、app/package.json；Backlog / data.json / state / manifest（四边同步）；evolution_log.md；后续全部前端组件的 store 编写方式。
+
 ---
 
 <!-- 后续在此追加，格式：

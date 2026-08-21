@@ -14,17 +14,17 @@
 - `current_stage`：`Sprint In Progress`
 - `current_stage_flow_doc`：`product/agents/aida/stage_flows/04_Sprint_In_Progress.md`
 - `last_run_at`：`2026-08-21`
-- `last_run_status`：`Sprint 2 执行中（AS-8 第 2 次授权用量中），UI-1/FUNC-1 已完成`
+- `last_run_status`：`Sprint 2 执行中（AS-8 第 2 次授权用量中），UI-1/FUNC-1/FUNC-2 已完成，前端自测能力已建立`
 - `execution_mode`：`AS-8 短 Sprint 自主执行（授权 4 次，Sprint 1 已闭环记 1 次，Sprint 2 闭环时记 2 次）`
 
 ---
 
 ## 2. 当前任务追踪
 
-- `current_task`：`FUNC-2 多语法高亮（语言扩展映射已随 FUNC-1 落地，待做高亮扩展装配验收）`
-- `task_status`：`in_progress`
-- `task_progress`：`Sprint 2 进行中：UI-1（布局设计）、FUNC-1（多标签文件编辑）已闭环；FUNC-2 语言映射已实现`
-- `next_action`：`FUNC-2 -> UI-2 -> UI-3 -> Sprint 2 收口`
+- `current_task`：`UI-2 交互设计（所见即所得编辑交互 / AI 面板交互 / 对比视图交互）`
+- `task_status`：`pending_start`
+- `task_progress`：`Sprint 2 进行中：UI-1、FUNC-1、FUNC-2 已闭环（FUNC-2 commit afb510d，DoD 7/7 + 自测 9/9 与多标签全过）；前端自测资产 test:ui / test:multitab 就绪`
+- `next_action`：`UI-2 -> UI-3 -> Sprint 2 收口`
 
 ---
 

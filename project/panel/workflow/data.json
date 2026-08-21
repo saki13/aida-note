@@ -5,8 +5,8 @@
     "sprint": "Sprint 2",
     "stage": "Planning",
     "stage_main": "Sprint In Progress",
-    "status": "Sprint 2 执行中（UI-1/FUNC-1 已完成，FUNC-2 多语法高亮进行中；AS-8 授权用量 2/4 将于收口时记入）",
-    "next": "FUNC-2（多语法高亮）-> UI-2 -> UI-3 -> Sprint 2 收口",
+    "status": "Sprint 2 执行中（UI-1/FUNC-1/FUNC-2 已完成，剩 UI-2/UI-3；前端自测能力已建立：test:ui/test:multitab）",
+    "next": "UI-2（交互设计）-> UI-3 -> Sprint 2 收口",
     "blocked": "无"
   },
   "backlog": [
@@ -18,7 +18,7 @@
     { "id": "UI-2", "title": "交互设计", "category": "UI 设计", "priority": "P0", "status": "pending" },
     { "id": "UI-3", "title": "视觉设计", "category": "UI 设计", "priority": "P1", "status": "pending" },
     { "id": "FUNC-1", "title": "多标签文件编辑", "category": "功能实现", "priority": "P0", "status": "done" },
-    { "id": "FUNC-2", "title": "多语法高亮", "category": "功能实现", "priority": "P0", "status": "pending" },
+    { "id": "FUNC-2", "title": "多语法高亮", "category": "功能实现", "priority": "P0", "status": "done" },
     { "id": "FUNC-3", "title": "Markdown 同屏所见即所得", "category": "功能实现", "priority": "P0", "status": "pending" },
     { "id": "FUNC-4", "title": "mermaid 编写 + 实时渲染", "category": "功能实现", "priority": "P0", "status": "pending" },
     { "id": "FUNC-5", "title": "代码格式化（4 种语言，SQL 暂不支持）", "category": "功能实现", "priority": "P0", "status": "pending" },
@@ -158,6 +158,20 @@
       "type": "任务完成",
       "summary": "FUNC-1 多标签文件编辑完成（DoD 9/9 过）：多标签/脏标记/撤销重做/语言识别/拖拽打开/关窗口确认全验收通过",
       "detail": "commit 4648820（前端实现+三插件）+ ef68836（dialog 注入）+ f2d7a55（白屏修复）+ 87334d2/52494ea（关窗口修复）；关键教训：白屏=useDialog 上下文陷阱（Provider 提升到 App 根）、关不掉=destroy() 缺 core:window:allow-destroy 权限（capabilities 补权限解决）"
+    },
+    {
+      "date": "2026-08-21",
+      "level": "P2",
+      "type": "能力建设",
+      "summary": "前端自测能力建立：Playwright + 系统 Edge 链路跑通，产出 test:ui / test:multitab 两个可复用 npm scripts",
+      "detail": "回应 PO「后边功能都是前端内容，你可以自己测试，大不了手动做一个测试 skill」的指令；channel:msedge 免下载 chromium 沙箱可用；ui-smoke 9 项检查全过、multitab-smoke 全过；后续前端功能验证不再转交 PO"
+    },
+    {
+      "date": "2026-08-21",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "FUNC-2 多语法高亮完成（DoD 7/7 过）：5 语言高亮/主题切换/多标签语言独立全验收通过，commit afb510d",
+      "detail": "排障过程发现三重根因：①初始 state 未注册 Compartment 槽位（reconfigure 被 CM6 静默忽略）②watch 时序污染 cmState 缓存 ③决定性发现：EditorState 存入 Pinia reactive 被 Vue 深度代理破坏 Compartment 身份（=== 失败），markRaw() 修复。27 个渐进式诊断脚本定位「无报错但功能失效」类问题"
     }
   ]
 }

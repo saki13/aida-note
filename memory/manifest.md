@@ -14,9 +14,9 @@
 | `current_sprint` | `Sprint 2（核心）` |
 | `current_stage` | `Sprint In Progress` |
 | `current_theme` | `核心（UI-1/2/3 + FUNC-1/2）` |
-| `current_task` | `FUNC-2 多语法高亮（语言映射已随 FUNC-1 落地，待装配高亮扩展）` |
-| `task_status` | `in_progress` |
-| `task_progress` | `Sprint 1 已闭环（decision-011）；Sprint 2 执行中：UI-1/FUNC-1 已完成（UI-1 commit 1169dc4；FUNC-1 commit 4648820 + 52494ea 含关窗口/白屏修复），FUNC-2 进行中` |
+| `current_task` | `UI-2 交互设计（FUNC-2 已闭环）` |
+| `task_status` | `pending_start` |
+| `task_progress` | `Sprint 1 已闭环（decision-011）；Sprint 2 执行中：UI-1/FUNC-1/FUNC-2 已完成（UI-1 commit 1169dc4；FUNC-1 commit 4648820 + 52494ea；FUNC-2 commit afb510d，markRaw 三重根因修复见 decision-013），前端自测资产 test:ui/test:multitab 就绪；剩 UI-2/UI-3 |
 
 ---
 
