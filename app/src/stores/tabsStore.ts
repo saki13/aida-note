@@ -149,6 +149,13 @@ export const useTabsStore = defineStore("tabs", () => {
     tab.dirty = false;
   }
 
+  /** 手动覆盖语言（SIS-FUNC-2 状态栏语言选择器；自动识别由 openTab 负责）。 */
+  function setLanguage(tabId: number, lang: LanguageId): void {
+    const tab = findTabById(tabId);
+    if (!tab) return;
+    tab.language = lang;
+  }
+
   /** 保存当前 tab；无路径时转另存为。返回是否成功。 */
   async function saveTab(tabId: number): Promise<boolean> {
     const tab = findTabById(tabId);
@@ -294,6 +301,7 @@ export const useTabsStore = defineStore("tabs", () => {
     createUntitled,
     setActive,
     moveTab,
+    setLanguage,
     updateContent,
     markSaved,
     saveTab,
