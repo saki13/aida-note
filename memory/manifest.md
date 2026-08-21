@@ -14,9 +14,9 @@
 | `current_sprint` | `Sprint 2（核心）` |
 | `current_stage` | `Sprint In Progress` |
 | `current_theme` | `核心（UI-1/2/3 + FUNC-1/2）` |
-| `current_task` | `UI-1 界面布局设计（Naive UI 首次引入）` |
+| `current_task` | `FUNC-2 多语法高亮（语言映射已随 FUNC-1 落地，待装配高亮扩展）` |
 | `task_status` | `in_progress` |
-| `task_progress` | `Sprint 1 已闭环（decision-011）；Sprint 2 已启动（启动收口产出，执行顺序 UI-1 -> FUNC-1 -> FUNC-2 -> UI-2 -> UI-3），UI-1 执行中` |
+| `task_progress` | `Sprint 1 已闭环（decision-011）；Sprint 2 执行中：UI-1/FUNC-1 已完成（UI-1 commit 1169dc4；FUNC-1 commit 4648820 + 52494ea 含关窗口/白屏修复），FUNC-2 进行中` |
 
 ---
 
@@ -98,5 +98,5 @@
 
 ## 待完善 / 下一步
 
-- **当前阶段**：Sprint 2 Planning（AS-8 授权模式：4 次短 Sprint，已用 1 次余 3 次）
-- 下一步：Sprint 2 启动收口 -> UI-1（界面布局，首次引入 Naive UI）-> FUNC-1（多标签，首次装 Tauri fs/dialog/store 三插件--镜像方案首考）-> FUNC-2 -> UI-2 -> UI-3 -> Sprint 2 收口 -> Sprint 3/4 依锁定顺序执行 -> 燃尽转项目交付
+- **当前阶段**：Sprint 2 In Progress（AS-8 授权模式：4 次短 Sprint，已用 1 次余 3 次）
+- 下一步：FUNC-2（多语法高亮）-> UI-2 -> UI-3 -> Sprint 2 收口 -> Sprint 3/4 依锁定顺序执行 -> 燃尽转项目交付

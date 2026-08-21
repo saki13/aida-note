@@ -109,6 +109,17 @@
 - **依据**：SIS-ARCH-1/ARCH-2 验收标准全过（2026-08-20）；Sprint_1_DoD对照表（23/23）；AS-8 阶段 3-8 闭环要求；Sprint_1_Review报告。
 - **影响范围**：app/docs/（两架构文档）；project/sprint/（DoD 对照表 / Review 报告 / Sprint 2 候选清单）；project/traces/（audit_trace_sprint1 + events_sprint1）；Backlog / data.json / state / manifest（四边同步收口）；evolution_log.md。
 
+### decision-012 · 2026-08-21 · FUNC-1 完成（多标签文件编辑）+ 关窗口/白屏/沙箱三类问题对策定案
+
+- **背景**：FUNC-1 前端实现与窗口验证完成，期间连遇三类技术问题：①关闭窗口确认失效（用户「关窗口无效」）；②白屏（用户「现在打开白屏了」）；③关窗口确认后仍无法关闭（用户「好家伙不白屏 就不能关闭」）。均已修复并经 PO 系统终端验证通过。
+- **决策**：
+  1. FUNC-1 收口（DoD 9/9 过，commit 4648820 + 52494ea），进入 FUNC-2。
+  2. **白屏根因与对策**：Naive UI `useDialog()` 必须在其 `NDialogProvider` 后代组件中调用；MainView setup 顶层在 Provider 挂载前调用导致崩溃白屏。对策：Provider 提升到 App 根部（commit f2d7a55）。
+  3. **关窗口根因与对策**：`destroy()` 属破坏性操作，不在 `core:default` 权限内，需单独授权 `core:window:allow-destroy`，缺失时被权限系统静默拒绝导致拦截后二次关闭失败；且二次关闭必须用 `destroy()` 而非 `close()`（close 会重新触发 onCloseRequested 造成无法关闭）。对策：capabilities 补 `core:window:allow-destroy` + 确认后调 destroy()（commit 52494ea）。
+  4. **沙箱教训（回填）**：IDE 沙箱无法承载 rustup 组件分发（300MB+ 截断），cargo 镜像方案对 crates 索引有效但组件分发仍受限——「沙箱长时命令执行规则」skill 立项评估继续保留观察。
+- **依据**：PO 验证反馈（2026-08-21「ok 这回行了」）；Tauri 2 官方权限模型与 onCloseRequested/destroy 文档；SIS-FUNC-1 验收标准 9/9。
+- **影响范围**：app/src/views/MainView.vue、app/src/App.vue、app/src-tauri/capabilities/default.json；Backlog / data.json / state / manifest（四边同步）；evolution_log.md。
+
 ---
 
 <!-- 后续在此追加，格式：

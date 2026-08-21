@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-08-20",
+  "updated_at": "2026-08-21",
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
     "sprint": "Sprint 2",
     "stage": "Planning",
     "stage_main": "Sprint In Progress",
-    "status": "Sprint 2 执行中（UI-1 已完成，FUNC-1 多标签文件编辑进行中；AS-8 授权用量 2/4 将于收口时记入）",
-    "next": "FUNC-1（Tauri 三插件 + Naive UI + 多标签）-> FUNC-2 -> UI-2 -> UI-3 -> Sprint 2 收口",
+    "status": "Sprint 2 执行中（UI-1/FUNC-1 已完成，FUNC-2 多语法高亮进行中；AS-8 授权用量 2/4 将于收口时记入）",
+    "next": "FUNC-2（多语法高亮）-> UI-2 -> UI-3 -> Sprint 2 收口",
     "blocked": "无"
   },
   "backlog": [
@@ -14,10 +14,10 @@
     { "id": "ENV-2", "title": "核心依赖接入", "category": "工程基础", "priority": "P0", "status": "done" },
     { "id": "ARCH-1", "title": "系统架构设计", "category": "架构设计", "priority": "P0", "status": "done" },
     { "id": "ARCH-2", "title": "文件与状态管理架构", "category": "架构设计", "priority": "P0", "status": "done" },
-    { "id": "UI-1", "title": "界面布局设计", "category": "UI 设计", "priority": "P0", "status": "pending" },
+    { "id": "UI-1", "title": "界面布局设计", "category": "UI 设计", "priority": "P0", "status": "done" },
     { "id": "UI-2", "title": "交互设计", "category": "UI 设计", "priority": "P0", "status": "pending" },
     { "id": "UI-3", "title": "视觉设计", "category": "UI 设计", "priority": "P1", "status": "pending" },
-    { "id": "FUNC-1", "title": "多标签文件编辑", "category": "功能实现", "priority": "P0", "status": "pending" },
+    { "id": "FUNC-1", "title": "多标签文件编辑", "category": "功能实现", "priority": "P0", "status": "done" },
     { "id": "FUNC-2", "title": "多语法高亮", "category": "功能实现", "priority": "P0", "status": "pending" },
     { "id": "FUNC-3", "title": "Markdown 同屏所见即所得", "category": "功能实现", "priority": "P0", "status": "pending" },
     { "id": "FUNC-4", "title": "mermaid 编写 + 实时渲染", "category": "功能实现", "priority": "P0", "status": "pending" },
@@ -151,6 +151,13 @@
       "type": "环境阻塞",
       "summary": "FUNC-1 前置环境阻塞：rustup 自动升级 stable 到 1.98.0，组件下载被沙箱截断，工具链被破坏（bin 下仅剩 cargo，manifest 缺失）",
       "detail": "镜像方案部分验证成功：rsproxy sparse 源生效（cargo fetch 193 crates index 更新正常）；失败点为 rustup 组件分发（6 components ≈ 300MB+，RUSTUP_DIST_SERVER=rsproxy.cn 仍超沙箱时长限制）。rustup 半途恢复时已删除旧组件，工具链需完整重装。观察点 5（镜像方案有效性）命中，触发「沙箱长时命令执行规则」skill 立项评估。转交 PO 系统终端执行"
+    },
+    {
+      "date": "2026-08-21",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "FUNC-1 多标签文件编辑完成（DoD 9/9 过）：多标签/脏标记/撤销重做/语言识别/拖拽打开/关窗口确认全验收通过",
+      "detail": "commit 4648820（前端实现+三插件）+ ef68836（dialog 注入）+ f2d7a55（白屏修复）+ 87334d2/52494ea（关窗口修复）；关键教训：白屏=useDialog 上下文陷阱（Provider 提升到 App 根）、关不掉=destroy() 缺 core:window:allow-destroy 权限（capabilities 补权限解决）"
     }
   ]
 }

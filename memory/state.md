@@ -2,7 +2,7 @@
 
 > 用途：记录当前项目的最小运行状态快照（L2 状态快照）。
 > 版本：v0.1.0
-> 状态：Sprint 2 Planning（AS-8 授权模式，Sprint 1 已闭环，授权用量 1/4）
+> 状态：Sprint 2 In Progress（AS-8 授权模式，Sprint 1 已闭环，授权用量 1/4，Sprint 2 闭环时记 2/4）
 
 ---
 
@@ -13,18 +13,18 @@
 - `current_theme`：`核心（UI-1/2/3 + FUNC-1/2）`
 - `current_stage`：`Sprint In Progress`
 - `current_stage_flow_doc`：`product/agents/aida/stage_flows/04_Sprint_In_Progress.md`
-- `last_run_at`：`2026-08-20`
-- `last_run_status`：`Sprint 2 启动（AS-8 第 2 次授权用量中），UI-1 执行开始`
+- `last_run_at`：`2026-08-21`
+- `last_run_status`：`Sprint 2 执行中（AS-8 第 2 次授权用量中），UI-1/FUNC-1 已完成`
 - `execution_mode`：`AS-8 短 Sprint 自主执行（授权 4 次，Sprint 1 已闭环记 1 次，Sprint 2 闭环时记 2 次）`
 
 ---
 
 ## 2. 当前任务追踪
 
-- `current_task`：`UI-1 界面布局设计（标签栏 / 工具栏 / 侧栏 / 状态栏四区布局，Naive UI 首次引入）`
+- `current_task`：`FUNC-2 多语法高亮（语言扩展映射已随 FUNC-1 落地，待做高亮扩展装配验收）`
 - `task_status`：`in_progress`
-- `task_progress`：`Sprint 2 已启动（启动收口完成）；UI-1 执行中`
-- `next_action`：`UI-1 -> FUNC-1（Tauri 三插件，镜像首考）-> FUNC-2 -> UI-2 -> UI-3 -> Sprint 2 收口`
+- `task_progress`：`Sprint 2 进行中：UI-1（布局设计）、FUNC-1（多标签文件编辑）已闭环；FUNC-2 语言映射已实现`
+- `next_action`：`FUNC-2 -> UI-2 -> UI-3 -> Sprint 2 收口`
 
 ---
 

@@ -68,6 +68,20 @@
   2. 沙箱被拒时（如 winget 写日志受限）会直接报 restricted 错误，这类错误可快速识别；更危险的是静默截断类失败
   3. 环境准备类阻塞的处置路径：先盘点已就绪项（本例 Node/MSVC 均在）-> 只补缺失项 -> 明确给出 PO 可直接复制的安装命令与验证命令 -> 阻塞与恢复条件写入 state/events 留痕，避免会话中断后丢失上下文
 
+### 2026-08-21 · 功能实现 · FUNC-1 多标签文件编辑落地：白屏 / 关窗口 / 权限模型三类坑的经验（Sprint 2）
+
+- **背景**：FUNC-1（多标签文件编辑）实现完成，验证期连遇三类问题并经 PO 验证闭环：①关窗口确认首次无效（PO「测试完了 关窗口无效」）；②白屏（PO「现在打开白屏了」）；③白屏修复后关窗口确认后仍无法关闭（PO「好家伙不白屏 就不能关闭」）。全部由 Aida 定位根因并修复（commit ef68836 / f2d7a55 / 87334d2 / 52494ea），PO 系统终端验证通过（2026-08-21「ok 这回行了」）。
+- **关联 decision**：decision-012（FUNC-1 完成 + 三类问题对策定案）
+- **影响范围**：app/src/App.vue、app/src/views/MainView.vue、app/src/stores/tabsStore.ts、app/src/components/TabBar.vue、app/src-tauri/capabilities/default.json；FUNC-2 及后续 UI/功能任务的组件编写方式
+- **经验**：
+  1. **Naive UI `useDialog()` 上下文陷阱（白屏根因）**：`useDialog()` 必须在 `NDialogProvider` 的**后代组件**中调用；在 provider 挂载前调用会抛错导致整棵树崩溃白屏。最早把 Provider 放 MainView 子树内、MainView 顶层又用 useDialog 属自相矛盾。解法：Provider 提升到 App 根部，Provider 内任何后代组件均可安全 useDialog。**通用教训：Provider 型 API 的注入点必须高于所有使用者**
+  2. **Tauri 2 `destroy()` 是受限权限，缺了会被静默拒绝**：`onCloseRequested` 里 `preventDefault()` 后需要二次关闭，官方正确方式是用 `destroy()`（`close()` 会再次触发 close requested）。但 `destroy` 不在 `core:default` 里，需在 capabilities 显式加 `core:window:allow-destroy`，否则调用被权限系统静默忽略——表现就是「确认框正常、保存正常、窗口就是关不掉」，且 Alt+F4/任务栏关闭全部失效（都被 preventDefault 拦截）。**诊断启发：capabilities 权限缺失是静默失败，排查 Tauri 权限类 bug 先核对 capabilities**
+  3. **「白屏时能关、正常时不能关」是绝佳隔离线索**：用户观察到白屏时窗口能正常关闭，直接证明无进程守护/秒开问题，问题必然出在 onCloseRequested 监听器本身——把排查范围从「系统层」收缩到「应用层监听逻辑」
+  4. **沙箱环境对 Tauri dev 的不利因素再确认**：rustup 组件分发（300MB+）仍超沙箱承载上限；「沙箱长时命令执行规则」skill 立项评估继续保留观察（触发条件已两次命中）
+- **改进项清单（回流方向）**：
+  1. 白屏/关闭类 Tauri 常见坑写入 app/docs/ 技术备忘（Sprint 2 收口时归并进 Review 报告）
+  2. 「沙箱长时命令执行规则」skill 立项评估：触发条件两次命中，建议 Sprint 2 收口时正式决策
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要
