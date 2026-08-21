@@ -7,12 +7,15 @@
  * （含 history），切换标签 setState 恢复，保存不清空、切回仍在。
  * 高亮与主题（SIS-FUNC-2）：语言扩展与明暗主题均用 Compartment 动态切换，
  * 语言随标签（自动识别 + 手动覆盖），明暗随系统 prefers-color-scheme 联动。
+ * 关键坑（FUNC-2 排查所得）：所有 state（含初始空 state）必须注册同一对
+ * Compartment 实例，且语言对齐在 switchToTab 恢复 cmState 后执行——
+ * applyLanguage 中写 cmState 会被新建标签时的 watch 时序污染。
  */
 
-import { onMounted, onBeforeUnmount, ref, watch } from "vue";
+import { onMounted, onBeforeUnmount, ref, watch, markRaw } from "vue";
 import { basicSetup } from "codemirror";
-import { EditorView, keymap, Compartment } from "@codemirror/view";
-import { EditorState, type Extension } from "@codemirror/state";
+import { EditorView, keymap } from "@codemirror/view";
+import { EditorState, Compartment, type Extension } from "@codemirror/state";
 import { indentWithTab, undo, redo } from "@codemirror/commands";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { languageExtension } from "../services/languageRegistry";
@@ -43,6 +46,21 @@ function languageExtensions(lang: LanguageId): Extension {
   return languageExtension(lang);
 }
 
+/** 空编辑器 state：注册 theme/language 两个 Compartment 槽位。
+ *  注意：必须在所有创建的 state 中都注册同一对 compartment 实例，
+ *  否则后续 reconfigure 找不到配置槽会被静默忽略（本组件关键坑，FUNC-2 排查所得）。 */
+function emptyState(): EditorState {
+  return EditorState.create({
+    doc: "",
+    extensions: [
+      basicSetup,
+      themeCompartment.of(themeExtension()),
+      languageCompartment.of([]),
+      keymap.of([indentWithTab]),
+    ],
+  });
+}
+
 function createState(tab: Tab): EditorState {
   const tabId = tab.id;
   return EditorState.create({
@@ -57,7 +75,9 @@ function createState(tab: Tab): EditorState {
           const t = tabsStore.tabs.find((x) => x.id === tabId);
           if (t) {
             tabsStore.updateContent(tabId, u.state.doc.toString());
-            t.cmState = u.state;
+            // markRaw：EditorState 是外部对象，存进 Pinia reactive 会被 Vue 深度代理，
+            // 破坏 Compartment 实例身份（===）比较导致 reconfigure 静默失效（FUNC-2 关键坑）
+            t.cmState = markRaw(u.state);
           }
         }
         const head = u.state.selection.main.head;
@@ -74,14 +94,15 @@ function emitCursor(state: EditorState) {
   emit("cursor", { line: line.number, col: head - line.from + 1 });
 }
 
-/** 手动切换语言：替换语言 Compartment（不触碰历史/主题），并同步缓存状态。 */
+/** 切换语言：替换语言 Compartment（不触碰历史/主题）。
+ *  注意：不能在这里写 t.cmState——Ctrl+N 新建时 language watch 先于
+ *  activeTabId watch 触发，会把「空初始 state」写进新标签的 cmState，
+ *  导致 switchToTab 恢复坏 state（FUNC-2 排查所得）。cmState 由
+ *  updateListener/switchToTab 统一维护，语言对齐在 switchToTab 恢复后做。 */
 function applyLanguage(lang: LanguageId) {
   view?.dispatch({
     effects: languageCompartment.reconfigure(languageExtensions(lang)),
   });
-  // dispatch 后 cmState 需含最新语言配置，否则切回标签恢复旧 state 时语言回退。
-  const t = tabsStore.activeTab;
-  if (t && view) t.cmState = view.state;
 }
 
 /** 切换明暗主题：替换主题 Compartment（不触碰文档）。 */
@@ -96,17 +117,18 @@ function switchToTab() {
   if (!view) return;
   const tab = tabsStore.activeTab;
   if (!tab) {
-    view.setState(EditorState.create({ doc: "", extensions: [basicSetup] }));
+    view.setState(emptyState());
     return;
   }
   if (tab.cmState) {
     view.setState(tab.cmState);
     emitCursor(tab.cmState);
     applyTheme(); // 恢复旧 state 后重推当前主题（避免主题过期）
+    applyLanguage(tab.language); // 恢复后对齐语言（cmState 缓存可能过期）
   } else {
     const state = createState(tab);
     view.setState(state);
-    tab.cmState = state;
+    tab.cmState = markRaw(state); // 同 updateListener：避免 Vue 代理破坏 Compartment 身份
     emitCursor(state);
   }
 }
@@ -115,7 +137,7 @@ onMounted(() => {
   mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
   view = new EditorView({
     parent: editorHost.value ?? undefined,
-    state: EditorState.create({ doc: "", extensions: [basicSetup] }),
+    state: emptyState(),
   });
   switchToTab();
   mediaQuery.addEventListener("change", applyTheme);

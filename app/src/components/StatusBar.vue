@@ -11,6 +11,7 @@
 import { computed, ref } from "vue";
 import { NDropdown, type DropdownOption } from "naive-ui";
 import { LANGUAGE_REGISTRY } from "../services/languageRegistry";
+import type { LanguageId } from "../services/language";
 import { useTabsStore } from "../stores/tabsStore";
 
 const props = defineProps<{ cursor: { line: number; col: number } }>();
@@ -40,7 +41,7 @@ const languageOptions: DropdownOption[] = LANGUAGE_REGISTRY.map((e) => ({
 function selectLanguage(key: string | number): void {
   const tabId = tab.value?.id;
   if (tabId === undefined) return;
-  tabsStore.setLanguage(tabId, key as typeof tab.value!.language);
+  tabsStore.setLanguage(tabId, key as LanguageId);
 }
 </script>
 
