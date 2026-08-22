@@ -5,8 +5,8 @@
     "sprint": "Sprint 3",
     "stage": "执行（阶段 4）",
     "stage_main": "Sprint In Progress",
-    "status": "FUNC-3 完成（28/28 自测全绿），FUNC-4 开工（授权 3/4 余 1 次）",
-    "next": "FUNC-4 -> FUNC-5 -> FUNC-7 -> FUNC-8 -> FUNC-6 -> Sprint 3 收口",
+    "status": "FUNC-4 完成（13/13 自测全绿），FUNC-5 开工（授权 3/4 余 1 次）",
+    "next": "FUNC-5 -> FUNC-7 -> FUNC-8 -> FUNC-6 -> Sprint 3 收口",
     "blocked": "无"
   },
   "backlog": [
@@ -85,7 +85,7 @@
       "title": "mermaid 编写 + 实时渲染",
       "category": "功能实现",
       "priority": "P0",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "FUNC-5",
@@ -367,6 +367,13 @@
       "type": "任务完成",
       "summary": "FUNC-3 Markdown 同屏所见即所得完成（DoD 28/28 过）：12 类元素渲染/块级双态/故障回退/主题联动/性能全验收，build 通过",
       "detail": "关键排障（decision-016）：ViewPlugin decorations 禁块级装饰（改 StateField + EditorView.decorations.from）；markdown() 默认无 GFM（显式 markdown({extensions: GFM})）；markdownLanguage 自带 fold prop 增量解析越界（弃用）；行级装饰 range 须零长度；widget 点击进源码态（SIS 建议项）"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "FUNC-4 mermaid 编写 + 原位实时渲染完成（DoD 13/13 过）：防抖出图/光标进源码/错误回退+AI 修复占位/缩放/导出 SVG/PNG/明暗主题联动全验收",
+      "detail": "mermaid 围栏块升级为图表 widget（复用 FUNC-3 StateField 通道）；关键排障（decision-017）：mermaid 全局单例并发渲染挂起（串行队列+10s 超时保护）；主题联动=matchMedia 变更重渲染"
     }
   ],
   "checklist": {

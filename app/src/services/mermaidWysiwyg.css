@@ -1,0 +1,162 @@
+/* ==========================================================================
+   mermaid 原位渲染样式（SIS-FUNC-4 / UI-2 §2）
+   容器 / loading / 图 / 缩放态 / 工具条 / 错误占位；明暗主题随系统联动
+   ========================================================================== */
+
+.cm-md-mermaid {
+  position: relative;
+  margin: 4px 0;
+  padding: 12px;
+  border: 1px solid var(--md-block-border, #d0d7de);
+  border-radius: 6px;
+  background: var(--md-block-bg, #f6f8fa);
+  overflow: auto;
+  max-width: 100%;
+  cursor: pointer; /* 点击进源码态 */
+}
+
+.cm-md-mermaid[data-state="loading"] {
+  color: #6b7280;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px 12px;
+}
+
+.cm-md-mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 4px;
+}
+
+/* 缩放查看态：图按原始尺寸展示，容器横向滚动 */
+.cm-md-mermaid.cm-md-mermaid-zoom svg {
+  max-width: none;
+  width: auto;
+  height: auto;
+}
+
+/* 图工具条（右上角悬浮） */
+.cm-md-mermaid-toolbar {
+  position: sticky;
+  left: 0;
+  top: 0;
+  float: right;
+  display: flex;
+  gap: 4px;
+  margin: -4px -4px 4px 4px;
+  z-index: 2;
+}
+
+.cm-md-mermaid-toolbar button {
+  font-size: 11px;
+  line-height: 1;
+  padding: 4px 8px;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #24292f;
+  cursor: pointer;
+}
+
+.cm-md-mermaid-toolbar button:hover {
+  background: #f3f4f6;
+}
+
+/* 语法错误占位 */
+.cm-md-mermaid-error {
+  font-size: 13px;
+  color: #cf222e;
+}
+
+.cm-md-mermaid-error-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.cm-md-mermaid-error-details pre {
+  margin: 4px 0;
+  padding: 8px;
+  background: #fff1f0;
+  border: 1px solid #ffd7d5;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 120px;
+  overflow: auto;
+  color: #cf222e;
+}
+
+.cm-md-mermaid-error-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.cm-md-mermaid-error-actions button {
+  font-size: 12px;
+  padding: 4px 10px;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #24292f;
+  cursor: pointer;
+}
+
+.cm-md-mermaid-error-actions button:hover {
+  background: #f3f4f6;
+}
+
+.cm-md-mermaid-error-actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ========== 暗色主题（系统跟随，UI-3） ========== */
+@media (prefers-color-scheme: dark) {
+  .cm-md-mermaid {
+    border-color: #30363d;
+    background: #161b22;
+  }
+
+  .cm-md-mermaid svg {
+    background: #0d1117;
+  }
+
+  .cm-md-mermaid-toolbar button {
+    border-color: #30363d;
+    background: #21262d;
+    color: #e6edf3;
+  }
+
+  .cm-md-mermaid-toolbar button:hover {
+    background: #30363d;
+  }
+
+  .cm-md-mermaid[data-state="loading"] {
+    color: #8b949e;
+  }
+
+  .cm-md-mermaid-error {
+    color: #ff7b72;
+  }
+
+  .cm-md-mermaid-error-details pre {
+    background: #3d2020;
+    border-color: #553535;
+    color: #ff7b72;
+  }
+
+  .cm-md-mermaid-error-actions button {
+    border-color: #30363d;
+    background: #21262d;
+    color: #e6edf3;
+  }
+
+  .cm-md-mermaid-error-actions button:hover {
+    background: #30363d;
+  }
+}

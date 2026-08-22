@@ -52,7 +52,7 @@
 - [x] P0 FUNC-1：多标签文件编辑（打开 / 新建 / 保存 / 另存 / 脏标记）（已完成 2026-08-21，SIS-FUNC-1，Sprint 2；commit 4648820 + 52494ea）
 - [x] P0 FUNC-2：多语法高亮（html / sql / js / json / markdown）（已完成 2026-08-21，SIS-FUNC-2，Sprint 2；commit afb510d）
 - [x] P0 FUNC-3：Markdown 同屏所见即所得（Typora 式）（已完成 2026-08-22，SIS-FUNC-3，Sprint 3）
-- [ ] P0 FUNC-4：mermaid 编写 + 原位实时渲染（已排期，SIS-FUNC-4）
+- [x] P0 FUNC-4：mermaid 编写 + 原位实时渲染（已完成 2026-08-22，SIS-FUNC-4，Sprint 3）
 - [ ] P0 FUNC-5：代码格式化（美化，4 种语言：html / js / json / markdown；SQL 格式化暂不支持）（已排期，SIS-FUNC-5）
 - [ ] P0 FUNC-6：文件对比（双栏 diff，高亮增删；源 = 两个独立文件 + 当前文件 vs 剪贴板；历史版本对比往后放）（已排期，SIS-FUNC-6）
 - [ ] P0 FUNC-7：搜索 / 替换（当前文件）（已排期，SIS-FUNC-7）

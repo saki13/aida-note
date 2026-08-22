@@ -11,7 +11,8 @@
     "tauri": "tauri",
     "test:ui": "node scripts/ui-smoke.mjs",
     "test:multitab": "node scripts/multitab-smoke.mjs",
-    "test:wysiwyg": "node scripts/wysiwyg-smoke.mjs"
+    "test:wysiwyg": "node scripts/wysiwyg-smoke.mjs",
+    "test:mermaid": "node scripts/mermaid-smoke.mjs"
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.12",

@@ -164,6 +164,18 @@
 - **依据**：SIS-FUNC-3 九项验收（wysiwyg-smoke.mjs 28/28 PASS）；CM6 view/state dist 源码实证（disallowBlockEffectsFor / LineDecoration.range / markdown() base 默认值）。
 - **影响范围**：markdownWysiwyg.ts/css、languageRegistry.ts、tabsStore.ts（openTab 联合类型 `in` 收窄，历史遗留 TS 错误修复）、wysiwyg-smoke.mjs（含 fs 落盘报告）、package.json（test:wysiwyg）；FUNC-4~8 复用 StateField 通道与自测资产；看板实例归位 project/panel/workflow/（此前读模板导致「未启动」显示）。
 
+### decision-017 · 2026-08-22 · FUNC-4 完成（mermaid 编写 + 原位实时渲染）
+
+- **背景**：Sprint 3 第二项 FUNC-4 实现，Playwright 自测 13/13 全绿，FUNC-3 回归 28/28 保持，build 通过。
+- **决策**：
+  1. mermaid 围栏块升级为图表 widget（block replace 替换 FencedCode），块级双态与 FUNC-3 同款（光标外渲染/光标内源码）；复用 StateField 通道与点击进源码交互（decision-016）。
+  2. **渲染串行队列 + 超时保护**：mermaid 是全局单例，多块并发渲染时错误块挂起会阻塞后续（实测：有效块永远等不到渲染）；改为 Promise 链串行 + 10s 超时兜底，失败落错误占位。
+  3. 防抖 300ms 出图（UI-2 §2.1：渲染是「离开触发」不是输入触发）；主题联动 = 渲染前按 prefers-color-scheme 设 mermaid theme + matchMedia change 时存活 widget 重渲染。
+  4. 图交互：只读 + 缩放（CSS 原尺寸/自适应切换）+ 导出 SVG/PNG（mermaid SVG 输出 + canvas 转 PNG + 浏览器下载，零新增依赖）。
+  5. 「AI 修复」入口占位：错误占位框内按钮 + dataset.source 存出错源码（数据传递契约），点击占位提示，逻辑归 AI-1（SIS 建议项，不实现 AI 调用）。
+- **依据**：SIS-FUNC-4 九项验收（mermaid-smoke.mjs 13/13 PASS）；UI-2 §2 蓝图；mermaid 11 API（render/initialize，dist 源码实证）。
+- **影响范围**：mermaidWysiwyg.ts/css、markdownWysiwyg.ts（FencedCode 分支接入）、wysiwyg-smoke.mjs（mermaid 断言升级为 widget）、package.json（test:mermaid）；FUNC-4 与 FUNC-3 协同（普通代码块保持源码展示）。
+
 ---
 
 <!-- 后续在此追加，格式：

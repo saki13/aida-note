@@ -32,6 +32,7 @@ import {
 import { Decoration, EditorView, WidgetType, type DecorationSet } from "@codemirror/view";
 import type { SyntaxNode } from "@lezer/common";
 import "./markdownWysiwyg.css";
+import { mermaidBlockDecoration } from "./mermaidWysiwyg";
 
 /** 隐藏 Markdown 标记文本（`#`、`**`、`>` 等，渲染态标记隐藏）。 */
 const hidden = Decoration.mark({ class: "cm-md-hidden" });
@@ -327,9 +328,16 @@ function buildDecorations(state: EditorState): DecorationSet {
       case "Blockquote":
         renderQuote(node);
         return;
-      case "FencedCode":
+      case "FencedCode": {
+        // mermaid 围栏块：光标外渲染为图表（FUNC-4）；其余代码块保持源码展示
+        const mermaidDeco = mermaidBlockDecoration(node, doc);
+        if (mermaidDeco) {
+          add(mermaidDeco, node.from, node.to);
+          return;
+        }
         renderFencedCode(node);
         return;
+      }
       case "ListItem":
         renderListItem(node);
         return;

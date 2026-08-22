@@ -12,11 +12,11 @@
 | 字段 | 值 |
 |------|-----|
 | `current_sprint` | `Sprint 3（增强）` |
-| `current_stage` | `执行（阶段 4，FUNC-3 完成，FUNC-4 开工）` |
+| `current_stage` | `执行（阶段 4，FUNC-4 完成，FUNC-5 开工）` |
 | `current_theme` | `增强（FUNC-3~8）` |
-| `current_task` | `FUNC-4 mermaid 编写 + 原位实时渲染` |
+| `current_task` | `FUNC-5 代码格式化（Prettier，html/js/json/markdown 4 种）` |
 | `task_status` | `pending` |
-| `task_progress` | `Sprint 1/2 已闭环（授权 2/4，decision-011/015）；Sprint 2 交付：UI-1/2/3 三文档 + FUNC-1 多标签 + FUNC-2 高亮（markRaw 原则 decision-013）；Sprint 3 启动收口完成（三原则风险卡点宣贯，六项 FUNC-3~8 锁定，顺序 3->4->5->7->8->6，授权 3/4 余 1 次）；FUNC-3 已完成（28/28 自测全绿，decision-016 四项 CM6 经验：StateField 通道/GFM 显式配置/行级零长度 range/树滞后防御） |
+| `task_progress` | `Sprint 1/2 已闭环（授权 2/4，decision-011/015）；Sprint 3 启动收口完成（三原则风险卡点宣贯，六项 FUNC-3~8 锁定，顺序 3->4->5->7->8->6，授权 3/4 余 1 次）；FUNC-3 已完成（28/28，decision-016 四项 CM6 经验：StateField 通道/GFM 显式配置/行级零长度 range/树滞后防御）；FUNC-4 已完成（13/13，decision-017：mermaid 串行渲染队列+超时保护/AI 修复入口占位） |
 
 ---
 
@@ -99,4 +99,4 @@
 ## 待完善 / 下一步
 
 - **当前阶段**：Sprint 3 执行（AS-8 授权模式：4 次短 Sprint，已用 3 次余 1 次）
-- 下一步：FUNC-4（mermaid 原位渲染）-> FUNC-5 -> FUNC-7 -> FUNC-8 -> FUNC-6 -> Sprint 3 收口 -> Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）-> 项目交付
+- 下一步：FUNC-5（代码格式化）-> FUNC-7 -> FUNC-8 -> FUNC-6 -> Sprint 3 收口 -> Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）-> 项目交付

@@ -53,6 +53,10 @@ const SAMPLE = [
   "graph TD; A-->B;",
   "```",
   "",
+  "```js",
+  "const a = 1;",
+  "```",
+  "",
   "---",
   "",
   "| 甲 | 乙 |",
@@ -108,7 +112,7 @@ try {
   check("图片渲染", (await selCount(".cm-md-img")) === 1);
   check("列表渲染（标记着色）", (await selCount(".cm-md-list-mark")) === 2);
   check("引用渲染（行级左边框）", (await selCount(".cm-line.cm-md-quote")) === 1);
-  check("代码块渲染（行级底纹，含 mermaid 围栏）", (await selCount(".cm-line.cm-md-codeblock")) >= 3);
+  check("代码块渲染（行级底纹，普通代码块）", (await selCount(".cm-line.cm-md-codeblock")) >= 2);
   check("分隔线渲染（hr widget）", (await selCount(".cm-md-hr")) === 1);
   const tableOk =
     (await selCount(".cm-md-table table")) === 1 &&
@@ -116,12 +120,8 @@ try {
     (await page.locator(".cm-md-table td").count()) === 2;
   check("表格渲染（table widget 2 表头 2 单元）", tableOk);
 
-  // 3. mermaid 围栏以源码展示（内容可见，无图表渲染）
-  const mermaidSrcVisible = await page.evaluate(() => {
-    const lines = [...document.querySelectorAll(".cm-line.cm-md-codeblock")];
-    return lines.some((l) => (l.textContent ?? "").includes("graph TD"));
-  });
-  check("mermaid 围栏内容源码展示", mermaidSrcVisible);
+  // 3. mermaid 围栏块：FUNC-4 渲染为图表 widget（光标外；loading/ready 态容器即存在）
+  check("mermaid 围栏渲染为图表 widget（FUNC-4）", (await selCount(".cm-md-mermaid")) === 1);
 
   // 4. 故障回退：未闭合加粗 / 坏表格
   const contentText = await page.locator(".cm-content").textContent();
