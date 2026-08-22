@@ -15,18 +15,20 @@
 import { onMounted, onBeforeUnmount, ref, watch, markRaw } from "vue";
 import { useMessage } from "naive-ui";
 import { basicSetup } from "codemirror";
+import { search, openSearchPanel } from "@codemirror/search";
 import { EditorView, keymap } from "@codemirror/view";
 import { EditorState, Compartment, Prec, type Extension } from "@codemirror/state";
 import { indentWithTab, undo, redo } from "@codemirror/commands";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { languageExtension } from "../services/languageRegistry";
 import { isFormatSupported, formatContent } from "../services/formatService";
+import { searchCountExtension } from "../services/searchCount";
 import { useTabsStore, type Tab } from "../stores/tabsStore";
 import type { LanguageId } from "../services/language";
 
 const emit = defineEmits<{
   (e: "cursor", c: { line: number; col: number }): void;
-  (e: "ready", api: { undo: () => void; redo: () => void; format: () => Promise<void> }): void;
+  (e: "ready", api: { undo: () => void; redo: () => void; format: () => Promise<void>; search: () => void }): void;
 }>();
 
 const tabsStore = useTabsStore();
@@ -111,6 +113,8 @@ function emptyState(): EditorState {
       basicSetup,
       themeCompartment.of(themeExtension()),
       languageCompartment.of([]),
+      search({ top: true }),
+      searchCountExtension,
       formatKeydownHandler(),
       keymap.of([indentWithTab]),
     ],
@@ -125,6 +129,8 @@ function createState(tab: Tab): EditorState {
       basicSetup,
       themeCompartment.of(themeExtension()),
       languageCompartment.of(languageExtensions(tab.language)),
+      search({ top: true }),
+      searchCountExtension,
       formatKeydownHandler(),
       keymap.of([indentWithTab]),
       EditorView.updateListener.of((u) => {
@@ -208,6 +214,10 @@ onMounted(() => {
       if (view) redo(view);
     },
     format: () => formatCurrent(),
+    search: () => {
+      view?.focus();
+      if (view) openSearchPanel(view);
+    },
   });
 });
 
@@ -247,5 +257,60 @@ watch(
 }
 .editor-host :deep(.cm-scroller) {
   font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+}
+/* FUNC-7：搜索面板顶部浮动（VS Code 风格，临时覆盖不压缩编辑区）。
+ * CM6 默认 .cm-panels-bottom 底部内嵌；search({top:true}) 改顶部 + 本样式悬浮。
+ * 面板位于 .editor-host 内，absolute 定位悬浮于编辑区上方。 */
+.editor-host {
+  position: relative;
+}
+.editor-host :deep(.cm-panels-top) {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  padding: 6px 10px;
+  background: var(--search-panel-bg, #ffffff);
+  color: inherit;
+}
+.editor-host :deep(.cm-search .cm-textfield) {
+  background: var(--search-input-bg, #fff);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 13px;
+}
+.editor-host :deep(.cm-search label) {
+  font-size: 12px;
+  margin-left: 6px;
+}
+.editor-host :deep(.cm-search .cm-searchInfo) {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #888;
+}
+.editor-host :deep(.cm-search .cm-search-count) {
+  margin-left: 10px;
+  font-size: 12px;
+  color: #555;
+  white-space: nowrap;
+}
+.editor-host :deep(.cm-search .cm-search-count-error) {
+  color: #d03050;
+}
+@media (prefers-color-scheme: dark) {
+  .editor-host :deep(.cm-panels-top) {
+    background: var(--search-panel-bg, #1e1e1e);
+    border-color: #3c3c3c;
+  }
+  .editor-host :deep(.cm-search .cm-textfield) {
+    background: #252526;
+    color: #e0e0e0;
+    border-color: #3c3c3c;
+  }
 }
 </style>

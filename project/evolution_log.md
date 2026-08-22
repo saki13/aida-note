@@ -168,6 +168,19 @@
   1. CM6 快捷键规范：组合键走 `Prec.highest domEventHandlers` + `e.key` 大小写双兼容（后续 FUNC-7 搜索快捷键、FUNC-8 等复用）
   2. 自测断言规范：多行内容用缩进空格、toast 用轮询目标文本、报告落盘为准（写入自测 skill 立项的评估清单）
 
+### 2026-08-22 · 任务经验 · FUNC-7 排障：CM6 搜索面板的「缺件」与测试输入链路差异
+
+- **背景**：FUNC-7（搜索/替换）实现，Playwright 自测 16/16 全绿（mermaid 回归 13/13 保持）。主要工作不是接 search 扩展（Ctrl+F 面板 basicSetup 就有），而是补「CM6 没做」的部分 + 适配测试输入。
+- **关联 decision**：decision-019
+- **影响范围**：EditorPane.vue（search({top:true}) + SearchCount + 浮动样式）、searchCount.ts、search-smoke.mjs；FUNC-8 与后续复用
+- **经验与教训**：
+  1. **「复用内置能力」前先核对验收清单与内置能力的缺口**：CM6 search 面板三选项/替换/高亮/跳转全齐，但**没有视觉计数与空态提示**（计数只走屏幕阅读器 announceMatch）——SIS 明确要求可见计数，自研 SearchCount ViewPlugin 补齐（`new SearchQuery(spec).getCursor(state)` 遍历计数）。判断启发：内置 ≠ 完整，逐条对验收标准找「缺件」
+  2. **测试输入链路差异（Playwright fill vs 真实打字）**：CM6 搜索框 commit 走 onkeyup/onchange（无 oninput）；Playwright `fill` 的 change 事件在「面板二次打开」会话中实测不触发 commit（同面板内 fill 却有效）——自测统一「点击 + Ctrl+A + type」。真实用户打字（keyup）无此问题，**是测试适配不是产品 bug**
+  3. **焦点 scope 决定快捷键归属**：替换后焦点留在搜索面板，"search-panel" scope 无 undo 绑定，Ctrl+Z 不达编辑器；撤销断言前先点击 .cm-content 聚焦。同理适用于任何「面板类 UI 操作后断言编辑器行为」的场景
+  4. **searchExtensions 预注册的副作用**：`search({top:true})` 预注册扩展后，openSearchPanel 走 togglePanel 分支而非 appendConfig 注入（后者是首次打开的动态方案）——`top: true` 必须在扩展里配置，仅靠 searchKeymap 无法置顶
+- **改进项清单（回流方向）**：
+  1. 自测 skill 立项评估清单增补：内置能力缺口核对（逐条对验收找缺件）+ 面板类 UI 操作后焦点 scope 断言规范
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要

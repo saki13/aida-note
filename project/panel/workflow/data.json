@@ -5,8 +5,8 @@
     "sprint": "Sprint 3",
     "stage": "执行（阶段 4）",
     "stage_main": "Sprint In Progress",
-    "status": "FUNC-5 完成（11/11 自测全绿），FUNC-7 待开工（授权 3/4 余 1 次）",
-    "next": "FUNC-7 -> FUNC-8 -> FUNC-6 -> Sprint 3 收口",
+    "status": "FUNC-7 完成（16/16 自测全绿），FUNC-8 待开工（授权 3/4 余 1 次）",
+    "next": "FUNC-8 -> FUNC-6 -> Sprint 3 收口",
     "blocked": "无"
   },
   "backlog": [
@@ -106,7 +106,7 @@
       "title": "搜索 / 替换",
       "category": "功能实现",
       "priority": "P0",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "FUNC-8",
@@ -381,6 +381,13 @@
       "type": "任务完成",
       "summary": "FUNC-5 代码格式化完成（DoD 11/11 过）：按钮+Ctrl+Shift+F/整文件原地替换进撤销栈/语法错误提示保持原文/SQL 置灰/四语言全验收，build 通过",
       "detail": "prettier standalone+按语言动态插件（babel+estree/html/markdown，零新增依赖）；关键排障（decision-018）：CM6 keymap Mod-Shift-f 被搜索面板 Mod-f 抢先命中（改 Prec.highest domEventHandlers，handler 参数顺序是 (event, view)）；.cm-content textContent 不含 \\n（CSS 渲染行），多行断言用缩进空格；Naive UI toast 3s 存留期需轮询内容而非等元素"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "FUNC-7 搜索/替换完成（DoD 16/16 过）：顶部浮动搜索框/三选项/高亮+计数/上下跳转/单次+全部替换可撤销/空态/非法正则全验收，build 通过",
+      "detail": "复用 CM6 search（search({top:true}) 顶部面板 + 自研浮动样式）；关键经验（decision-019）：CM6 面板无视觉计数（自研 SearchCount ViewPlugin 用 SearchQuery.getCursor 计数：N 个匹配/无结果/正则无效）；搜索框 commit 走 onkeyup/onchange，Playwright fill 二次打开面板后不触发（自测改点击+Ctrl+A+type）；替换后撤销需先聚焦编辑器（焦点在搜索面板时 Ctrl+Z 不达编辑器）"
     }
   ],
   "checklist": {

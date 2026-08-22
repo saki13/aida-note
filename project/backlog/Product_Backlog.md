@@ -55,7 +55,7 @@
 - [x] P0 FUNC-4：mermaid 编写 + 原位实时渲染（已完成 2026-08-22，SIS-FUNC-4，Sprint 3）
 - [x] P0 FUNC-5：代码格式化（美化，4 种语言：html / js / json / markdown；SQL 格式化暂不支持）（已完成 2026-08-22，SIS-FUNC-5，Sprint 3）
 - [ ] P0 FUNC-6：文件对比（双栏 diff，高亮增删；源 = 两个独立文件 + 当前文件 vs 剪贴板；历史版本对比往后放）（已排期，SIS-FUNC-6）
-- [ ] P0 FUNC-7：搜索 / 替换（当前文件）（已排期，SIS-FUNC-7）
+- [x] P0 FUNC-7：搜索 / 替换（当前文件）（已完成 2026-08-22，SIS-FUNC-7，Sprint 3）
 - [ ] P0 FUNC-8：软换行展示（默认开启，可开关，保存不写入换行符）（已排期，SIS-FUNC-8）
 - [ ] P1 FUNC-9：主题切换（明 / 暗 + 多套配色）（已排期，SIS-FUNC-9）
 - [ ] P1 FUNC-10：自动保存 / 崩溃恢复草稿（临时目录存储，退出/恢复后清理、不留碎片）（已排期，SIS-FUNC-10）

@@ -23,8 +23,9 @@ interface EditorApi {
   undo: () => void;
   redo: () => void;
   format: () => Promise<void>;
+  search: () => void;
 }
-const editorApi: EditorApi = { undo: () => undefined, redo: () => undefined, format: () => Promise.resolve() };
+const editorApi: EditorApi = { undo: () => undefined, redo: () => undefined, format: () => Promise.resolve(), search: () => undefined };
 provide<EditorApi>("editorApi", editorApi);
 
 function isTauri(): boolean {
@@ -110,7 +111,7 @@ onBeforeUnmount(() => {
     <ToolBar />
     <TabBar />
     <div class="editor-area">
-      <EditorPane @cursor="cursor = $event" @ready="editorApi.undo = $event.undo; editorApi.redo = $event.redo; editorApi.format = $event.format" />
+      <EditorPane @cursor="cursor = $event" @ready="editorApi.undo = $event.undo; editorApi.redo = $event.redo; editorApi.format = $event.format; editorApi.search = $event.search" />
     </div>
     <StatusBar :cursor="cursor" />
   </div>

@@ -187,6 +187,17 @@
 - **依据**：SIS-FUNC-5 九项验收（format-smoke.mjs 11/11 PASS）；CM6 view dist 源码实证（buildKeymap 同 key run 顺序、bindHandler 参数顺序、contentDOM 事件绑定、domEventHandlers runHandlers）；w3c-keyname base[70]="f"。
 - **影响范围**：EditorPane.vue（formatKeydownHandler 替换 formatKeymap）、formatService.ts、ToolBar.vue（canFormat 置灰）、MainView.vue（EditorApi.format）、format-smoke.mjs、package.json（test:format）；后续 FUNC-7~8 的自测断言遵循「无 \n」与「轮询内容」经验。
 
+### decision-019 · 2026-08-22 · FUNC-7 完成（搜索/替换）+ CM6 搜索面板三条经验
+
+- **背景**：Sprint 3 第四项 FUNC-7 实现（复用 CM6 search 扩展），Playwright 自测 16/16 全绿，mermaid 回归 13/13 保持，build 通过。
+- **决策**：
+  1. **CM6 搜索面板无视觉计数/空态提示**（仅 announceMatch 屏幕阅读器播报）——SIS 要求可见计数，自研 `SearchCount` ViewPlugin：监听查询变化（getSearchQuery 的 spec 键），用 `new SearchQuery(spec).getCursor(state)` 遍历计数，渲染 `.cm-search-count` span（「N 个匹配」/「无结果」/「正则无效」三态），零新增依赖。
+  2. **面板顶部浮动**：`search({ top: true })` 预注册 searchExtensions（basicSetup 仅含 searchKeymap，面板首次打开才动态 appendConfig）+ CSS absolute 悬浮（VS Code 风格，临时覆盖不压缩编辑区）。**注意**：openSearchPanel 在 searchExtensions 未注册时用 StateEffect.appendConfig 注入，注册后走 togglePanel 分支。
+  3. **Playwright fill 在搜索面板二次打开后不触发 commit**：CM6 搜索框 commit 走 onkeyup/onchange（无 oninput），fill 的 change 在「Esc 关闭→重开」会话中实测失效（同面板内 fill 有效）——自测统一改用「点击 + Ctrl+A + type」（type 触发 keyup）。
+  4. **替换后撤销须先聚焦编辑器**：替换按钮点击后焦点留在搜索面板，Ctrl+Z 在 "search-panel" scope 无 undo 绑定，需点击 .cm-content 聚焦后撤销。
+- **依据**：SIS-FUNC-7 八项验收（search-smoke.mjs 16/16 PASS）；CM6 search dist 源码实证（SearchPanel commit/onkeyup、openSearchPanel appendConfig、SearchQuery.getCursor、searchConfigFacet 默认 top:false）。
+- **影响范围**：EditorPane.vue（search({top:true}) + searchCountExtension + ready.search + 面板样式）、searchCount.ts、ToolBar.vue（搜索按钮解锁）、MainView.vue（EditorApi.search）、search-smoke.mjs、package.json（test:search）；FUNC-8 软换行同理在 extensions 加配置。
+
 ---
 
 <!-- 后续在此追加，格式：

@@ -15,6 +15,7 @@ interface EditorApi {
   undo: () => void;
   redo: () => void;
   format: () => Promise<void>;
+  search: () => void;
 }
 
 const tabsStore = useTabsStore();
@@ -49,6 +50,10 @@ async function onSaveAs(): Promise<void> {
 async function onFormat(): Promise<void> {
   await editorApi?.format();
 }
+
+function onSearch(): void {
+  editorApi?.search();
+}
 </script>
 
 <template>
@@ -66,7 +71,7 @@ async function onFormat(): Promise<void> {
     <span class="sep"></span>
 
     <!-- 以下为后续 Sprint 占位（UI-1 映射防对不齐，禁用） -->
-    <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>搜索</n-button></template>FUNC-7（Sprint 3）</n-tooltip>
+    <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onSearch" :disabled="!hasActive">搜索</n-button></template>FUNC-7（Sprint 3，Ctrl+F）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onFormat" :disabled="!canFormat">格式化</n-button></template>FUNC-5（Sprint 3，Ctrl+Shift+F）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>软换行</n-button></template>FUNC-8（Sprint 3）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>对比</n-button></template>FUNC-6（Sprint 3）</n-tooltip>
