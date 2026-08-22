@@ -13,21 +13,24 @@
  */
 
 import { onMounted, onBeforeUnmount, ref, watch, markRaw } from "vue";
+import { useMessage } from "naive-ui";
 import { basicSetup } from "codemirror";
 import { EditorView, keymap } from "@codemirror/view";
-import { EditorState, Compartment, type Extension } from "@codemirror/state";
+import { EditorState, Compartment, Prec, type Extension } from "@codemirror/state";
 import { indentWithTab, undo, redo } from "@codemirror/commands";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { languageExtension } from "../services/languageRegistry";
+import { isFormatSupported, formatContent } from "../services/formatService";
 import { useTabsStore, type Tab } from "../stores/tabsStore";
 import type { LanguageId } from "../services/language";
 
 const emit = defineEmits<{
   (e: "cursor", c: { line: number; col: number }): void;
-  (e: "ready", api: { undo: () => void; redo: () => void }): void;
+  (e: "ready", api: { undo: () => void; redo: () => void; format: () => Promise<void> }): void;
 }>();
 
 const tabsStore = useTabsStore();
+const message = useMessage();
 const editorHost = ref<HTMLDivElement | null>(null);
 let view: EditorView | null = null;
 
@@ -46,6 +49,58 @@ function languageExtensions(lang: LanguageId): Extension {
   return languageExtension(lang);
 }
 
+/** 格式化当前文件（SIS-FUNC-5）：整文件原地替换 + 进撤销栈 + toast 反馈。
+ *  语法错误/不支持语言：提示并保持原文不变。 */
+async function formatCurrent(): Promise<void> {
+  const tab = tabsStore.activeTab;
+  if (!view || !tab) return;
+  if (!isFormatSupported(tab.language)) {
+    message.warning(`当前语言（${tab.language}）不支持格式化`);
+    return;
+  }
+  const before = view.state.doc.toString();
+  try {
+    const after = await formatContent(tab.language, before);
+    if (after === before) {
+      message.info("已格式化（内容无变化）");
+      return;
+    }
+    // 整文件替换为一次编辑操作（进撤销栈，可 Ctrl+Z 回退）；尽量保持光标相对位置
+    const head = Math.min(view.state.selection.main.head, after.length);
+    view.dispatch({
+      changes: { from: 0, to: before.length, insert: after },
+      selection: { anchor: head },
+    });
+    message.success("已格式化");
+  } catch (e) {
+    message.error(`格式化失败：${e instanceof Error ? e.message : String(e)}`);
+  }
+}
+
+/** Ctrl+Shift+F 格式化快捷键（SIS-FUNC-5）。
+ *  注意：不用 CM6 keymap（"Mod-Shift-f"）——实测该绑定在 Shift 组合下
+ *  会被搜索面板的 "Mod-f" 抢先命中（event.key 大小写差异：Playwright 合成
+ *  小写 "f" 走 A 分支拼出 "Ctrl-f" 命中 openSearchPanel），改用
+ *  Prec.highest domEventHandlers 直接拦截，兼容 event.key 大小写两种形态。 */
+function formatKeydownHandler(): Extension {
+  return Prec.highest(
+    EditorView.domEventHandlers({
+      keydown: (e, v) => {
+        if (
+          (e.ctrlKey || e.metaKey) &&
+          e.shiftKey &&
+          !e.altKey &&
+          (e.key === "f" || e.key === "F")
+        ) {
+          void formatCurrent();
+          return true; // 已处理：阻止默认行为并停止后续 handler（含 keymap）
+        }
+        return false;
+      },
+    })
+  );
+}
+
 /** 空编辑器 state：注册 theme/language 两个 Compartment 槽位。
  *  注意：必须在所有创建的 state 中都注册同一对 compartment 实例，
  *  否则后续 reconfigure 找不到配置槽会被静默忽略（本组件关键坑，FUNC-2 排查所得）。 */
@@ -56,6 +111,7 @@ function emptyState(): EditorState {
       basicSetup,
       themeCompartment.of(themeExtension()),
       languageCompartment.of([]),
+      formatKeydownHandler(),
       keymap.of([indentWithTab]),
     ],
   });
@@ -69,6 +125,7 @@ function createState(tab: Tab): EditorState {
       basicSetup,
       themeCompartment.of(themeExtension()),
       languageCompartment.of(languageExtensions(tab.language)),
+      formatKeydownHandler(),
       keymap.of([indentWithTab]),
       EditorView.updateListener.of((u) => {
         if (u.docChanged) {
@@ -150,6 +207,7 @@ onMounted(() => {
       view?.focus();
       if (view) redo(view);
     },
+    format: () => formatCurrent(),
   });
 });
 

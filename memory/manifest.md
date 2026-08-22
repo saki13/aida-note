@@ -12,11 +12,11 @@
 | 字段 | 值 |
 |------|-----|
 | `current_sprint` | `Sprint 3（增强）` |
-| `current_stage` | `执行（阶段 4，FUNC-4 完成，FUNC-5 开工）` |
+| `current_stage` | `执行（阶段 4，FUNC-5 完成，FUNC-7 待开工）` |
 | `current_theme` | `增强（FUNC-3~8）` |
-| `current_task` | `FUNC-5 代码格式化（Prettier，html/js/json/markdown 4 种）` |
+| `current_task` | `FUNC-7 搜索/替换（当前文件）` |
 | `task_status` | `pending` |
-| `task_progress` | `Sprint 1/2 已闭环（授权 2/4，decision-011/015）；Sprint 3 启动收口完成（三原则风险卡点宣贯，六项 FUNC-3~8 锁定，顺序 3->4->5->7->8->6，授权 3/4 余 1 次）；FUNC-3 已完成（28/28，decision-016 四项 CM6 经验：StateField 通道/GFM 显式配置/行级零长度 range/树滞后防御）；FUNC-4 已完成（13/13，decision-017：mermaid 串行渲染队列+超时保护/AI 修复入口占位） |
+| `task_progress` | `Sprint 1/2 已闭环（授权 2/4，decision-011/015）；Sprint 3 启动收口完成（三原则风险卡点宣贯，六项 FUNC-3~8 锁定，顺序 3->4->5->7->8->6，授权 3/4 余 1 次）；FUNC-3 已完成（28/28，decision-016）；FUNC-4 已完成（13/13，decision-017）；FUNC-5 已完成（11/11，decision-018：格式化快捷键改 Prec.highest domEventHandlers——handler 参数顺序 (event, view)，.cm-content textContent 无 \n，Naive UI toast 3s 存留期轮询） |
 
 ---
 
@@ -99,4 +99,4 @@
 ## 待完善 / 下一步
 
 - **当前阶段**：Sprint 3 执行（AS-8 授权模式：4 次短 Sprint，已用 3 次余 1 次）
-- 下一步：FUNC-5（代码格式化）-> FUNC-7 -> FUNC-8 -> FUNC-6 -> Sprint 3 收口 -> Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）-> 项目交付
+- 下一步：FUNC-7（搜索替换）-> FUNC-8 -> FUNC-6 -> Sprint 3 收口 -> Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）-> 项目交付

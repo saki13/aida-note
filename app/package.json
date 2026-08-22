@@ -12,7 +12,8 @@
     "test:ui": "node scripts/ui-smoke.mjs",
     "test:multitab": "node scripts/multitab-smoke.mjs",
     "test:wysiwyg": "node scripts/wysiwyg-smoke.mjs",
-    "test:mermaid": "node scripts/mermaid-smoke.mjs"
+    "test:mermaid": "node scripts/mermaid-smoke.mjs",
+    "test:format": "node scripts/format-smoke.mjs"
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.12",

@@ -176,6 +176,17 @@
 - **依据**：SIS-FUNC-4 九项验收（mermaid-smoke.mjs 13/13 PASS）；UI-2 §2 蓝图；mermaid 11 API（render/initialize，dist 源码实证）。
 - **影响范围**：mermaidWysiwyg.ts/css、markdownWysiwyg.ts（FencedCode 分支接入）、wysiwyg-smoke.mjs（mermaid 断言升级为 widget）、package.json（test:mermaid）；FUNC-4 与 FUNC-3 协同（普通代码块保持源码展示）。
 
+### decision-018 · 2026-08-22 · FUNC-5 完成（代码格式化）+ 快捷键与自测三条经验
+
+- **背景**：Sprint 3 第三项 FUNC-5 实现（Prettier standalone + 按语言动态插件，html/js/json/markdown），Playwright 自测 11/11 全绿，FUNC-3/4 回归 28/28 + 13/13 保持，build 通过。
+- **决策**：
+  1. **Ctrl+Shift+F 不用 CM6 keymap（"Mod-Shift-f"），改 `Prec.highest(EditorView.domEventHandlers({keydown}))` 直接拦截**：实测 "Mod-Shift-f" 绑定在 Shift 组合下被搜索面板 "Mod-f" 抢先命中——Playwright 合成事件 `event.key` 是小写 "f"，CM6 keyName 走 A 分支拼出 "Ctrl-f" 命中 openSearchPanel；真实键盘 `event.key` 为大写 "F"，需 fallback 的 base[70]="f" 分支（B1）才能命中，环境相关。domEventHandlers 双兼容 `e.key === "f" || "F"`，返回 true 停止后续 handler。
+  2. **EditorView.domEventHandlers 的 handler 参数顺序是 `(event, view)`**（bindHandler 内 `handler.call(plugin, event, view)`），写反会静默失效（条件恒 false，无报错无日志——「无报错但功能失效」类问题新一例）。
+  3. **CM6 的 `.cm-content` textContent 不含 `\n`**（CM6 用 CSS 渲染行，块间不产生换行符）：多行内容断言不能用 `\n`，改用缩进空格子串（如 `"  <p>hi</p>"`）。
+  4. Naive UI toast 3s 存留期：等 toast 元素会被前一步旧 toast 骗过，须轮询「内容变化」（waitForFunction 目标文本）而非等元素出现。
+- **依据**：SIS-FUNC-5 九项验收（format-smoke.mjs 11/11 PASS）；CM6 view dist 源码实证（buildKeymap 同 key run 顺序、bindHandler 参数顺序、contentDOM 事件绑定、domEventHandlers runHandlers）；w3c-keyname base[70]="f"。
+- **影响范围**：EditorPane.vue（formatKeydownHandler 替换 formatKeymap）、formatService.ts、ToolBar.vue（canFormat 置灰）、MainView.vue（EditorApi.format）、format-smoke.mjs、package.json（test:format）；后续 FUNC-7~8 的自测断言遵循「无 \n」与「轮询内容」经验。
+
 ---
 
 <!-- 后续在此追加，格式：

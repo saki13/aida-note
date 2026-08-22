@@ -9,10 +9,12 @@
 import { inject, computed } from "vue";
 import { NTooltip, NButton } from "naive-ui";
 import { useTabsStore } from "../stores/tabsStore";
+import { isFormatSupported } from "../services/formatService";
 
 interface EditorApi {
   undo: () => void;
   redo: () => void;
+  format: () => Promise<void>;
 }
 
 const tabsStore = useTabsStore();
@@ -20,6 +22,11 @@ const editorApi = inject<EditorApi | null>("editorApi", null);
 
 const hasActive = computed(() => tabsStore.activeTab !== null);
 const dirtyCount = computed(() => tabsStore.tabs.filter((t) => t.dirty).length);
+// 格式化仅支持 html/js/json/markdown（SIS-FUNC-5；SQL 置灰）
+const canFormat = computed(() => {
+  const tab = tabsStore.activeTab;
+  return !!tab && isFormatSupported(tab.language);
+});
 
 async function onNew(): Promise<void> {
   tabsStore.createUntitled();
@@ -37,6 +44,10 @@ async function onSave(): Promise<void> {
 async function onSaveAs(): Promise<void> {
   const tab = tabsStore.activeTab;
   if (tab) await tabsStore.saveTabAs(tab.id);
+}
+
+async function onFormat(): Promise<void> {
+  await editorApi?.format();
 }
 </script>
 
@@ -56,7 +67,7 @@ async function onSaveAs(): Promise<void> {
 
     <!-- 以下为后续 Sprint 占位（UI-1 映射防对不齐，禁用） -->
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>搜索</n-button></template>FUNC-7（Sprint 3）</n-tooltip>
-    <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>格式化</n-button></template>FUNC-5（Sprint 3）</n-tooltip>
+    <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onFormat" :disabled="!canFormat">格式化</n-button></template>FUNC-5（Sprint 3，Ctrl+Shift+F）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>软换行</n-button></template>FUNC-8（Sprint 3）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>对比</n-button></template>FUNC-6（Sprint 3）</n-tooltip>
 

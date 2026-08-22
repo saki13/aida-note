@@ -5,8 +5,8 @@
     "sprint": "Sprint 3",
     "stage": "执行（阶段 4）",
     "stage_main": "Sprint In Progress",
-    "status": "FUNC-4 完成（13/13 自测全绿），FUNC-5 开工（授权 3/4 余 1 次）",
-    "next": "FUNC-5 -> FUNC-7 -> FUNC-8 -> FUNC-6 -> Sprint 3 收口",
+    "status": "FUNC-5 完成（11/11 自测全绿），FUNC-7 待开工（授权 3/4 余 1 次）",
+    "next": "FUNC-7 -> FUNC-8 -> FUNC-6 -> Sprint 3 收口",
     "blocked": "无"
   },
   "backlog": [
@@ -92,7 +92,7 @@
       "title": "代码格式化（4 种语言，SQL 暂不支持）",
       "category": "功能实现",
       "priority": "P0",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "FUNC-6",
@@ -374,6 +374,13 @@
       "type": "任务完成",
       "summary": "FUNC-4 mermaid 编写 + 原位实时渲染完成（DoD 13/13 过）：防抖出图/光标进源码/错误回退+AI 修复占位/缩放/导出 SVG/PNG/明暗主题联动全验收",
       "detail": "mermaid 围栏块升级为图表 widget（复用 FUNC-3 StateField 通道）；关键排障（decision-017）：mermaid 全局单例并发渲染挂起（串行队列+10s 超时保护）；主题联动=matchMedia 变更重渲染"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "FUNC-5 代码格式化完成（DoD 11/11 过）：按钮+Ctrl+Shift+F/整文件原地替换进撤销栈/语法错误提示保持原文/SQL 置灰/四语言全验收，build 通过",
+      "detail": "prettier standalone+按语言动态插件（babel+estree/html/markdown，零新增依赖）；关键排障（decision-018）：CM6 keymap Mod-Shift-f 被搜索面板 Mod-f 抢先命中（改 Prec.highest domEventHandlers，handler 参数顺序是 (event, view)）；.cm-content textContent 不含 \\n（CSS 渲染行），多行断言用缩进空格；Naive UI toast 3s 存留期需轮询内容而非等元素"
     }
   ],
   "checklist": {

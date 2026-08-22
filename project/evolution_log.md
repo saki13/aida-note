@@ -153,6 +153,21 @@
   1. 自测脚本 skill 化立项评估条件进一步增强（串行队列 + 超时保护模式可复用为通用「异步渲染自测模板」；Sprint 3 剩余 FUNC-5/7/8/6 高频复用）
   2. 全局单例异步 API（mermaid 类）在本项目内的使用规范：任何并发调用点必须串行化 + 超时（写入 FUNC-6 等后续任务的前置认知）
 
+### 2026-08-22 · 任务经验 · FUNC-5 排障：CM6 快捷键与 Playwright 合成事件的「环境相关」陷阱 + 断言时机
+
+- **背景**：FUNC-5（代码格式化）实现，Playwright 自测 11/11 全绿（FUNC-3/4 回归保持）。两个 FAIL 的根因都是「断言/触发与真实环境的差异」，非实现缺失。
+- **关联 decision**：decision-018
+- **影响范围**：EditorPane.vue（formatKeydownHandler）、format-smoke.mjs；FUNC-7/8 自测与快捷键实现复用
+- **经验与教训**：
+  1. **CM6 keymap 的 `Mod-Shift-f` 在 Shift 组合下被 `Mod-f`（搜索面板）抢先命中，且行为随事件源变化**：Playwright 合成 Ctrl+Shift+f 的 `event.key` 是小写 "f"（CM6 A 分支拼 "Ctrl-f" 直接命中 openSearchPanel），真实键盘是大写 "F"（需 fallback base[70] 分支才命中）。同一绑定、两种事件、两种命运——**快捷键实现不要依赖 CM6 对 Shift 组合的降级匹配，用 `Prec.highest(EditorView.domEventHandlers({keydown}))` 显式匹配 `e.key === "f" || "F"` 最稳**。
+  2. **domEventHandlers 参数顺序是 `(event, view)`**：bindHandler 内部 `handler.call(plugin, event, view)`。写反静默失效（「无报错但功能失效」类问题第三例——前两例：reconfigure 槽位、Vue 代理破坏 Compartment 身份）。判断启发：CM6 的 DOM 回调沿用 DOM 惯例（事件参数在前），不要照搬 ViewPlugin 的 (view) 直觉。
+  3. **CM6 `.cm-content` 的 textContent 不含 `\n`**（CSS 渲染行，块间无换行符）：多行断言用 `\n` 永远不命中且不报错（waitForFunction 空等）。改用缩进空格子串断言（`"  <p>hi</p>"`）。
+  4. **toast 断言轮询「内容」而非「元素」**：Naive UI message 3s 存留期，`waitForSelector(".n-message")` 会被前一步旧 toast 骗过，内容尚未格式化完就断言失败；改为 waitForFunction 轮询目标文本。
+  5. 沙箱 stdout 截断会掩盖脚本实际完成度（报告文件才是真相）：format-smoke 完整 11 项跑完，沙箱只显示前 3~6 行且 exit 0，误判「脚本卡停」——**自测脚本务必 fs 落盘报告并以其为准**。
+- **改进项清单（回流方向）**：
+  1. CM6 快捷键规范：组合键走 `Prec.highest domEventHandlers` + `e.key` 大小写双兼容（后续 FUNC-7 搜索快捷键、FUNC-8 等复用）
+  2. 自测断言规范：多行内容用缩进空格、toast 用轮询目标文本、报告落盘为准（写入自测 skill 立项的评估清单）
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要
