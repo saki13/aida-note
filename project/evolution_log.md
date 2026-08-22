@@ -209,6 +209,23 @@
   1. 自测 skill 立项评估清单增补：滚动类断言的空间前提、外部文本源 CRLF 归一、按需导入组件自查清单
   2. Sprint 3 六项全部闭环 → 走阶段 4→5→6→7→8（DoD 对照表 + Review 报告 + Retrospective 轻量并入本日志）；Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）复用 settings 通道（theme/recentFiles/aiConfig 字段已就位）
 
+### 2026-08-22 · Sprint 闭环 · Sprint 3 收口回填（轻量 Retrospective，AS-8 第 3 次授权闭环）
+
+- **背景**：Sprint 3（增强）六任务全部完成（FUNC-3 28/28 / FUNC-4 13/13 / FUNC-5 11/11 / FUNC-7 16/16 / FUNC-8 10/10 / FUNC-6 12/12，合计 90/90 DoD 子项），走完阶段 4->5->6->7->8 完整闭环。Review 结论 Passed With Observation（Aida 代行判定，events[] 广播 PO）。本记录承担阶段 7 反思纪要职能（轻量形态，沿 Sprint 1/2 先例）。
+- **关联 decision**：decision-016~021（FUNC-3~8 各一）；Sprint 3 闭环不再单开 decision（循 decision-011 先例并入收口批次）
+- **影响范围**：project/sprint/（Sprint_3_DoD对照表 + Sprint_3_Review报告 + Sprint_4_Planning输入候选清单）；Sprint 4 执行模式
+- **过程数据**：任务 6/6 DoD 通过（90/90 子项）；events 本 Sprint 新增 7 条（任务级 6 + 闭环 1 计入收口批次）；git commit 主线 7 个（FUNC-3/4 未单列 hash 于 Backlog，FUNC-5 55e4da4 / FUNC-7 a72d3db / FUNC-8 652d2e6 / FUNC-6 d57ddc9 + 收口 1 个）；PO 转交 0 次（环境/工具链由 PO 系统终端执行 0 次，前端功能 Aida 用 Playwright 自测，全 Sprint 零转交）；新增正式测试资产 6 个（test:wysiwyg/test:mermaid/test:format/test:search/test:wrap/test:compare）
+- **经验与教训**：
+  1. **六任务全前端 + 自测链路成熟 = 全 Sprint 零转交**：Sprint 1 转交 2 次（环境下载）、Sprint 2 转交 1 次（关窗口验证）、Sprint 3 转交 0 次——「自测能力是自主性的分水岭」结论（Sprint 2 期）在 Sprint 3 完全兑现；Playwright+系统 Edge 链路成为前端功能验证的默认路径
+  2. **技术坑密度随复杂度上升但全部前置化**：FUNC-3（主峰）4 个 CM6 装饰坑、FUNC-4 全局单例并发、FUNC-5 快捷键合成事件、FUNC-7 搜索面板缺件、FUNC-8 settings 最小子集、FUNC-6 对称字段漏更——每任务一条 Evolution Log 经验 + decision 定案，Sprint 4（AI-1 主峰含流式/API 真实交互）直接复用排查方法论
+  3. **「外部写回 vs 缓存」一致性以 store content 为唯一事实源**（FUNC-6 关键）：cmState 降级为「未过期缓存」，switchToTab 比较 doc 与 content——这是对 FUNC-2 markRaw 原则的自然延伸：**store 持有外部对象时，内容类状态以 store 文本为事实源，外部对象只做缓存**
+  4. **按需导入的组件自查**：Naive UI 按需导入模式下，每个 SFC 的 n-xxx 必须自己 import（MainView 的 NModal 修复不解决 CompareView 的 NButton）——「修一处 import 只解决该组件的标签」
+  5. **滚动类断言的数据前提**：测试内容长度必须覆盖断言依赖的物理条件（无滚动空间时 scrollTop 恒 0，功能正常也会误判 FAIL）
+- **改进项清单（回流方向）**：
+  1. 自测 skill 立项评估进入决策点：Sprint 4 收口时正式立项 product/skills/（6 个 smoke 脚本模式一致，模板化收益明确；PO 建议过「手动做一个测试 skill」）
+  2. Sprint 4 观察：AI-1 真实 API 调用的沙箱限制应对（mock 层或 PO 提供测试配置）；FUNC-10 关闭三选边界复验；两文件对比入口 PO Tauri 手动验证
+  3. Sprint 4 复用清单：settings 通道完整化（theme/recentFiles/aiConfig 字段已就位）、markRaw/Compartment 原则、自测脚本模板模式、六任务经验（decision-016~021）
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要

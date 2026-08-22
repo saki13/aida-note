@@ -3,10 +3,10 @@
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
     "sprint": "Sprint 3",
-    "stage": "执行（阶段 4）",
-    "stage_main": "Sprint In Progress",
-    "status": "Sprint 3 六项全部完成（FUNC-6 12/12 自测全绿），待 Sprint 3 收口（授权 3/4 余 1 次）",
-    "next": "Sprint 3 收口（阶段 4→5→6→7→8）-> Sprint 4",
+    "stage": "Planning Input Ready（阶段 8）",
+    "stage_main": "Planning Input Ready",
+    "status": "Sprint 3 闭环完成（阶段 4→5→6→7→8，90/90 DoD 子项通过，授权 3/4 余 1 次），Sprint 4 候选清单就绪",
+    "next": "Sprint 4 Planning（阶段 3，最后一次授权）-> 项目交付",
     "blocked": "无"
   },
   "backlog": [
@@ -402,6 +402,13 @@
       "type": "任务完成",
       "summary": "FUNC-6 文件对比完成（DoD 12/12 过）：双栏 diff 行级+行内字符级高亮/滚动联动/差异跳转计数/接受左或右合并写回置脏/剪贴板只读/两文件源入口全验收，build 通过；Sprint 3 六项全部闭环",
       "detail": "diffService（jsdiff 行级+字符级）+ CompareView 双栏 + MainView 源选择弹窗（两文件/剪贴板）合并写回 tabsStore；关键排障（decision-021）：配对块 rightText 漏更致右栏空白、剪贴板 CRLF 需归一、switchToTab 以 tab.content 为准（cmState 内容过期时重建）、CompareView 缺 NButton 导入、自测数据需够长才有滚动空间；commit d57ddc9"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "Sprint 闭环",
+      "summary": "Sprint 3 闭环完成（阶段 4→5→6→7→8），授权用量 3/4，余 1 次；六项 FUNC-3~8 全部完成（90/90 DoD 子项通过）",
+      "detail": "Review 结论 Passed With Observation（4 观察项：两文件对比 PO Tauri 手动验证 / 自测 skill 化立项评估 / 窗口三选边界复验 / 打开文件闪退留观）；DoD 对照表 + Review 报告 + Sprint_4_Planning输入候选清单产出；Retrospective 轻量并入 Evolution Log；Backlog 累计 15/19，余 4 项（FUNC-9/10/11、AI-1）"
     }
   ],
   "checklist": {

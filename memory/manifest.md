@@ -11,12 +11,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| `current_sprint` | `Sprint 3（增强）` |
-| `current_stage` | `执行（阶段 4，Sprint 3 六项 FUNC-3~8 全部完成，待 Sprint 收口）` |
-| `current_theme` | `增强（FUNC-3~8）` |
-| `current_task` | `Sprint 3 收口（阶段 4→5→6→7→8）` |
+| `current_sprint` | `Sprint 3`（已闭环；下一轮 Sprint 4） |
+| `current_stage` | `Planning Input Ready（阶段 8，Sprint 3 闭环，Sprint 4 候选清单就绪）` |
+| `current_theme` | `增强（FUNC-3~8）`（已闭环；下一轮「体验/AI」FUNC-9~11、AI-1） |
+| `current_task` | `Sprint 4 Planning（阶段 3，最后一次授权燃尽）` |
 | `task_status` | `pending` |
-| `task_progress` | `Sprint 1/2 已闭环（授权 2/4，decision-011/015）；Sprint 3 启动收口完成（六项 FUNC-3~8 锁定，顺序 3->4->5->7->8->6，授权 3/4 余 1 次）；FUNC-3（28/28，decision-016）；FUNC-4（13/13，decision-017）；FUNC-5（11/11，decision-018）；FUNC-7（16/16，decision-019）；FUNC-8（10/10，decision-020）；FUNC-6（12/12，decision-021：jsdiff 行级+字符级双栏 diff，配对块 rightText 漏更修复 + CRLF 行尾归一 + switchToTab 以 content 为准）——Sprint 3 六项全部闭环 |
+| `task_progress` | `Sprint 1/2/3 全部闭环（decision-001~021，授权 3/4 余 1 次）；Sprint 3 六项 FUNC-3（28/28）FUNC-4（13/13）FUNC-5（11/11，55e4da4）FUNC-7（16/16，a72d3db）FUNC-8（10/10，652d2e6）FUNC-6（12/12，d57ddc9，decision-016~021）；Backlog 15/19 完成，余 4 项（FUNC-9/10/11、AI-1） |
 
 ---
 
@@ -98,5 +98,5 @@
 
 ## 待完善 / 下一步
 
-- **当前阶段**：Sprint 3 执行（AS-8 授权模式：4 次短 Sprint，已用 3 次余 1 次）
-- 下一步：Sprint 3 收口（阶段 4→5→6→7→8，DoD 对照表 + Review + Retrospective 轻量并入 Evolution Log）-> Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）-> 项目交付
+- **当前阶段**：Planning Input Ready（Sprint 3 闭环，AS-8 授权 3/4 余 1 次 = Sprint 4）
+- 下一步：Sprint 4 Planning（阶段 3）-> 执行（FUNC-9 主题切换 -> FUNC-11 最近文件 -> FUNC-10 自动保存 -> AI-1 主峰）-> 项目交付（Backlog 燃尽）
