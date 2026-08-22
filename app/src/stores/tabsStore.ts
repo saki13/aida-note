@@ -106,8 +106,8 @@ export const useTabsStore = defineStore("tabs", () => {
       return tab.id;
     }
 
-    // 新建未命名标签
-    const title = input.title ?? `未命名-${untitledCount++}`;
+    // 新建未命名标签（此处 input 可能仍是联合类型，用 in 收窄）
+    const title = "title" in input ? input.title : `未命名-${untitledCount++}`;
     const tab: Tab = {
       id: nextId++,
       filePath: null,

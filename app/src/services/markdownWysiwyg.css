@@ -1,0 +1,143 @@
+/**
+ * Markdown 所见即所得渲染态样式（SIS-FUNC-3 / UI-3 §2 联动）
+ *
+ * 明暗双主题：@media prefers-color-scheme，与 FUNC-2 主题机制一致
+ * （系统跟随，matchMedia matches -> oneDark）。
+ * 类名约定：cm-md-*；隐藏标记统一 .cm-md-hidden。
+ */
+
+.cm-editor .cm-md-hidden {
+  display: none;
+}
+
+/* 标题（line class，行级字号字重） */
+.cm-editor .cm-line.cm-md-h1 {
+  font-size: 1.8em;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.cm-editor .cm-line.cm-md-h2 {
+  font-size: 1.5em;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.cm-editor .cm-line.cm-md-h3 {
+  font-size: 1.3em;
+  font-weight: 600;
+}
+.cm-editor .cm-line.cm-md-h4 {
+  font-size: 1.15em;
+  font-weight: 600;
+}
+.cm-editor .cm-line.cm-md-h5 {
+  font-size: 1.05em;
+  font-weight: 600;
+}
+.cm-editor .cm-line.cm-md-h6 {
+  font-size: 1em;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+/* 行内元素（mark class） */
+.cm-editor .cm-md-strong {
+  font-weight: 700;
+}
+.cm-editor .cm-md-em {
+  font-style: italic;
+}
+.cm-editor .cm-md-del {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+.cm-editor .cm-md-code {
+  background: rgba(127, 127, 127, 0.18);
+  border-radius: 3px;
+  padding: 0.1em 0.3em;
+  font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+  font-size: 0.92em;
+}
+.cm-editor .cm-md-link {
+  color: #0550ae;
+  text-decoration: underline;
+}
+.cm-editor .cm-md-img {
+  color: #0550ae;
+  border: 1px dashed #8ab0d8;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+/* 列表标记（保留显示，着色加粗） */
+.cm-editor .cm-md-list-mark {
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+/* 引用块（line class：左边框 + 弱化） */
+.cm-editor .cm-line.cm-md-quote {
+  border-left: 3px solid #d0d7de;
+  background: rgba(125, 125, 125, 0.07);
+  color: #57606a;
+  padding-left: 8px;
+}
+
+/* 代码块（line class：底纹） */
+.cm-editor .cm-line.cm-md-codeblock {
+  background: rgba(125, 125, 125, 0.09);
+}
+
+/* 分隔线 widget */
+.cm-editor .cm-md-hr {
+  border: none;
+  border-top: 2px solid #d0d7de;
+  margin: 0.4em 0;
+}
+
+/* 表格 widget */
+.cm-editor .cm-md-table table {
+  border-collapse: collapse;
+  margin: 2px 0;
+}
+.cm-editor .cm-md-table th,
+.cm-editor .cm-md-table td {
+  border: 1px solid #d0d7de;
+  padding: 3px 10px;
+  text-align: left;
+}
+.cm-editor .cm-md-table th {
+  background: rgba(125, 125, 125, 0.12);
+  font-weight: 600;
+}
+
+/* 暗色主题（oneDark 基调，UI-3 §2 色值基线） */
+@media (prefers-color-scheme: dark) {
+  .cm-editor .cm-md-link {
+    color: #58a6ff;
+  }
+  .cm-editor .cm-md-img {
+    color: #58a6ff;
+    border-color: #38597e;
+  }
+  .cm-editor .cm-md-code {
+    background: rgba(110, 118, 129, 0.4);
+  }
+  .cm-editor .cm-line.cm-md-quote {
+    border-left-color: #444c56;
+    background: rgba(110, 118, 129, 0.13);
+    color: #8b949e;
+  }
+  .cm-editor .cm-line.cm-md-codeblock {
+    background: rgba(110, 118, 129, 0.16);
+  }
+  .cm-editor .cm-md-hr {
+    border-top-color: #444c56;
+  }
+  .cm-editor .cm-md-table th,
+  .cm-editor .cm-md-table td {
+    border-color: #444c56;
+  }
+  .cm-editor .cm-md-table th {
+    background: rgba(110, 118, 129, 0.22);
+  }
+}

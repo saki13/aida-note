@@ -10,7 +10,8 @@
     "lint": "eslint . --fix",
     "tauri": "tauri",
     "test:ui": "node scripts/ui-smoke.mjs",
-    "test:multitab": "node scripts/multitab-smoke.mjs"
+    "test:multitab": "node scripts/multitab-smoke.mjs",
+    "test:wysiwyg": "node scripts/wysiwyg-smoke.mjs"
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.12",

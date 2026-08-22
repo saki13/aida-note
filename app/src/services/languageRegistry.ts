@@ -12,6 +12,8 @@ import { sql } from "@codemirror/lang-sql";
 import { javascript } from "@codemirror/lang-javascript";
 import { json } from "@codemirror/lang-json";
 import { markdown } from "@codemirror/lang-markdown";
+import { GFM } from "@lezer/markdown";
+import { markdownWysiwyg } from "./markdownWysiwyg";
 import type { LanguageId } from "./language";
 
 export interface LanguageEntry {
@@ -26,7 +28,17 @@ export const LANGUAGE_REGISTRY: LanguageEntry[] = [
   { id: "sql", label: "SQL", createExtension: () => sql() },
   { id: "javascript", label: "JavaScript", createExtension: () => javascript() },
   { id: "json", label: "JSON", createExtension: () => json() },
-  { id: "markdown", label: "Markdown", createExtension: () => markdown() },
+  {
+    id: "markdown",
+    label: "Markdown",
+    // 所见即所得扩展随语言挂载/移除（languageCompartment reconfigure，无独立槽位）。
+    // 注意①：markdown() 默认 base 是 commonmarkLanguage（无 GFM！删除线/表格不解析），
+    //   必须显式挂 GFM 扩展才能出 Strikethrough/Table 节点。
+    // 注意②：不用 markdownLanguage（含 GFM+下标+上标+emoji）——它自带的
+    //   foldNodeProp.add({Table}) 在增量解析时对未对齐的旧树位置调 doc.lineAt 会
+    //   抛 TypeError（本 Sprint 实测）；单独挂 GFM 只有语法、无 fold 陷阱。
+    createExtension: () => [markdown({ extensions: GFM }), markdownWysiwyg()],
+  },
   { id: "plaintext", label: "纯文本", createExtension: () => [] },
 ];
 
