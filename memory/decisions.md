@@ -233,4 +233,15 @@
 - **依据**：SIS-FUNC-9 八项验收（theme-smoke.mjs 8/8 PASS）；Naive UI dist 源码（dropdown option class 为 .n-dropdown-option；default primary #18a058）；ui-visual.md §1/§2（三态解析规则 + CM 联动）。
 - **影响范围**：settingsService.ts（accentColor 字段）、settingsStore.ts（resolvedTheme/systemDark/ACCENT_OVERRIDES）、App.vue（NConfigProvider）、EditorPane.vue（themeExtension 读 store）、ToolBar.vue（主题下拉）、theme-smoke.mjs、package.json（test:theme）；FUNC-11/AI-1 复用 settings 通道（recentFiles/aiConfig 字段待扩展）。
 
+### decision-023 · 2026-08-22 · FUNC-11 完成（最近文件）+ 行为变更连动测试与 store 钩子自测方法
+
+- **背景**：Sprint 4 第二项 FUNC-11 实现（打开/保存记录最近文件 + 空态列表 + 工具栏下拉 + 去重置顶上限 20 + 失效提示移除 + settings.json 持久化），Playwright 自测 9/9 全绿，build 通过；全部 9 个 smoke 脚本回归保持。
+- **决策**：
+  1. **记录钩子 = tabsStore 成功后副作用（非侵入）**：openTab（含重新激活已有标签，算最近访问置顶）与 markSaved（含另存新路径）成功后调 `settingsStore.addRecentFile`——settings 是副作用，不改 tabsStore 事实源与脏标记链路；去重置顶 + 上限 20 + 持久化全部封装在 settingsStore。
+  2. **失效处理**：tabsStore.openPath 读盘失败返回 false，调用方（空态/下拉）message.error「文件不存在」+ settingsStore.removeRecentFile——提示与移除在 UI 层，openPath 保持纯打开语义。
+  3. **空态接管无标签主区**：MainView 由「无标签也渲染 EditorPane 空编辑器」改为「无标签显示 RecentEmpty 最近文件列表」——符合 SIS，但**连带影响全部依赖『启动即有 .cm-editor』的旧测试假设**（8 个脚本 goto 后等 .cm-editor 全部超时），批量改为 goto 后先 Ctrl+n 建标签；reload 后同理。经验：**UI 行为变更必须先盘点对现有测试断言的前提假设**。
+  4. **浏览器自测 store 钩子的方法**：`page.evaluate` 里 `document.querySelector('#app').__vue_app__.config.globalProperties.$pinia` 拿 pinia，`await import('/src/stores/xxx.ts')` 后 `useStore(pinia)` 显式传实例——**Pinia useStore 显式传参时会 setActivePinia**，store 内无参 use 其他 store 可正常解析；裸 `import('pinia')` 在 Vite 浏览器环境不可解析（用 /src 路径 + Vite 转换）。
+- **依据**：SIS-FUNC-11 八项验收（recent-smoke.mjs 9/9 PASS）；ARCH-2 §4.2（recentFiles 字段）+ decision-020（settings 通道复用）。
+- **影响范围**：settingsStore.ts（recentFiles/addRecentFile/removeRecentFile）、tabsStore.ts（recordRecent/openPath 钩子）、RecentEmpty.vue（新建空态）、ToolBar.vue（最近下拉）、MainView.vue（空态接管）、recent-smoke.mjs + 8 个旧 smoke 脚本适配（建标签前置）、package.json（test:recent）；FUNC-10/AI-1 复用 tabsStore.openPath 与 settings 通道。
+
 ---

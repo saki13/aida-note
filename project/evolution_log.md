@@ -241,6 +241,20 @@
 - **改进项清单（回流方向）**：
   1. settings 通道继续供 FUNC-11（recentFiles）/ AI-1（aiConfig）扩展；自测锚点模式（data-* 属性 + CSS 变量）可入自测 skill 模板
 
+### 2026-08-22 · 任务经验 · FUNC-11 落地：非侵入记录钩子 + 空态行为变更的测试连动盘点
+
+- **背景**：Sprint 4 第二项 FUNC-11（最近文件列表）实现，Playwright 自测 9/9 全绿 + 全部 9 个 smoke 脚本回归保持。主要工作量在「记录时机非侵入化」与「无标签主区行为变更的测试连动」。
+- **关联 decision**：decision-023
+- **影响范围**：settingsStore.ts（recentFiles/addRecentFile/removeRecentFile）、tabsStore.ts（recordRecent/openPath）、RecentEmpty.vue（新建）、ToolBar.vue（最近下拉）、MainView.vue（空态接管）、recent-smoke.mjs + 8 个旧脚本适配；FUNC-10/AI-1 复用
+- **经验与教训**：
+  1. **记录类副作用用「成功后钩子」而非侵入主链路**：recentFiles 写入点在 tabsStore.openTab/markSaved 成功后调 settingsStore.addRecentFile（settings 是副作用，tabsStore 事实源与脏标记链路零改动）——与 decision-021「content 为唯一事实源」一致：每个 store 管好自己领域，跨领域副作用用钩子转发
+  2. **UI 行为变更先盘点测试前提假设**：MainView 由「无标签渲染空编辑器」改「无标签显示最近文件空态」后，8 个旧 smoke 脚本 goto 后等 `.cm-editor` 全部超时（启动无标签 → 无编辑器）——批量改为 goto 后先 Ctrl+n。**通用教训：改 UI 首屏/空态行为前，先 grep 所有测试对旧行为的依赖**（本次花了 8 处批量适配，若提前盘点可一次到位）
+  3. **浏览器自测 Pinia store 钩子**：`__vue_app__.config.globalProperties.$pinia` 拿实例 + `useStore(pinia)` 显式传参（Pinia 内部会 setActivePinia，store 内无参 use 可解析）；裸 `import('pinia')` 在 Vite 浏览器不可用——用 `/src/...` Vite 路径动态 import
+  4. **「最近访问」语义**：重新激活已有标签也算最近访问（置顶），openTab 的 existing 分支同样 recordRecent
+- **改进项清单（回流方向）**：
+  1. 自测 skill 立项评估清单增补：UI 行为变更的测试前提盘点步骤、Pinia store 直调模板（evaluate 拿 $pinia + useStore(pinia)）
+  2. Sprint 4 收口时评估：9 个 smoke 脚本（ui/multitab/wysiwyg/mermaid/format/search/wrap/compare/theme/recent）统一模式已成熟，模板化/skill 化正式立项
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要

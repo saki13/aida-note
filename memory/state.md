@@ -2,7 +2,7 @@
 
 > 用途：记录当前项目的最小运行状态快照（L2 状态快照）。
 > 版本：v0.1.0
-> 状态：Sprint 4 执行中（AS-8 授权用量 4/4 = 最后一次，燃尽即交付），FUNC-9 完成，FUNC-11 待开工
+> 状态：Sprint 4 执行中（AS-8 授权用量 4/4 = 最后一次，燃尽即交付），FUNC-11 完成，FUNC-10 待开工
 
 ---
 
@@ -11,20 +11,20 @@
 - `skill_version`：`v0.1.0`
 - `current_sprint`：`Sprint 4`
 - `current_theme`：`体验/AI（FUNC-9~11、AI-1）`
-- `current_stage`：`执行（阶段 4，FUNC-9 完成，FUNC-11 待开工）`
+- `current_stage`：`执行（阶段 4，FUNC-11 完成，FUNC-10 待开工）`
 - `current_stage_flow_doc`：`product/agents/aida/stage_flows/04_执行.md`
 - `last_run_at`：`2026-08-22`
-- `last_run_status`：`FUNC-9 完成（theme-smoke 8/8 PASS，build 通过，commit 7c9334b）；Sprint 4 顺序 FUNC-9->11->10->AI-1`
+- `last_run_status`：`FUNC-11 完成（recent-smoke 9/9 PASS，build 通过，commit 757f0fa）；Sprint 4 剩余 FUNC-10 -> AI-1`
 - `execution_mode`：`AS-8 短 Sprint 自主执行（授权 4 次，Sprint 1/2/3 已闭环记 3 次，Sprint 4 记第 4 次=燃尽）`
 
 ---
 
 ## 2. 当前任务追踪
 
-- `current_task`：`FUNC-11 打开最近文件列表`
+- `current_task`：`FUNC-10 自动保存 / 崩溃恢复草稿`
 - `task_status`：`pending`
-- `task_progress`：`Sprint 1/2/3 全部闭环（decision-001~021）；Backlog 16/19 完成；Sprint 4：FUNC-9（8/8，decision-022）完成`
-- `next_action`：`FUNC-11（最近文件）-> FUNC-10（自动保存）-> AI-1（主峰）-> 项目交付`
+- `task_progress`：`Sprint 1/2/3 全部闭环（decision-001~021）；Backlog 17/19 完成；Sprint 4：FUNC-9（8/8，decision-022）、FUNC-11（9/9，decision-023）完成`
+- `next_action`：`FUNC-10（自动保存）-> AI-1（主峰）-> 项目交付`
 
 ---
 
