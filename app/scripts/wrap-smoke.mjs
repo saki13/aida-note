@@ -59,10 +59,11 @@ try {
   page.on("pageerror", (e) => pageErrors.push(e.stack ?? String(e)));
 
   await page.goto(BASE, { waitUntil: "networkidle" });
+  // 无标签时显示最近文件空态（SIS-FUNC-11），需先建标签才有 .cm-editor
+  await page.keyboard.press("Control+n");
   await page.waitForSelector(".cm-editor", { timeout: 8000 });
 
   // ---- 1. 默认开启软换行，长行折行显示 ----
-  await page.keyboard.press("Control+n");
   await page.waitForTimeout(300);
   await page.locator(".cm-content").click();
   await page.keyboard.type(LONG_LINE, { delay: 0 });
@@ -126,6 +127,8 @@ try {
   await page.locator(".tool-bar button", { hasText: "换行" }).click(); // off
   await page.waitForTimeout(300);
   await page.reload({ waitUntil: "networkidle" });
+  // reload 后无标签显示空态（SIS-FUNC-11），先建标签再断言持久化状态
+  await page.keyboard.press("Control+n");
   await page.waitForSelector(".cm-editor", { timeout: 8000 });
   await page.waitForTimeout(600);
   const afterReload = await wrapOn(page);

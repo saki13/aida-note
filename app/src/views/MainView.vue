@@ -13,6 +13,7 @@ import TabBar from "../components/TabBar.vue";
 import EditorPane from "../components/EditorPane.vue";
 import StatusBar from "../components/StatusBar.vue";
 import CompareView from "../components/CompareView.vue";
+import RecentEmpty from "../components/RecentEmpty.vue";
 import { useTabsStore } from "../stores/tabsStore";
 import { readFile, pickFiles, basename } from "../services/fileService";
 
@@ -212,6 +213,7 @@ onBeforeUnmount(() => {
         @close="onCompareClose"
         @apply="onCompareApply"
       />
+      <RecentEmpty v-else-if="!tabsStore.activeTab" />
       <EditorPane v-else @cursor="cursor = $event" @ready="editorApi.undo = $event.undo; editorApi.redo = $event.redo; editorApi.format = $event.format; editorApi.search = $event.search" />
     </div>
     <StatusBar :cursor="cursor" />

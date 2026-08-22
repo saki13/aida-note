@@ -73,8 +73,9 @@ try {
   });
 
   await page.goto(BASE, { waitUntil: "networkidle" });
-  await page.waitForSelector(".cm-editor", { timeout: 8000 });
+  // 无标签时显示最近文件空态（SIS-FUNC-11），需先建标签才有 .cm-editor
   await page.keyboard.press("Control+n");
+  await page.waitForSelector(".cm-editor", { timeout: 8000 });
   await page.locator(".lang-switch").click();
   await page.waitForSelector(".n-dropdown-menu", { timeout: 3000 });
   await page.locator(".n-dropdown-menu .n-dropdown-option", { hasText: "Markdown" }).click();

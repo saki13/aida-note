@@ -42,6 +42,8 @@ export const useSettingsStore = defineStore("settings", () => {
   const theme = ref<ThemePref>("system");
   /** 强调色方案（FUNC-9，默认 blue） */
   const accentColor = ref<AccentColor>("blue");
+  /** 最近文件：绝对路径数组，新的在前，去重，上限 20（SIS-FUNC-11） */
+  const recentFiles = ref<string[]>([]);
   /** 系统当前明暗（仅 system 模式使用；matchMedia 监听实时更新） */
   const systemDark = ref(false);
 
@@ -59,6 +61,7 @@ export const useSettingsStore = defineStore("settings", () => {
     wordWrap.value = s.wordWrap;
     theme.value = s.theme;
     accentColor.value = s.accentColor;
+    recentFiles.value = s.recentFiles;
     if (!mediaQuery) {
       mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       systemDark.value = mediaQuery.matches;
@@ -67,6 +70,19 @@ export const useSettingsStore = defineStore("settings", () => {
       };
       mediaQuery.addEventListener("change", mediaListener);
     }
+  }
+
+  /** 记录最近文件（SIS-FUNC-11）：去重置顶 + 上限 20（移除最旧）+ 持久化。 */
+  async function addRecentFile(path: string): Promise<void> {
+    if (!path) return;
+    recentFiles.value = [path, ...recentFiles.value.filter((p) => p !== path)].slice(0, 20);
+    await saveSettings({ recentFiles: recentFiles.value });
+  }
+
+  /** 移除失效最近文件（点击文件不存在时）+ 持久化。 */
+  async function removeRecentFile(path: string): Promise<void> {
+    recentFiles.value = recentFiles.value.filter((p) => p !== path);
+    await saveSettings({ recentFiles: recentFiles.value });
   }
 
   /** 切换主题偏好三态：更新状态 + 持久化（resolvedTheme 派生即时生效）。 */
@@ -87,5 +103,5 @@ export const useSettingsStore = defineStore("settings", () => {
     await saveSettings({ wordWrap: v });
   }
 
-  return { wordWrap, theme, accentColor, systemDark, resolvedTheme, init, setTheme, setAccentColor, setWordWrap };
+  return { wordWrap, theme, accentColor, recentFiles, systemDark, resolvedTheme, init, addRecentFile, removeRecentFile, setTheme, setAccentColor, setWordWrap };
 });

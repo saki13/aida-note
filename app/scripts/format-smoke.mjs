@@ -93,6 +93,8 @@ try {
   });
 
   await page.goto(BASE, { waitUntil: "networkidle" });
+  // 无标签时显示最近文件空态（SIS-FUNC-11），需先建标签才有 .cm-editor
+  await page.keyboard.press("Control+n");
   await page.waitForSelector(".cm-editor", { timeout: 8000 });
 
   // ---- 1. JavaScript：按钮格式化 + 整文件替换 + toast ----

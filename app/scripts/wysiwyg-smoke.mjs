@@ -86,9 +86,9 @@ try {
 
   await page.goto(BASE, { waitUntil: "networkidle" });
 
-  // 0. 编辑器就绪 + 新建标签 + 切 Markdown 语言
-  await page.waitForSelector(".cm-editor", { timeout: 8000 });
+  // 0. 编辑器就绪 + 新建标签 + 切 Markdown 语言（无标签时显示最近文件空态 SIS-FUNC-11，先建标签）
   await page.keyboard.press("Control+n");
+  await page.waitForSelector(".cm-editor", { timeout: 8000 });
   await page.locator(".lang-switch").click();
   await page.waitForSelector(".n-dropdown-menu", { timeout: 3000 });
   await page.locator(".n-dropdown-menu .n-dropdown-option", { hasText: "Markdown" }).click();

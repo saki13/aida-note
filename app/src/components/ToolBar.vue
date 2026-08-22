@@ -7,10 +7,11 @@
  */
 
 import { inject, computed } from "vue";
-import { NTooltip, NButton, NDropdown, type DropdownOption } from "naive-ui";
+import { NTooltip, NButton, NDropdown, useMessage, type DropdownOption } from "naive-ui";
 import { useTabsStore } from "../stores/tabsStore";
 import { useSettingsStore, type ThemePref } from "../stores/settingsStore";
 import { isFormatSupported } from "../services/formatService";
+import { basename } from "../services/fileService";
 import type { AccentColor } from "../services/settingsService";
 
 interface EditorApi {
@@ -23,6 +24,7 @@ interface EditorApi {
 const tabsStore = useTabsStore();
 const settingsStore = useSettingsStore();
 const editorApi = inject<EditorApi | null>("editorApi", null);
+const message = useMessage();
 
 const hasActive = computed(() => tabsStore.activeTab !== null);
 const dirtyCount = computed(() => tabsStore.tabs.filter((t) => t.dirty).length);
@@ -88,6 +90,26 @@ function onThemeSelect(key: string): void {
     void settingsStore.setAccentColor(accent);
   }
 }
+
+/** 最近文件下拉（SIS-FUNC-11）：列表 + 点击打开；失效提示「文件不存在」并移除。 */
+const recentOptions = computed<DropdownOption[]>(() => {
+  if (!settingsStore.recentFiles.length) {
+    return [{ label: "暂无最近文件", key: "__empty__", disabled: true }];
+  }
+  return settingsStore.recentFiles.map((p) => ({
+    label: basename(p),
+    tooltip: p, // 完整路径（建议项：路径过长截断展示）
+    key: p,
+  }));
+});
+async function onOpenRecent(path: string): Promise<void> {
+  if (path === "__empty__") return;
+  const ok = await tabsStore.openPath(path);
+  if (!ok) {
+    message.error(`文件不存在：${path}`);
+    await settingsStore.removeRecentFile(path);
+  }
+}
 </script>
 
 <template>
@@ -96,6 +118,12 @@ function onThemeSelect(key: string): void {
     <n-button size="small" @click="onOpen">打开</n-button>
     <n-button size="small" @click="onSave" :disabled="!hasActive">保存</n-button>
     <n-button size="small" @click="onSaveAs" :disabled="!hasActive">另存为</n-button>
+
+    <n-tooltip trigger="hover"><template #trigger>
+      <n-dropdown :options="recentOptions" trigger="click" @select="onOpenRecent">
+        <n-button size="small">最近</n-button>
+      </n-dropdown>
+    </template>最近文件（FUNC-11，Sprint 4）</n-tooltip>
 
     <span class="sep"></span>
 

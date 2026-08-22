@@ -46,6 +46,8 @@ try {
   page.on("pageerror", (e) => pageErrors.push(e.stack ?? String(e)));
 
   await page.goto(BASE, { waitUntil: "networkidle" });
+  // 无标签时显示最近文件空态（SIS-FUNC-11），需先建标签才有 .cm-editor
+  await page.keyboard.press("Control+n");
   await page.waitForSelector(".cm-editor", { timeout: 8000 });
 
   // 当前文件内容（左）：31 行，第 10 行变化（内容足够长以验证滚动跳转/联动）
@@ -57,7 +59,6 @@ try {
   clipRows.push("row32 added");
   const rightText = clipRows.join("\n");
 
-  await page.keyboard.press("Control+n");
   await page.waitForTimeout(300);
   await page.locator(".cm-content").click();
   await page.keyboard.type(leftText, { delay: 1 });

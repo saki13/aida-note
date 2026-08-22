@@ -42,6 +42,8 @@ try {
   page.on("pageerror", (e) => pageErrors.push(e.stack ?? String(e)));
 
   await page.goto(BASE, { waitUntil: "networkidle" });
+  // 无标签时显示最近文件空态（SIS-FUNC-11），需先建标签才有 .cm-editor（验证 CM 主题联动）
+  await page.keyboard.press("Control+n");
   await page.waitForSelector(".cm-editor", { timeout: 8000 });
   // 等待 settingsStore.init 完成（首屏加载持久化设置）
   await page.waitForFunction(() => document.querySelector(".app-root")?.getAttribute("data-theme") !== null);
@@ -100,7 +102,7 @@ try {
 
   // ---- 7. 重启记住（reload 后保持 theme=system + accent=purple）----
   await page.reload({ waitUntil: "networkidle" });
-  await page.waitForSelector(".cm-editor", { timeout: 8000 });
+  // reload 后无标签显示空态（SIS-FUNC-11），用 data-accent 等待 init 完成
   await page.waitForFunction(() => document.querySelector(".app-root")?.getAttribute("data-accent") === "purple");
   check("重启记住（reload 后 theme+accent 保持）", (await rootTheme()) === "light" && (await rootAccent()) === "purple", `theme=${await rootTheme()} accent=${await rootAccent()}`);
 

@@ -82,6 +82,8 @@ try {
   page.on("pageerror", (e) => pageErrors.push(e.stack ?? String(e)));
 
   await page.goto(BASE, { waitUntil: "networkidle" });
+  // 无标签时显示最近文件空态（SIS-FUNC-11），需先建标签才有 .cm-editor
+  await page.keyboard.press("Control+n");
   await page.waitForSelector(".cm-editor", { timeout: 8000 });
 
   // ---- 1. Ctrl+F 唤起顶部浮动搜索框，Esc 关闭 ----

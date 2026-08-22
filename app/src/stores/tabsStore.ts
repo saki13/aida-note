@@ -19,6 +19,7 @@ import {
   basename,
 } from "../services/fileService";
 import { detectLanguage, type LanguageId } from "../services/language";
+import { useSettingsStore } from "./settingsStore";
 
 export interface Tab {
   id: number;
@@ -47,6 +48,12 @@ export const useTabsStore = defineStore("tabs", () => {
   const activeTab = computed<Tab | null>(
     () => tabs.value.find((t) => t.id === activeTabId.value) ?? null
   );
+
+  /** 最近文件记录（SIS-FUNC-11 钩子）：打开/保存成功后写入，去重置顶、上限 20（settingsStore 内实现）。 */
+  function recordRecent(path: string): void {
+    if (!path) return;
+    void useSettingsStore().addRecentFile(path);
+  }
 
   function findTabById(tabId: number): Tab | undefined {
     return tabs.value.find((t) => t.id === tabId);
@@ -86,6 +93,7 @@ export const useTabsStore = defineStore("tabs", () => {
       const existing = tabs.value.find((t) => t.filePath === input.filePath);
       if (existing) {
         setActive(existing.id);
+        recordRecent(input.filePath); // 重新激活也算最近访问（SIS-FUNC-11 置顶）
         return existing.id;
       }
       const language = detectLanguage(input.filePath);
@@ -103,6 +111,7 @@ export const useTabsStore = defineStore("tabs", () => {
       };
       tabs.value.push(tab);
       activeTabId.value = tab.id;
+      recordRecent(input.filePath); // 打开文件成功 -> 写入最近列表（SIS-FUNC-11）
       return tab.id;
     }
 
@@ -144,9 +153,22 @@ export const useTabsStore = defineStore("tabs", () => {
       tab.title = basename(filePath);
       tab.language = detectLanguage(filePath);
       tab.isNewFile = false;
+      recordRecent(filePath); // 保存（含另存为新路径）成功后写入最近列表（SIS-FUNC-11）
     }
     tab.savedContent = tab.content;
     tab.dirty = false;
+  }
+
+  /** 按路径打开（SIS-FUNC-11 最近文件入口）：读文件失败（文件不存在等）返回 false 由调用方提示移除。 */
+  async function openPath(path: string): Promise<boolean> {
+    try {
+      const { content, hadBom } = await readFile(path);
+      openTab({ filePath: path, content, hadBom });
+      return true;
+    } catch (e) {
+      console.error(`openPath failed: ${path}`, e);
+      return false;
+    }
   }
 
   /** 手动覆盖语言（SIS-FUNC-2 状态栏语言选择器；自动识别由 openTab 负责）。 */
@@ -298,6 +320,7 @@ export const useTabsStore = defineStore("tabs", () => {
     activeTabId,
     activeTab,
     openTab,
+    openPath,
     createUntitled,
     setActive,
     moveTab,

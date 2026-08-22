@@ -33,6 +33,8 @@ try {
   });
 
   await page.goto(BASE, { waitUntil: "networkidle" });
+  // 无标签时显示最近文件空态（SIS-FUNC-11），先建标签再断言编辑器挂载
+  await page.keyboard.press("Control+n");
 
   // 1. 编辑器挂载（非白屏）：CodeMirror 容器存在且有高度
   const cmReady = await page.waitForSelector(".cm-editor", { timeout: 8000 })
@@ -96,6 +98,5 @@ try {
 const failed = results.filter((r) => !r.ok).length;
 const lines = results.map((r) => `${r.ok ? "PASS" : "FAIL"}  ${r.name}${r.detail ? "  -- " + r.detail : ""}`);
 lines.push(`${results.length - failed}/${results.length} passed`);
-writeFileSync(LOG, lines.join("\n"), "utf-8");
 console.log(lines.join("\n"));
 process.exit(failed > 0 ? 1 : 0);
