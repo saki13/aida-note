@@ -11,12 +11,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| `current_sprint` | `Sprint 4（体验/AI，授权燃尽）` |
-| `current_stage` | `执行（阶段 4）完成，AI-1 闭环；待 Sprint 4 收口（阶段 5-8）与项目交付（阶段 11）` |
+| `current_sprint` | `Sprint 4（已闭环，授权燃尽）` |
+| `current_stage` | `项目交付（阶段 11，Backlog 燃尽，项目报告征询 PO）` |
 | `current_theme` | `体验/AI（FUNC-9~11、AI-1）` |
-| `current_task` | `Sprint 4 整体收口 + 项目交付征询 PO` |
-| `task_status` | `pending` |
-| `task_progress` | `Sprint 1/2/3/4 全部闭环（decision-001~025，授权 4/4 燃尽）；Backlog 19/19 完成：ENV-1/2、ARCH-1/2、UI-1/2/3、FUNC-1~11、AI-1（AI-1：ai-smoke 9/9 + ai-mermaid-smoke 4/4，commit bf335f7） |
+| `current_task` | `项目交付（项目报告生成 + 征询 PO 意见）` |
+| `task_status` | `pending（待 PO 审批）` |
+| `task_progress` | `Sprint 1/2/3/4 全部闭环（decision-001~025，授权 4/4 燃尽）；Backlog 19/19 完成（ENV-1/2、ARCH-1/2、UI-1/2/3、FUNC-1~11、AI-1；Sprint 4 收口：DoD 34/34 + Review Passed With Observation） |
 
 ---
 
@@ -98,5 +98,5 @@
 
 ## 待完善 / 下一步
 
-- **当前阶段**：Sprint 4 执行完成（Backlog 19/19 燃尽，授权 4/4 燃尽）
-- 下一步：Sprint 4 整体收口（阶段 5 DoD 对照表 -> 6 Review -> 7 Retrospective 轻量并入 Evolution Log -> 8 Planning Input Ready）-> 项目交付（阶段 11，项目报告征询 PO）
+- **当前阶段**：项目交付（Backlog 19/19 燃尽，授权 4/4 燃尽；Sprint 4 收口完成：DoD 34/34 + Review Passed With Observation）
+- 下一步：项目报告已产出，征询 PO 意见（同意 -> 交付产品 + 项目资产，流程结束；否决 -> 进入新 Planning）

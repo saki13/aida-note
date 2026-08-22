@@ -2,11 +2,11 @@
   "updated_at": "2026-08-22",
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
-    "sprint": "Sprint 4",
-    "stage": "执行（阶段 4）完成，AI-1 闭环；待 Sprint 4 收口（阶段 5-8）与项目交付（阶段 11）",
-    "stage_main": "Sprint In Progress",
-    "status": "AI-1 完成（ai-smoke 9/9 + ai-mermaid-smoke 4/4，build 通过，commit bf335f7）；Backlog 19/19 全部完成（燃尽）",
-    "next": "Sprint 4 整体收口（阶段 4→5→6→7→8）-> 项目交付（阶段 11，项目报告征询 PO）",
+    "sprint": "Sprint 4（已闭环）",
+    "stage": "项目交付（阶段 11，Backlog 燃尽，项目报告征询 PO）",
+    "stage_main": "项目交付",
+    "status": "Sprint 4 整体收口完成：DoD 对照表 34/34 + Review Passed With Observation + Retrospective 轻量并入 Evolution Log；Backlog 19/19 全部完成（燃尽）",
+    "next": "PO 同意 -> 交付产品 + 项目资产，流程结束；PO 否决 -> 进入新 Planning",
     "blocked": "无"
   },
   "backlog": [
@@ -464,6 +464,13 @@
       "type": "任务完成",
       "summary": "AI-1 AI 接入完成（SIS-AI-1 十项验收，ai-smoke 9/9 + ai-mermaid-smoke 4/4，build 通过）；Backlog 19/19 全部完成（燃尽）",
       "detail": "aiService/aiStore/AiPanel 新建（OpenAI 兼容流式 SSE + 润色四选 + 问答侧栏仅选中上下文 + mermaid 修复）；EditorPane 选区浮条+右键菜单+diff 结果气泡接受/撤销；ToolBar AI 面板/AI 润色/修复 mermaid 入口；mermaid 错误占位 AI 修复接线；关键修复：AiPanel 选区 computed 缓存 Bug（window 非响应式）；沙箱限制对策：SSE 长连接被静默击杀 → page.route 模拟流式验证全链路，真实流式冒烟列 PO 验证项；commit bf335f7；decision-025"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "Sprint 闭环",
+      "summary": "Sprint 4 整体收口完成（阶段 4→5→6→7→8），授权用量 4/4 全部用尽（燃尽）；Backlog 19/19 全部完成（燃尽）",
+      "detail": "DoD 对照表 34/34（FUNC-9 8/8 + FUNC-11 9/9 + FUNC-10 9/9 + AI-1 9/9+4/4）；全量回归 13 脚本全绿；Review 结论 Passed With Observation（5 观察项：AI-1 真实流式/mermaid 修复真实渲染/两文件对比/Tauri 退出草稿清理/沙箱长连接限制）；Retrospective 轻量并入 Evolution Log；进入项目交付（阶段 11）征询 PO"
     }
   ],
   "checklist": {
