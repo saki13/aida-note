@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AidaPulse 工作流看板</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="board-header">
+    <div class="header-inner">
+      <div class="title-block">
+        <h1>AidaPulse <span class="title-accent">工作流看板</span></h1>
+        <p class="subtitle">Aida v0.1.0 · 全流程可视化 · 数据来源：工作流图与检查表（C-A1-v2）</p>
+      </div>
+      <div class="status-panel">
+        <div class="status-line">
+          <span class="dot dot-current"></span>
+          <span class="status-label">当前阶段</span>
+          <span class="status-value" id="status-stage">Sprint D / In Progress</span>
+        </div>
+        <div class="status-line">
+          <span class="dot dot-ok"></span>
+          <span class="status-label">下一步</span>
+          <span class="status-value" id="status-next">Sprint Completed → Review</span>
+        </div>
+        <div class="status-line">
+          <span class="dot dot-none"></span>
+          <span class="status-label">当前阻塞</span>
+          <span class="status-value" id="status-blocked">无</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend" role="list" aria-label="状态图例">
+      <span class="chip chip-normal" role="listitem">正常</span>
+      <span class="chip chip-current" role="listitem">当前阶段</span>
+      <span class="chip chip-block" role="listitem">阻断</span>
+      <span class="chip chip-optional" role="listitem">可选</span>
+      <span class="chip chip-done" role="listitem">完成</span>
+      <span class="chip chip-decision" role="listitem">决策分支</span>
+      <span class="chip chip-note" role="listitem">点击任意阶段卡片可展开详情</span>
+    </div>
+  </header>
+
+  <div class="data-banner" id="data-banner" role="status" hidden></div>
+
+  <!-- ============ Sprint 迭代时间轴（数据来自 data.json 的 sprints 字段） ============ -->
+  <section class="sprint-panel" id="sprint-panel" aria-label="Sprint 迭代时间轴">
+    <div class="sprint-header">
+      <div>
+        <h2>Sprint 迭代时间轴</h2>
+        <p class="sprint-meta">横向展示迭代顺序 · 数据源：<code>data.json</code> 的 sprints 字段</p>
+      </div>
+    </div>
+    <div class="sprint-track" id="sprint-track">
+      <p class="panel-placeholder">加载 Sprint 数据…</p>
+    </div>
+  </section>
+
+  <main class="flow" id="flow">
+
+    <!-- ============ 01 项目准备阶段 ============ -->
+    <article class="stage-row">
+      <div class="node node-main node-prep" id="stage-prep" data-stage="项目准备阶段" role="button" tabindex="0" aria-expanded="false" aria-controls="detail-prep">
+        <div class="node-head">
+          <span class="node-index">01</span>
+          <h2 class="node-title">项目准备阶段</h2>
+          <span class="tag tag-normal">正常</span>
+          <span class="caret" aria-hidden="true">＋</span>
+        </div>
+        <p class="node-sub">收集资料、组建团队</p>
+      </div>
+
+      <div class="detail" id="detail-prep" hidden>
+        <div class="detail-item">
+          <h3>输入</h3>
+          <p>PO 的项目意图、初始资料</p>
+        </div>
+        <div class="detail-item">
+          <h3>Aida 动作</h3>
+          <p>接收项目意图，辅助 PO 形成初始 PCB 和 Backlog 雏形</p>
+        </div>
+        <div class="detail-item">
+          <h3>输出</h3>
+          <p>初始 PCB（<code>project/pcb/项目背景蓝图_待确认.md</code>）、初始 Backlog（<code>project/backlog/Product_Backlog_待确认.md</code>）</p>
+        </div>
+        <div class="detail-item is-block">
+          <h3>阻断条件</h3>
+          <p>无（起始阶段）</p>
+        </div>
+      </div>
+
+      <div class="edge edge-down" aria-hidden="true">
+        <span class="edge-arrow">→</span>
+        <span class="edge-label">有初始资料</span>
+      </div>
+    </article>
+
+    <!-- ============ 02 Backlog Grooming ============ -->
+    <article class="stage-row">
+      <div class="node node-main node-normal" id="stage-bg" data-stage="Backlog Grooming" role="button" tabindex="0" aria-expanded="false" aria-controls="detail-bg">
+        <div class="node-head">
+          <span class="node-index">02</span>
+          <h2 class="node-title">Backlog Grooming</h2>
+          <span class="tag tag-normal">正常</span>
+          <span class="caret" aria-hidden="true">＋</span>
+        </div>
+        <p class="node-sub">待办事项整理</p>
+      </div>
+
+      <div class="branch">
+        <div class="branch-row">
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">缺失基础资产</span></div>
+          <div class="node node-mini node-block">
+            <span class="tag tag-block">阻断</span>
+            <p class="mini-title">Backlog Grooming (Blocked)</p>
+            <p class="mini-sub">缺少 PCB / Backlog / 未决议题（G5 硬阻断）</p>
+          </div>
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">按模板生成最小 PCB / Backlog + 问卷</span></div>
+          <div class="edge-loop"><span class="edge-arrow">↺</span> 返回 Backlog Grooming</div>
+        </div>
+      </div>
+
+      <div class="detail" id="detail-bg" hidden>
+        <div class="detail-item">
+          <h3>输入</h3>
+          <ul>
+            <li>PCB：<code>project/pcb/项目背景蓝图_待确认.md</code></li>
+            <li>Backlog：<code>project/backlog/Product_Backlog_待确认.md</code></li>
+            <li>白皮书：<code>product/whitepaper/AidaPulse白皮书_待确认.md</code></li>
+            <li>会议治理规则：<code>product/rules/会议治理总规则_待确认.md</code></li>
+          </ul>
+        </div>
+        <div class="detail-item">
+          <h3>Aida 动作</h3>
+          <ol>
+            <li>读取 PCB 和 Backlog，建立全局理解</li>
+            <li>辅助 PO 整理子任务，以结构化文档/指令集输出</li>
+            <li>给出评估反馈，PO 负责澄清模糊点</li>
+            <li>记录未决事项</li>
+          </ol>
+        </div>
+        <div class="detail-item">
+          <h3>输出</h3>
+          <p>更新后的 Backlog、未决议题记录</p>
+        </div>
+        <div class="detail-item is-block">
+          <h3>阻断条件</h3>
+          <ul>
+            <li>无初始 PCB</li>
+            <li>无初始 Backlog</li>
+            <li>无未决议题记录</li>
+          </ul>
+          <p class="mini-sub">补救：按 PCB 模板生成最小化 PCB；按项目要素生成初始调研 Backlog + 问卷，问卷收敛后进入下一个 Grooming 任务</p>
+        </div>
+      </div>
+
+      <div class="edge edge-down" aria-hidden="true">
+        <span class="edge-arrow">→</span>
+        <span class="edge-label">PCB + Backlog + 未决议题齐备</span>
+      </div>
+    </article>
+
+    <!-- ============ 03 Planning ============ -->
+    <article class="stage-row">
+      <div class="node node-main node-normal" id="stage-plan" data-stage="Planning" role="button" tabindex="0" aria-expanded="false" aria-controls="detail-plan">
+        <div class="node-head">
+          <span class="node-index">03</span>
+          <h2 class="node-title">Planning</h2>
+          <span class="tag tag-normal">正常</span>
+          <span class="caret" aria-hidden="true">＋</span>
+        </div>
+        <p class="node-sub">脉冲计划会议</p>
+      </div>
+
+      <div class="branch">
+        <div class="branch-row">
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">三级收敛 + 产出启动文档</span></div>
+          <div class="node node-mini node-done">
+            <span class="tag tag-done">完成</span>
+            <p class="mini-title">Planning Completed</p>
+            <p class="mini-sub">已产出启动收口文档</p>
+          </div>
+        </div>
+        <div class="branch-row">
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">无任务池</span></div>
+          <div class="node node-mini node-decision">
+            <p class="mini-title">◆ Backlog 是否还有剩余项？</p>
+            <p class="mini-sub">无任务池时检查是否项目完成</p>
+          </div>
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">有剩余</span></div>
+          <div class="edge-loop"><span class="edge-arrow">↺</span> 回到 Planning</div>
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">无剩余，项目完成</span></div>
+          <div class="node node-mini node-done">
+            <p class="mini-title">项目交付</p>
+            <p class="mini-sub">直接进入收尾（跳到终点）</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail" id="detail-plan" hidden>
+        <div class="detail-item">
+          <h3>输入</h3>
+          <ul>
+            <li>Backlog：<code>project/backlog/Product_Backlog_待确认.md</code></li>
+            <li>上一轮 Retrospective 纪要（如有）</li>
+            <li>会议治理规则、会议纪要模板</li>
+          </ul>
+        </div>
+        <div class="detail-item">
+          <h3>Aida 动作</h3>
+          <ol>
+            <li>开场与范围确认</li>
+            <li>从 Backlog、反思结论、候补项池拉取候选，按优先级呈现</li>
+            <li>三级收敛：范围确认 → DoD 与前置依赖检查 → 锁定正式输入/候补/暂缓</li>
+            <li>执行顺序确认（Aida 建议，PO 确认）</li>
+            <li>产出 Sprint 启动收口文档</li>
+            <li>回写资产（Backlog、manifest、状态快照）</li>
+          </ol>
+        </div>
+        <div class="detail-item">
+          <h3>输出</h3>
+          <p>Sprint 启动收口文档（<code>project/sprint/Sprint启动收口_xxx.md</code>）、更新后的 Backlog、更新后的 manifest 和 state</p>
+        </div>
+        <div class="detail-item is-block">
+          <h3>阻断条件</h3>
+          <p>无可用任务池（PO 确认没有新任务 → 项目已完成，走项目收尾）</p>
+        </div>
+      </div>
+
+      <div class="edge edge-down" aria-hidden="true">
+        <span class="edge-arrow">→</span>
+        <span class="edge-label">常规执行</span>
+      </div>
+    </article>
+
+    <!-- ============ 04 Sprint In Progress（当前阶段） ============ -->
+    <article class="stage-row">
+      <div class="node node-main" id="stage-sprint" data-stage="Sprint In Progress" role="button" tabindex="0" aria-expanded="false" aria-controls="detail-sprint">
+        <div class="node-head">
+          <span class="node-index">04</span>
+          <h2 class="node-title">Sprint In Progress</h2>
+          <span class="caret" aria-hidden="true">＋</span>
+        </div>
+        <p class="node-sub">执行 Sprint 任务 + 异步事件广播</p>
+      </div>
+
+      <div class="branch">
+        <div class="branch-row">
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">来自 Planning Completed：PO授权 + 准入满足</span></div>
+          <div class="node node-mini node-decision">
+            <p class="mini-title">◆ 短 Sprint 准入检查</p>
+            <p class="mini-sub">PO授权 + Backlog明确 + 高内聚需求 + AI可自主评估</p>
+          </div>
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">是 / 否，转常规 Sprint</span></div>
+          <div class="edge-loop"><span class="edge-arrow">→</span> 均进入 Sprint In Progress</div>
+        </div>
+      </div>
+
+      <div class="detail" id="detail-sprint" hidden>
+        <div class="detail-item">
+          <h3>输入</h3>
+          <ul>
+            <li>Sprint 启动收口文档（<code>project/sprint/Sprint启动收口_xxx.md</code>）</li>
+            <li>Backlog、manifest (L1)、state (L2)</li>
+            <li>Aida SKILL 执行载体（<code>product/agents/aida/Aida_v0.1.0_SKILL_待确认.md</code>）</li>
+          </ul>
+        </div>
+        <div class="detail-item">
+          <h3>Aida 动作</h3>
+          <ol>
+            <li>从 manifest 找到 in_progress 任务继续，或启动下一个 pending 项</li>
+            <li>推进任务执行 → 产生异步广播事件</li>
+            <li>完成一个任务后先回核主事实源，再启动下一个 → 广播</li>
+            <li>调用 AI 本身或其他专项 Agent 自动执行 SIS → 广播</li>
+            <li>卡点需人工清障时 → 广播</li>
+            <li>资源告警或风险通告时 → 广播</li>
+          </ol>
+        </div>
+        <div class="detail-item">
+          <h3>输出</h3>
+          <p>任务交付物、更新后的 state.md、审计轨迹（<code>project/traces/audit_trace_xxx.md</code>）、异步广播事件日志（<code>project/traces/events_xxx.md</code>）</p>
+        </div>
+        <div class="detail-item is-block">
+          <h3>阻断条件</h3>
+          <p>无。Sprint 执行阶段不设阻断，问题通过异步广播事件通知，由 PO 决定是否介入</p>
+        </div>
+      </div>
+
+      <div class="edge edge-down" aria-hidden="true">
+        <span class="edge-arrow">→</span>
+        <span class="edge-label">所有任务完成</span>
+      </div>
+    </article>
+
+    <!-- ============ 05 Sprint Completed ============ -->
+    <article class="stage-row">
+      <div class="node node-main node-normal" id="stage-sprint-done" data-stage="Sprint Completed" role="button" tabindex="0" aria-expanded="false" aria-controls="detail-sprint-done">
+        <div class="node-head">
+          <span class="node-index">05</span>
+          <h2 class="node-title">Sprint Completed</h2>
+          <span class="tag tag-normal">正常</span>
+          <span class="caret" aria-hidden="true">＋</span>
+        </div>
+        <p class="node-sub">所有任务已有明确状态</p>
+      </div>
+
+      <div class="detail" id="detail-sprint-done" hidden>
+        <div class="detail-item">
+          <h3>输入</h3>
+          <ul>
+            <li>Sprint 启动收口文档（对照 DoD 定义）</li>
+            <li>state.md (L2 状态快照)</li>
+            <li>所有任务的交付物</li>
+          </ul>
+        </div>
+        <div class="detail-item">
+          <h3>Aida 动作</h3>
+          <ol>
+            <li>检查交付完整性</li>
+            <li>读取启动文档中的 DoD 定义</li>
+            <li>逐项对照实际产出做通过/不通过判断</li>
+            <li>形成 DoD 对照表</li>
+            <li>对未通过项给出处理建议</li>
+            <li>自动发起 Review</li>
+          </ol>
+        </div>
+        <div class="detail-item">
+          <h3>输出</h3>
+          <p>DoD 对照表、Review 发起通知</p>
+        </div>
+        <div class="detail-item is-block">
+          <h3>阻断条件</h3>
+          <p>无交付成果可展示（回退到 Sprint In Progress 继续执行）</p>
+        </div>
+      </div>
+
+      <div class="edge edge-down" aria-hidden="true">
+        <span class="edge-arrow">→</span>
+        <span class="edge-label">发起评审</span>
+      </div>
+    </article>
+
+    <!-- ============ 06 Review ============ -->
+    <article class="stage-row">
+      <div class="node node-main node-normal" id="stage-review" data-stage="Review" role="button" tabindex="0" aria-expanded="false" aria-controls="detail-review">
+        <div class="node-head">
+          <span class="node-index">06</span>
+          <h2 class="node-title">Review</h2>
+          <span class="tag tag-normal">正常</span>
+          <span class="caret" aria-hidden="true">＋</span>
+        </div>
+        <p class="node-sub">评审会议（含 3 种结果）</p>
+      </div>
+
+      <div class="branch">
+        <div class="branch-row">
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">通过</span></div>
+          <div class="node node-mini node-ok">
+            <p class="mini-title">Review Passed</p>
+            <p class="mini-sub">通过评审</p>
+          </div>
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">检查是否需要反思</span></div>
+        </div>
+        <div class="branch-row">
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">通过但有观察项</span></div>
+          <div class="node node-mini node-ok">
+            <p class="mini-title">Review Passed With Observation</p>
+            <p class="mini-sub">通过但有观察项</p>
+          </div>
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">检查是否需要反思</span></div>
+        </div>
+        <div class="branch-row">
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">未通过</span></div>
+          <div class="node node-mini node-fail">
+            <p class="mini-title">Review Failed</p>
+            <p class="mini-sub">未通过，需纠偏</p>
+          </div>
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">纠偏后重新执行</span></div>
+          <div class="edge-loop"><span class="edge-arrow">↺</span> 回到 Sprint In Progress</div>
+        </div>
+      </div>
+
+      <div class="detail" id="detail-review" hidden>
+        <div class="detail-item">
+          <h3>输入</h3>
+          <ul>
+            <li>Sprint 启动收口文档（对照承诺）、DoD 对照表</li>
+            <li>所有交付物、审计轨迹（<code>project/traces/audit_trace_xxx.md</code>）</li>
+            <li>会议纪要模板</li>
+          </ul>
+        </div>
+        <div class="detail-item">
+          <h3>Aida 动作</h3>
+          <ol>
+            <li>开场与范围确认</li>
+            <li>回顾 Sprint 原始承诺</li>
+            <li>Aida 汇报完成情况</li>
+            <li>审查式清单：目标 / 交付物 / Aida 表现 / 一致性 / 风险与未通过项</li>
+            <li>PO 反馈与认可判断（必须由 PO 给出正式判断）</li>
+            <li>Backlog 与状态处理</li>
+            <li>决定下一阶段</li>
+          </ol>
+        </div>
+        <div class="detail-item">
+          <h3>输出</h3>
+          <p>Review 报告（含 DoD 对照表和审查结论）、更新后的 Backlog（关闭完成项，未通过项回流）</p>
+        </div>
+        <div class="detail-item is-block">
+          <h3>阻断条件</h3>
+          <p>无主动阻断。未通过项回流到下次 Planning 或反思会；Review 结论必须产出，未产出则补写</p>
+        </div>
+      </div>
+
+      <div class="edge edge-down" aria-hidden="true">
+        <span class="edge-arrow">→</span>
+        <span class="edge-label">检查是否需要反思</span>
+      </div>
+    </article>
+
+    <!-- ============ 07 Retrospective（可选） ============ -->
+    <article class="stage-row">
+      <div class="node node-main node-optional" id="stage-retro" data-stage="Retrospective" role="button" tabindex="0" aria-expanded="false" aria-controls="detail-retro">
+        <div class="node-head">
+          <span class="node-index">07</span>
+          <h2 class="node-title">Retrospective</h2>
+          <span class="tag tag-optional">可选</span>
+          <span class="caret" aria-hidden="true">＋</span>
+        </div>
+        <p class="node-sub">反思与进化会议（Aida 建议 + PO 认可后触发）</p>
+      </div>
+
+      <div class="branch">
+        <div class="branch-row">
+          <div class="node node-mini node-decision">
+            <p class="mini-title">◆ Aida 是否建议开反思会？</p>
+            <p class="mini-sub">输入来自 Review Passed / With Observation</p>
+          </div>
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">不需要</span></div>
+          <div class="edge-loop"><span class="edge-arrow">→</span> Planning Input Ready（下一阶段）</div>
+        </div>
+        <div class="branch-row">
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">Aida 建议 + PO 认可</span></div>
+          <div class="node node-mini node-optional">
+            <span class="tag tag-optional">可选</span>
+            <p class="mini-title">Retrospective（反思会议）</p>
+            <p class="mini-sub">反思与进化会议</p>
+          </div>
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">产出纪要</span></div>
+          <div class="node node-mini node-ok">
+            <p class="mini-title">Retrospective Completed</p>
+            <p class="mini-sub">已产出反思纪要</p>
+          </div>
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">进入下一轮准备</span></div>
+          <div class="edge-loop"><span class="edge-arrow">→</span> Planning Input Ready</div>
+        </div>
+      </div>
+
+      <div class="detail" id="detail-retro" hidden>
+        <div class="detail-item">
+          <h3>触发条件</h3>
+          <p>Aida 觉得 Sprint 中有做的不好的、需要讨论的问题（未完成、效果不理想等），通知 PO 建议开启反思会，PO 认可后才走此流程</p>
+        </div>
+        <div class="detail-item">
+          <h3>输入</h3>
+          <ul>
+            <li>Review 报告、审计轨迹</li>
+            <li>Sprint 中的异步广播事件日志（决策辅助依据）</li>
+            <li><code>project/reports/</code> 下的审查报告、会议纪要模板</li>
+          </ul>
+        </div>
+        <div class="detail-item">
+          <h3>Aida 动作</h3>
+          <ol>
+            <li>开场与范围确认</li>
+            <li>汇报过程数据（风险、阻塞、未通过项、关键事件、异步广播事件统计）</li>
+            <li>团队回顾（PO 反馈：做得好的 / 做得不好的）</li>
+            <li>识别瓶颈（流程 / 协作 / 工具 / 质量）</li>
+            <li>形成改进项（方向、责任人、优先级）</li>
+            <li>判断回流方向（回流规则 / 新增 Backlog / 仅记录）</li>
+            <li>产出反思纪要</li>
+          </ol>
+        </div>
+        <div class="detail-item">
+          <h3>输出</h3>
+          <p>反思纪要（<code>project/meetings/Sprint反思_xxx.md</code>）、改进项清单、回流规则或新增 Backlog 项</p>
+        </div>
+        <div class="detail-item is-block">
+          <h3>阻断条件</h3>
+          <p>无主动阻断。未形成有效结论 → 把问题作为待完善项加入 Backlog 或在原 Backlog 上修改</p>
+        </div>
+      </div>
+
+      <div class="edge edge-down" aria-hidden="true">
+        <span class="edge-arrow">→</span>
+        <span class="edge-label">进入下一轮准备（或不需要反思）</span>
+      </div>
+    </article>
+
+    <!-- ============ 08 Planning Input Ready ============ -->
+    <article class="stage-row">
+      <div class="node node-main node-normal" id="stage-plan-input" data-stage="Planning Input Ready" role="button" tabindex="0" aria-expanded="false" aria-controls="detail-plan-input">
+        <div class="node-head">
+          <span class="node-index">08</span>
+          <h2 class="node-title">Planning Input Ready</h2>
+          <span class="tag tag-normal">正常</span>
+          <span class="caret" aria-hidden="true">＋</span>
+        </div>
+        <p class="node-sub">Aida 自省，准备下一轮</p>
+      </div>
+
+      <div class="branch">
+        <div class="branch-row">
+          <div class="edge-h"><span class="edge-arrow">→</span><span class="edge-label">Backlog 有剩余</span></div>
+          <div class="edge-loop"><span class="edge-arrow">↺</span> 回到 Planning</div>
+        </div>
+      </div>
+
+      <div class="detail" id="detail-plan-input" hidden>
+        <div class="detail-item">
+          <h3>输入</h3>
+          <ul>
+            <li>Review 报告</li>
+            <li>反思纪要（可选，如有）</li>
+            <li>Backlog（检查剩余项）：<code>project/backlog/Product_Backlog_待确认.md</code></li>
+          </ul>
+        </div>
+        <div class="detail-item">
+          <h3>Aida 动作</h3>
+          <ol>
+            <li>从反思结论中提取候选项（如有反思纪要）</li>
+            <li>整理为 Planning 输入候选清单</li>
+            <li>检查 Backlog 是否还有剩余项</li>
+            <li>Backlog 燃尽 → 项目交付；还有剩余 → 自动进入下一轮 Planning</li>
+          </ol>
+        </div>
+        <div class="detail-item">
+          <h3>输出</h3>
+          <p>Planning 输入候选清单</p>
+        </div>
+        <div class="detail-item is-block">
+          <h3>阻断条件</h3>
+          <p>无。只要有 Backlog 就可以进入 Planning</p>
+        </div>
+      </div>
+
+      <div class="edge edge-down" aria-hidden="true">
+        <span class="edge-arrow">→</span>
+        <span class="edge-label">Backlog 燃尽</span>
+      </div>
+    </article>
+
+    <!-- ============ 09 项目交付 ============ -->
+    <article class="stage-row stage-final">
+      <div class="node node-main node-done" id="stage-done" data-stage="项目交付" role="button" tabindex="0" aria-expanded="false" aria-controls="detail-done">
+        <div class="node-head">
+          <span class="node-index">09</span>
+          <h2 class="node-title">项目交付</h2>
+          <span class="tag tag-done">完成</span>
+          <span class="caret" aria-hidden="true">＋</span>
+        </div>
+        <p class="node-sub">Backlog 燃尽，客户满意</p>
+      </div>
+
+      <div class="detail" id="detail-done" hidden>
+        <div class="detail-item">
+          <h3>输入</h3>
+          <p>Backlog 已燃尽（无剩余项）</p>
+        </div>
+        <div class="detail-item">
+          <h3>Aida 动作</h3>
+          <p>项目收尾，交付软件产品，确认客户满意</p>
+        </div>
+        <div class="detail-item">
+          <h3>输出</h3>
+          <p>可交付的软件产品</p>
+        </div>
+        <div class="detail-item is-block">
+          <h3>阻断条件</h3>
+          <p>无</p>
+          <p class="mini-sub">说明：项目交付为终点阶段，工作流图源文件中无独立详表章节，以上为按工作流图描述的概要信息</p>
+        </div>
+      </div>
+
+      <div class="edge edge-end" aria-hidden="true">
+        <span class="edge-arrow">■</span>
+        <span class="edge-label">流程结束</span>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- ============ 燃尽图 + 事件流（数据来自 data.json 的 burnout / events 字段） ============ -->
+  <section class="analytics-row" id="analytics-row" aria-label="燃尽图与事件流">
+    <div class="burnout-panel">
+      <div class="panel-header">
+        <h2>燃尽图</h2>
+        <p class="panel-meta">剩余任务数随时间变化（纯 SVG 绘制） · 数据源：<code>data.json</code> 的 burnout 字段</p>
+      </div>
+      <div class="burnout-chart" id="burnout-chart">
+        <p class="panel-placeholder">加载燃尽图…</p>
+      </div>
+    </div>
+
+    <div class="events-panel">
+      <div class="panel-header">
+        <h2>事件流</h2>
+        <p class="panel-meta">按时间倒序展示 · 数据源：<code>data.json</code> 的 events 字段</p>
+      </div>
+      <ul class="events-list" id="events-list">
+        <li class="panel-placeholder">加载事件流…</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 阶段检查表（数据来自 data.json 的 checklist 字段，只读展示） ============ -->
+  <section class="checklist-panel" id="checklist-panel" aria-label="阶段检查表">
+    <div class="checklist-header">
+      <div>
+        <h2>阶段检查表</h2>
+        <p class="checklist-meta">Aida 自检用检查项 · 可视化只读展示 · 数据源：<code>data.json</code> 的 checklist 字段</p>
+      </div>
+      <div class="checklist-controls">
+        <label for="checklist-stage">切换阶段</label>
+        <select id="checklist-stage" aria-label="切换阶段查看检查表"></select>
+      </div>
+    </div>
+    <div class="checklist-card" id="checklist-card" aria-live="polite">
+      <p class="checklist-placeholder">加载检查表数据…</p>
+    </div>
+  </section>
+
+  <!-- ============ Backlog 任务列表（数据来自 data.json） ============ -->
+  <section class="backlog-panel" id="backlog-panel" aria-label="Backlog 任务列表">
+    <div class="backlog-header">
+      <h2>Backlog 任务列表</h2>
+      <p class="backlog-meta" id="backlog-meta">数据源：<code>data.json</code> · 更新时间：—</p>
+    </div>
+
+    <div class="backlog-tools">
+      <div class="backlog-legend" role="list" aria-label="Backlog 状态图例">
+        <span class="b-chip b-done" role="listitem">已完成 ✓</span>
+        <span class="b-chip b-progress" role="listitem">进行中 ▶</span>
+        <span class="b-chip b-pending" role="listitem">待办 ○</span>
+      </div>
+      <div class="backlog-filters">
+        <label for="filter-status">状态
+          <select id="filter-status">
+            <option value="all">全部</option>
+            <option value="done">已完成</option>
+            <option value="in_progress">进行中</option>
+            <option value="pending">待办</option>
+          </select>
+        </label>
+        <label for="filter-priority">优先级
+          <select id="filter-priority">
+            <option value="all">全部</option>
+            <option value="P0">P0</option>
+            <option value="P1">P1</option>
+            <option value="P2">P2</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <p class="backlog-summary" id="backlog-summary">共 0 项</p>
+    <p class="backlog-note">节点角标按任务状态统计：待办 → Backlog Grooming，进行中 → Sprint In Progress，已完成 → Sprint Completed</p>
+    <ul class="backlog-list" id="backlog-list"></ul>
+  </section>
+
+  <footer class="board-footer">
+    <p>流程数据来源：<code>product/agents/aida/工作流图与检查表_待确认.md</code>（C-A1-v2）· 白皮书 <code>product/whitepaper/AidaPulse白皮书_待确认.md</code></p>
+    <p>实时数据源：<code>project/panel/workflow/data.json</code>（由 Aida 在状态变更时更新，刷新页面即可同步）· 更新时间：<span id="footer-updated">—</span></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

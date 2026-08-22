@@ -125,6 +125,21 @@
   1. Sprint 3 观察：窗口关闭三选边界复验（顺带）；自测脚本 skill 化立项评估（Sprint 3 六任务全前端，高频复用触发条件）；闪退留观
   2. FUNC-3 实现前置宣贯三原则（markRaw/Compartment 槽位/watch 单点写缓存），写进 Sprint 3 启动收口风险卡点
 
+### 2026-08-22 · 任务经验 · FUNC-3 排障方法论：CM6 装饰机制的四次「无报错/报错定位」实证
+
+- **背景**：Sprint 3 主峰 FUNC-3（同屏所见即所得）实现，Playwright 自测从 0/19 逐项追到 28/28 全绿，途中踩穿 CM6 装饰机制的 4 个隐性规则，全部用「读 dist 源码实证」而非猜测解决。
+- **关联 decision**：decision-016（四项 CM6 经验定案）
+- **影响范围**：markdownWysiwyg.ts/css（StateField 通道）；languageRegistry.ts（GFM 显式配置）；wysiwyg-smoke.mjs（fs 落盘报告防沙箱截断 stdout）；FUNC-4~8 复用
+- **经验与教训**：
+  1. **「报错堆栈指向的模块 ≠ 报错来源」**：`RangeError: Block decorations may not be specified via plugins` 的抛错点在 @codemirror/view，初判误入「Compartment 槽位」方向；实为 ViewPlugin `decorations` spec 是函数形式、CM6 强制禁止块级装饰（view d.ts §EditorView.decorations 明文）。解法：读 dist 源码 + d.ts 对照，别凭记忆
+  2. **库的默认值必须实测**：`markdown()` 默认 base 是 commonmarkLanguage（无 GFM），此前语法树 dump 用的是自配 GFM parser 才「误以为」运行时支持删除线/表格。教训：运行时语法树要用运行时配置 dump（debug-tree 先踩了这坑，后改用与注册表一致的配置验证）
+  3. **「没传参数」类 bug 比想象隐蔽**：HrWidget 少传 `from`（undefined）导致 dispatch `{selection:{anchor:undefined}}` → bracketState 的 lineAt 死循环越界 → **整个事务构造失败** → 表现为「点击后无效果」而非报错。排障靠给 mousedown handler 打印 `this` 的 keys+值，一行日志破案
+  4. **CM6 事务失败的连带症状**：selection 越界目标在事务构造期被某字段（closeBrackets/bracketState）读坏 → 事务整体失败 → 界面「静默无效」。排查思路：pageerror 捕获堆栈 + 逐步复现最小交互（debug-89 系列），而非全链路重跑
+  5. **测试脚本自身的断言缺陷会伪装成实现 bug**：check 6 点击引用块后用「即将消失的 class 选择器」读取 → 30s 超时挂死（沙箱还截断了 stdout 掩盖真相）。解法：断言按文本定位行元素；脚本增量落盘（node fs 直写，绕过沙箱 stdout 截断）
+- **改进项清单（回流方向）**：
+  1. 自测脚本 skill 化立项评估（wysiwyg-smoke 的增量落盘 + 异常钩子模式值得固化；Sprint 3 六任务高频复用）
+  2. CM6 系列经验（StateField 块级装饰通道 / GFM 显式配置 / 行级零长度 range / 树滞后防御）已入 decision-016，供 FUNC-4~8 直接复用，避免重复踩坑
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要

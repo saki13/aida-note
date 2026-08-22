@@ -153,6 +153,17 @@
 - **依据**：SIS-UI-1/2/3、SIS-FUNC-1/2 验收标准全过（2026-08-20~21）；Sprint_2_DoD对照表（36/36）；AS-8 阶段 3-8 闭环要求；Sprint_2_Review报告。
 - **影响范围**：project/sprint/（DoD 对照表 / Review 报告 / Sprint 3 候选清单）；Backlog / data.json / state / manifest（四边同步收口）；evolution_log.md；Sprint 3 执行全程。
 
+### decision-016 · 2026-08-22 · FUNC-3 完成（Markdown 同屏所见即所得）+ 四项 CM6 关键经验
+
+- **背景**：Sprint 3 主峰 FUNC-3 实现，Playwright 自测 28/28 全绿，build 通过，收口四边同步。
+- **决策**：
+  1. decorations 提交通道：块级装饰（block widget / 行级 class）必须经 StateField + `EditorView.decorations.from`（compute 型直接值）提供；ViewPlugin 的 `decorations` spec 是函数形式，CM6 强制禁止含块级装饰（抛 `RangeError: Block decorations may not be specified via plugins`，view d.ts §EditorView.decorations：仅直接提供的 set 可影响垂直布局）。
+  2. markdown 语言配置：`markdown()` 默认 base 是 commonmarkLanguage（无 GFM，删除线/表格不解析），须显式 `markdown({ extensions: GFM })`（GFM 自 @lezer/markdown 导入）；**不用** `markdownLanguage`——其自带 `foldNodeProp.add({Table})` 在增量解析时对未对齐旧树位置调 lineAt 抛 TypeError（本任务实测）。
+  3. 行级装饰 range 必须零长度（`Decoration.line(...).range(lineStart)`，CM6 校验非零即抛）；表格/分隔线块 widget 点击进源码态 = mousedown preventDefault + dispatch selection 到块起点（SIS 建议项，验收通过）。
+  4. 语法树增量解析滞后防御：StateField.update 中 `syntaxTree(tr.state).length !== doc.length` 时沿用旧 deco（CM6 绘制时按事务 changes 自动映射），避免 lineAt 越界。
+- **依据**：SIS-FUNC-3 九项验收（wysiwyg-smoke.mjs 28/28 PASS）；CM6 view/state dist 源码实证（disallowBlockEffectsFor / LineDecoration.range / markdown() base 默认值）。
+- **影响范围**：markdownWysiwyg.ts/css、languageRegistry.ts、tabsStore.ts（openTab 联合类型 `in` 收窄，历史遗留 TS 错误修复）、wysiwyg-smoke.mjs（含 fs 落盘报告）、package.json（test:wysiwyg）；FUNC-4~8 复用 StateField 通道与自测资产；看板实例归位 project/panel/workflow/（此前读模板导致「未启动」显示）。
+
 ---
 
 <!-- 后续在此追加，格式：
