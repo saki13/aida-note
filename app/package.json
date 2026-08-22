@@ -16,7 +16,8 @@
     "test:format": "node scripts/format-smoke.mjs",
     "test:search": "node scripts/search-smoke.mjs",
     "test:wrap": "node scripts/wrap-smoke.mjs",
-    "test:compare": "node scripts/compare-smoke.mjs"
+    "test:compare": "node scripts/compare-smoke.mjs",
+    "test:theme": "node scripts/theme-smoke.mjs"
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.12",

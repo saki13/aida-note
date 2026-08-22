@@ -7,10 +7,11 @@
  */
 
 import { inject, computed } from "vue";
-import { NTooltip, NButton } from "naive-ui";
+import { NTooltip, NButton, NDropdown, type DropdownOption } from "naive-ui";
 import { useTabsStore } from "../stores/tabsStore";
-import { useSettingsStore } from "../stores/settingsStore";
+import { useSettingsStore, type ThemePref } from "../stores/settingsStore";
 import { isFormatSupported } from "../services/formatService";
+import type { AccentColor } from "../services/settingsService";
 
 interface EditorApi {
   undo: () => void;
@@ -66,6 +67,27 @@ const compareApi = inject<{ open: () => void } | null>("compareApi", null);
 function onCompare(): void {
   compareApi?.open();
 }
+
+/** 主题下拉（SIS-FUNC-9）：三态偏好 + 强调色（蓝/绿/紫），选择即持久化。 */
+const THEME_LABEL: Record<ThemePref, string> = { light: "亮", dark: "暗", system: "跟随系统" };
+const themeLabel = computed(() => THEME_LABEL[settingsStore.theme]);
+const themeOptions: DropdownOption[] = [
+  { label: "亮色", key: "light" },
+  { label: "暗色", key: "dark" },
+  { label: "跟随系统", key: "system" },
+  { type: "divider" },
+  { label: "强调色 · 蓝", key: "accent-blue" },
+  { label: "强调色 · 绿", key: "accent-green" },
+  { label: "强调色 · 紫", key: "accent-purple" },
+];
+function onThemeSelect(key: string): void {
+  if (key === "light" || key === "dark" || key === "system") {
+    void settingsStore.setTheme(key);
+  } else {
+    const accent = key.replace("accent-", "") as AccentColor;
+    void settingsStore.setAccentColor(accent);
+  }
+}
 </script>
 
 <template>
@@ -90,7 +112,11 @@ function onCompare(): void {
 
     <span class="sep"></span>
 
-    <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>主题</n-button></template>FUNC-9（Sprint 4）</n-tooltip>
+    <n-tooltip trigger="hover"><template #trigger>
+      <n-dropdown :options="themeOptions" :value="settingsStore.theme" trigger="click" @select="onThemeSelect">
+        <n-button size="small">主题：{{ themeLabel }}</n-button>
+      </n-dropdown>
+    </template>主题切换（FUNC-9，Sprint 4：亮/暗/跟随系统 + 强调色）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>AI 面板</n-button></template>AI-1（Sprint 4）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>设置</n-button></template>ARCH-2 settingsStore（Sprint 4）</n-tooltip>
 

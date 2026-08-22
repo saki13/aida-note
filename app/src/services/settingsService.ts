@@ -8,10 +8,15 @@
 
 import { load as loadStore } from "@tauri-apps/plugin-store";
 
+/** 强调色方案（SIS-FUNC-9：蓝/绿/紫，作用于 UI 主题色 primary） */
+export type AccentColor = "blue" | "green" | "purple";
+
 /** 设置结构（ARCH-2 §4.2 的 AppSettings，字段与 TS 接口一致） */
 export interface AppSettings {
   /** 主题：light / dark / system（FUNC-9 三态，默认 system） */
   theme: "light" | "dark" | "system";
+  /** 强调色方案（FUNC-9：蓝/绿/紫，默认 blue） */
+  accentColor: AccentColor;
   /** 软换行：全局共享，默认开启（FUNC-8） */
   wordWrap: boolean;
   /** 最近文件：绝对路径数组，新的在前，去重，上限 20（FUNC-11） */
@@ -27,6 +32,7 @@ export interface AppSettings {
 /** 兜底默认值（ARCH-2 §4.2 DEFAULT_SETTINGS） */
 export const DEFAULT_SETTINGS: AppSettings = {
   theme: "system",
+  accentColor: "blue",
   wordWrap: true,
   recentFiles: [],
   aiConfig: { baseURL: "", apiKey: "", model: "" },

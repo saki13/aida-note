@@ -42,11 +42,10 @@ let view: EditorView | null = null;
 const languageCompartment = new Compartment();
 const themeCompartment = new Compartment();
 const wrapCompartment = new Compartment();
-let mediaQuery: MediaQueryList | null = null;
 
-/** 当前明暗主题扩展：跟随系统 prefers-color-scheme（SIS-FUNC-2 主题联动）。 */
+/** 当前明暗主题扩展：跟随全局解析结果（SIS-FUNC-9，settingsStore.resolvedTheme 驱动）。 */
 function themeExtension(): Extension {
-  return mediaQuery?.matches ? oneDark : [];
+  return settingsStore.resolvedTheme === "dark" ? oneDark : [];
 }
 
 /** 重建语言扩展（按当前标签语言）；用于手动切换语言后整体替换。 */
@@ -211,14 +210,12 @@ function switchToTab() {
 }
 
 onMounted(() => {
-  mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
   view = new EditorView({
     parent: editorHost.value ?? undefined,
     state: emptyState(),
   });
   switchToTab();
-  void settingsStore.init(); // 加载持久化设置；wordWrap 变化由下方 watch 同步到编辑器
-  mediaQuery.addEventListener("change", applyTheme);
+  void settingsStore.init(); // 加载持久化设置；wordWrap/resolvedTheme 变化由下方 watch 同步到编辑器
   emit("ready", {
     undo: () => {
       view?.focus();
@@ -237,13 +234,18 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  mediaQuery?.removeEventListener("change", applyTheme);
-  mediaQuery = null;
   view?.destroy();
   view = null;
 });
 
 watch(() => tabsStore.activeTabId, switchToTab);
+// 主题解析结果（SIS-FUNC-9）：三态切换或系统明暗变化时即时作用于编辑器高亮。
+watch(
+  () => settingsStore.resolvedTheme,
+  (v, prev) => {
+    if (v !== prev) applyTheme();
+  }
+);
 // 软换行开关（全局共享，SIS-FUNC-8）：状态变化即时作用于编辑器显示。
 watch(
   () => settingsStore.wordWrap,
