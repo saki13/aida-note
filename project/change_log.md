@@ -8,7 +8,16 @@
 
 ## 变更记录
 
-*暂无变更记录。*
+### CHG-001 · 2026-08-22 · 打包元数据规范化 + 绿色版交付 + MSI/NSIS 列 PO 本地兜底（Sprint 5）
+
+| 字段 | 内容 |
+|------|------|
+| 发起人 | PO（追加授权第 5 次短 Sprint：「使用手册 + 安装包」） |
+| 风险等级 | 低（打包元数据调整 + 交付物产出，不改变功能与架构） |
+| 评估结论 | productName/identifier/窗口尺寸/描述等为发布必需元数据，规范化无功能回归；安装包为交付必需产物 |
+| 批准人 | PO（追加授权，低风险变更按 T3 5.1/6 + AS-8 短 Sprint 自主执行） |
+| 同步动作 | tauri.conf.json（productName=aida-note、bundle.targets=all、short/longDescription）、Cargo.toml（name=aida-note）；Sprint_5_DoD对照表、memory/state.md、memory/manifest.md、memory/decisions.md（decision-026）、project/panel/workflow/data.json |
+| 状态 | 已关闭（使用手册 5/5 ✅；绿色版 ZIP 已交付；MSI/NSIS 前置全就绪，产物路径 `app/src-tauri/target/release/bundle/` 交 PO 本地 `npm run tauri build` 一键产出） |
 
 ---
 

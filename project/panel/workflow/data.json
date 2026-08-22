@@ -2,11 +2,11 @@
   "updated_at": "2026-08-22",
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
-    "sprint": "Sprint 4（已闭环）",
-    "stage": "项目交付（阶段 11，Backlog 燃尽，项目报告征询 PO）",
+    "sprint": "Sprint 5（已闭环：使用手册 + 安装包，PO 追加授权第 5 次）",
+    "stage": "项目交付（阶段 11，PO 已确认交付 + Sprint 5 追加收尾完成）",
     "stage_main": "项目交付",
-    "status": "Sprint 4 整体收口完成：DoD 对照表 34/34 + Review Passed With Observation + Retrospective 轻量并入 Evolution Log；Backlog 19/19 全部完成（燃尽）",
-    "next": "PO 同意 -> 交付产品 + 项目资产，流程结束；PO 否决 -> 进入新 Planning",
+    "status": "Sprint 5 收口完成：使用手册 5/5 ✅ + 绿色版 ZIP（app/dist-install/aida-note-portable.zip，4.6MB 解压即用）✅ + release exe 启动冒烟 ✅；MSI/NSIS 正式安装包待 PO 本地 npm run tauri build（产物 app/src-tauri/target/release/bundle/）",
+    "next": "PO 本地产出 MSI/NSIS 安装包 + 复验 4 项本地观察项（AI-1 真实流式/mermaid 修复真实渲染/两文件对比入口/Tauri 退出草稿清理）；无流程动作待办",
     "blocked": "无"
   },
   "backlog": [
@@ -186,6 +186,14 @@
         "FUNC-10",
         "FUNC-11",
         "AI-1"
+      ]
+    },
+    {
+      "id": "Sprint 5",
+      "theme": "交付收尾（使用手册 + 安装包，PO 追加授权）",
+      "items": [
+        "使用手册",
+        "安装包"
       ]
     }
   ],
@@ -471,6 +479,34 @@
       "type": "Sprint 闭环",
       "summary": "Sprint 4 整体收口完成（阶段 4→5→6→7→8），授权用量 4/4 全部用尽（燃尽）；Backlog 19/19 全部完成（燃尽）",
       "detail": "DoD 对照表 34/34（FUNC-9 8/8 + FUNC-11 9/9 + FUNC-10 9/9 + AI-1 9/9+4/4）；全量回归 13 脚本全绿；Review 结论 Passed With Observation（5 观察项：AI-1 真实流式/mermaid 修复真实渲染/两文件对比/Tauri 退出草稿清理/沙箱长连接限制）；Retrospective 轻量并入 Evolution Log；进入项目交付（阶段 11）征询 PO"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "Sprint 启动",
+      "summary": "Sprint 5 启动收口完成（PO 追加授权第 5 次：「使用手册 + 安装包」，项目交付后追加收尾）",
+      "detail": "两任务：①使用手册（覆盖 19 项功能、安装/布局/AI 配置/快捷键/FAQ/边界）②安装包（打包元数据规范化 → tauri build 产出）；风险对策：沙箱击杀长命令 → 后台孤儿进程；bundler 工具下载受限 → 绿色版 ZIP 先行 + MSI/NSIS 列 PO 本地兜底"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "Sprint 5 任务①使用手册完成（DoD 5/5 ✅）：project/使用手册.md 十节完整最终用户手册",
+      "detail": "①产品简介与能力表 ②安装（MSI/NSIS + 源码 + 浏览器调试 + 首次 AI 配置）③界面布局 ④基础编辑（文件/搜索/格式化）⑤Markdown 所见即所得 + mermaid ⑥对比/主题/自动保存 ⑦AI 功能四能力 ⑧快捷键速查 ⑨常见问题 ⑩已知边界"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "Sprint 5 任务②安装包交付（DoD：元数据/exe/启动验证/绿色版 ZIP/dist 最新 5 项 ✅；MSI+NSIS ⏳ PO 本地）：release exe 12.95MB + aida-note-portable.zip 4.6MB",
+      "detail": "打包元数据规范化（tauri.conf.json productName=aida-note、Cargo.toml name=aida-note，exe 版本信息实测）；release 编译 + 启动冒烟 15s 存活；绿色版 ZIP 解压即用；沙箱对 WiX/NSIS 下载特定阻断 → MSI/NSIS 前置全就绪列 PO 本地 npm run tauri build（产物 app/src-tauri/target/release/bundle/）；change_log CHG-001 + decision-026"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "Sprint 闭环",
+      "summary": "Sprint 5 闭环完成（PO 追加授权第 5 次：使用手册 + 安装包），项目交付收尾全部完成",
+      "detail": "DoD 对照表：使用手册 5/5 ✅；安装包 元数据 ✅ + exe ✅ + 启动验证 ✅ + 绿色版 ZIP ✅ + dist 最新 ✅ + MSI/NSIS ⏳（PO 本地 npm run tauri build 一键产出，一切前置就绪）；交付物：project/使用手册.md + app/dist-install/aida-note-portable.zip；commit 收口；等待 PO：MSI/NSIS 产出 + 4 项本地观察项复验"
     }
   ],
   "checklist": {

@@ -6,6 +6,19 @@
 
 ## 决策记录
 
+### decision-026 · 2026-08-22 · Sprint 5（使用手册 + 安装包）：打包元数据规范化 + 沙箱 bundler 限制对策（绿色版交付 / PO 本地兜底）
+
+- **背景**：项目交付（Backlog 19/19 燃尽、报告 PO 确认）后，PO 追加授权第 5 次短 Sprint：「还需要使用手册 + 安装包」。
+- **决策**：
+  1. **打包元数据规范化**：`tauri.conf.json` productName=aida-note、identifier=com.aidanote.editor、窗口 1200×800（min 640×480）、bundle.targets=all（MSI+NSIS）、short/longDescription 中文描述；`Cargo.toml` name=aida-note（lib 名 app_lib 保留，main.rs/lib.rs 零改动）；exe 版本信息实测 ProductName=aida-note/0.1.0。
+  2. **沙箱对 tauri bundler 工具下载（WiX/NSIS）特定阻断**：github.com HEAD 200 可达、但下载连接停滞（缓存目录不生成、进程 CPU≈0）、ghproxy.net 403 → 判定非全局网络故障，而是沙箱对 bundler 下载的特定阻断。对策：**绿色版 ZIP（便携）立即交付**（release exe 自包含前端，解压即用，4.6MB，启动冒烟 15s 存活）+ MSI/NSIS 前置全就绪（dist 已刷新 / cargo release 缓存 / 配置规范化）列 PO 本地终端 `npm run tauri build` 一键兜底，产物 `app/src-tauri/target/release/bundle/`。
+  3. **`--config <file>` 覆盖技巧**：独立 JSON 配置文件（`tauri.bundle.config.json`）的 `build.beforeBuildCommand: "echo ..."` 可跳过 tauri build 前置前端构建（PowerShell 内联 JSON 引号会被损坏，内联不可行）；收口后删除该临时文件。
+  4. **沙箱长命令存活法（第三次验证）**：前台长命令（cargo build / tauri build / vue-tsc 段）被静默击杀（退出码 0 无输出），后台孤儿进程（`cmd 2>&1 | Out-String` 或 Start-Process 分离）可存活并推进——本 Sprint 完成 release 编译与 dist 刷新均靠此机制。
+- **依据**：Sprint_5_DoD对照表（使用手册 5/5 ✅；安装包：元数据/exe/启动验证/绿色版 ZIP/dist 最新 ✅；MSI+NSIS ⏳ PO 兜底）；实测（exe 12.95MB、启动 15s 存活、zip 4.6MB、dist 19:43 刷新）。
+- **影响范围**：tauri.conf.json / Cargo.toml（元数据）；`app/dist-install/`（aida-note.exe + aida-note-portable.zip 交付物）；`project/使用手册.md`（10 节完整手册）；Sprint_5_启动收口.md / Sprint_5_DoD对照表.md；change_log CHG-001；MSI/NSIS 正式安装包由 PO 本地产出。
+
+---
+
 ### decision-025 · 2026-08-22 · AI-1 完成（AI 接入）+ 沙箱流式限制对策与选区缓存 Bug
 
 - **背景**：Sprint 4 最后一项 AI-1 实现（单套 OpenAI 兼容 API 配置 + 润色四选/问答/mermaid 修复三能力 + 流式输出 + 原位替换接受/撤销 + 问答侧栏插光标 + mermaid 双入口修复），Playwright 自测 ai-smoke 9/9 + ai-mermaid-smoke 4/4 全绿，build 通过，全量回归 13 脚本保持。

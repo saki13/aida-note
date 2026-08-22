@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "app",
+  "productName": "aida-note",
   "version": "0.1.0",
   "identifier": "com.aidanote.editor",
   "build": {
@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "app",
-        "width": 800,
-        "height": 600
+        "title": "aida-note",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 640,
+        "minHeight": 480
       }
     ],
     "security": {
@@ -30,6 +32,8 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "shortDescription": "轻便全能文本编辑器",
+    "longDescription": "aida-note：轻量全能文本编辑器（Tauri 2 + Vue 3）。多标签编辑、Markdown 所见即所得、mermaid 实时渲染、格式化、对比、搜索替换、主题、最近文件、自动保存/崩溃恢复、AI 润色/问答/mermaid 修复。"
   }
 }

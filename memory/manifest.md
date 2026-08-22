@@ -2,7 +2,7 @@
 
 > 用途：新会话的统一恢复入口（L1 恢复清单）。
 > 版本：v0.1.0
-> 最后更新：2026-08-20
+> 最后更新：2026-08-22
 > 更新者：Aida v0.1.0
 
 ---
@@ -11,12 +11,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| `current_sprint` | `Sprint 4（已闭环，授权燃尽）` |
-| `current_stage` | `项目交付（阶段 11，Backlog 燃尽，项目报告征询 PO）` |
-| `current_theme` | `体验/AI（FUNC-9~11、AI-1）` |
-| `current_task` | `项目交付（项目报告生成 + 征询 PO 意见）` |
-| `task_status` | `pending（待 PO 审批）` |
-| `task_progress` | `Sprint 1/2/3/4 全部闭环（decision-001~025，授权 4/4 燃尽）；Backlog 19/19 完成（ENV-1/2、ARCH-1/2、UI-1/2/3、FUNC-1~11、AI-1；Sprint 4 收口：DoD 34/34 + Review Passed With Observation） |
+| `current_sprint` | `Sprint 5（已闭环：使用手册 + 安装包，PO 追加授权第 5 次）` |
+| `current_stage` | `项目交付（阶段 11，PO 已确认交付；Sprint 5 追加收尾完成）` |
+| `current_theme` | `交付收尾（使用手册 + 安装包）` |
+| `current_task` | `Sprint 5：使用手册 + 安装包（收口完成）` |
+| `task_status` | `done` |
+| `task_progress` | `Sprint 1/2/3/4/5 全部闭环（decision-001~026）；Backlog 19/19 完成；Sprint 5：使用手册 5/5 ✅ + 绿色版 ZIP ✅（app/dist-install/aida-note-portable.zip，4.6MB）+ release exe ✅（12.95MB，冒烟 15s 存活）+ MSI/NSIS ⏳（PO 本地 npm run tauri build）` |
 
 ---
 
@@ -98,5 +98,5 @@
 
 ## 待完善 / 下一步
 
-- **当前阶段**：项目交付（Backlog 19/19 燃尽，授权 4/4 燃尽；Sprint 4 收口完成：DoD 34/34 + Review Passed With Observation）
-- 下一步：项目报告已产出，征询 PO 意见（同意 -> 交付产品 + 项目资产，流程结束；否决 -> 进入新 Planning）
+- **当前阶段**：项目交付（Backlog 19/19 燃尽；PO 确认交付；Sprint 5 追加「使用手册 + 安装包」收口完成：手册 5/5 ✅ + 绿色版 ZIP 交付 ✅）
+- 下一步：PO 本地 `npm run tauri build` 产出 MSI/NSIS 正式安装包（`app/src-tauri/target/release/bundle/`）+ 复验 4 项本地观察项；无流程动作待办
