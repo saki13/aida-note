@@ -10,6 +10,7 @@ import { inject, computed } from "vue";
 import { NTooltip, NButton, NDropdown, useMessage, type DropdownOption } from "naive-ui";
 import { useTabsStore } from "../stores/tabsStore";
 import { useSettingsStore, type ThemePref } from "../stores/settingsStore";
+import { useAiStore } from "../stores/aiStore";
 import { isFormatSupported } from "../services/formatService";
 import { basename } from "../services/fileService";
 import type { AccentColor } from "../services/settingsService";
@@ -19,10 +20,13 @@ interface EditorApi {
   redo: () => void;
   format: () => Promise<void>;
   search: () => void;
+  polish: (mode: "rewrite" | "polish" | "shorten" | "expand") => void;
+  replaceRange: (from: number, to: number, text: string) => void;
 }
 
 const tabsStore = useTabsStore();
 const settingsStore = useSettingsStore();
+const aiStore = useAiStore();
 const editorApi = inject<EditorApi | null>("editorApi", null);
 const message = useMessage();
 
@@ -110,6 +114,58 @@ async function onOpenRecent(path: string): Promise<void> {
     await settingsStore.removeRecentFile(path);
   }
 }
+
+/** ---- AI-1 入口（SIS-AI-1 §2/§4：AI 面板开关 + 润色四选 + 修复 mermaid） ---- */
+const aiPanelApi = inject<{ toggle: () => void } | null>("aiPanelApi", null);
+function onToggleAiPanel(): void {
+  aiPanelApi?.toggle();
+}
+
+const polishOptions: DropdownOption[] = [
+  { label: "改写", key: "rewrite" },
+  { label: "润色", key: "polish" },
+  { label: "缩短", key: "shorten" },
+  { label: "扩写", key: "expand" },
+];
+function onPolishSelect(key: string): void {
+  if (!tabsStore.activeTab) {
+    message.warning("当前没有活动文件");
+    return;
+  }
+  editorApi?.polish(key as "rewrite" | "polish" | "shorten" | "expand");
+}
+
+/** 提取文档第一个 mermaid 围栏块（```mermaid 或 ~~~mermaid，含围栏），供工具栏修复。 */
+function firstMermaidBlock(content: string): { code: string; start: number; end: number } | null {
+  const re = /(?:```|~~~)\s*mermaid\s*\n([\s\S]*?)(?:```|~~~)/;
+  const m = re.exec(content);
+  if (!m) return null;
+  return { code: m[1], start: m.index, end: m.index + m[0].length };
+}
+
+async function onFixMermaid(): Promise<void> {
+  const tab = tabsStore.activeTab;
+  if (!tab) {
+    message.warning("当前没有活动文件");
+    return;
+  }
+  const block = firstMermaidBlock(tab.content);
+  if (!block) {
+    message.info("当前文档没有 mermaid 代码块");
+    return;
+  }
+  try {
+    const fixed = await aiStore.fixMermaid(block.code);
+    if (!fixed.trim()) {
+      message.warning("AI 未返回有效代码");
+      return;
+    }
+    editorApi?.replaceRange(block.start, block.end, "```mermaid\n" + fixed.replace(/^```mermaid\s*\n?|```$/g, "").trim() + "\n```");
+    message.success("mermaid 已修复");
+  } catch (e) {
+    message.error(e instanceof Error ? e.message : String(e));
+  }
+}
 </script>
 
 <template>
@@ -145,7 +201,15 @@ async function onOpenRecent(path: string): Promise<void> {
         <n-button size="small">主题：{{ themeLabel }}</n-button>
       </n-dropdown>
     </template>主题切换（FUNC-9，Sprint 4：亮/暗/跟随系统 + 强调色）</n-tooltip>
-    <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>AI 面板</n-button></template>AI-1（Sprint 4）</n-tooltip>
+    <n-tooltip trigger="hover"><template #trigger>
+      <n-dropdown :options="polishOptions" trigger="click" @select="onPolishSelect">
+        <n-button size="small" :disabled="!hasActive">AI 润色</n-button>
+      </n-dropdown>
+    </template>AI 润色（AI-1，Sprint 4：选中文本改写/润色/缩短/扩写）</n-tooltip>
+    <n-tooltip trigger="hover"><template #trigger>
+      <n-button size="small" :disabled="!hasActive" @click="onFixMermaid">修复 mermaid</n-button>
+    </template>AI 修复 mermaid（AI-1，Sprint 4）</n-tooltip>
+    <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onToggleAiPanel">AI 面板</n-button></template>AI 问答侧栏（AI-1，Sprint 4，可折叠）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>设置</n-button></template>ARCH-2 settingsStore（Sprint 4）</n-tooltip>
 
     <span class="spacer"></span>

@@ -14,11 +14,14 @@ import EditorPane from "../components/EditorPane.vue";
 import StatusBar from "../components/StatusBar.vue";
 import CompareView from "../components/CompareView.vue";
 import RecentEmpty from "../components/RecentEmpty.vue";
+import AiPanel from "../components/AiPanel.vue";
 import { useTabsStore } from "../stores/tabsStore";
+import { useAiStore } from "../stores/aiStore";
 import { readFile, pickFiles, basename } from "../services/fileService";
 import { checkRecover, removeDraft, clearAllDrafts, type DraftRecord } from "../services/draftService";
 
 const tabsStore = useTabsStore();
+const aiStore = useAiStore();
 const dialog = useDialog();
 const message = useMessage();
 const cursor = ref({ line: 1, col: 1 });
@@ -28,9 +31,24 @@ interface EditorApi {
   redo: () => void;
   format: () => Promise<void>;
   search: () => void;
+  polish: (mode: "rewrite" | "polish" | "shorten" | "expand") => void;
+  insertAtCursor: (text: string) => void;
+  replaceRange: (from: number, to: number, text: string) => void;
 }
-const editorApi: EditorApi = { undo: () => undefined, redo: () => undefined, format: () => Promise.resolve(), search: () => undefined };
+const editorApi: EditorApi = {
+  undo: () => undefined,
+  redo: () => undefined,
+  format: () => Promise.resolve(),
+  search: () => undefined,
+  polish: () => undefined,
+  insertAtCursor: () => undefined,
+  replaceRange: () => undefined,
+};
 provide<EditorApi>("editorApi", editorApi);
+
+// ---- AI 问答侧栏（SIS-AI-1：可折叠，ToolBar「AI 面板」开关）----
+const aiPanelOpen = ref(false);
+provide("aiPanelApi", { toggle: () => { aiPanelOpen.value = !aiPanelOpen.value; } });
 
 // ---- 文件对比（SIS-FUNC-6）----
 interface CompareState {
@@ -226,6 +244,7 @@ onMounted(() => {
   window.addEventListener("keydown", onKeydown);
   void setupTauriEvents();
   void setupRecovery(); // 启动扫描崩溃残留草稿（SIS-FUNC-10）
+  void aiStore.init(); // 加载 AI 配置（SIS-AI-1）
 });
 
 onBeforeUnmount(() => {
@@ -252,7 +271,9 @@ onBeforeUnmount(() => {
         @apply="onCompareApply"
       />
       <RecentEmpty v-else-if="!tabsStore.activeTab" />
-      <EditorPane v-else @cursor="cursor = $event" @ready="editorApi.undo = $event.undo; editorApi.redo = $event.redo; editorApi.format = $event.format; editorApi.search = $event.search" />
+      <EditorPane v-else @cursor="cursor = $event" @ready="editorApi.undo = $event.undo; editorApi.redo = $event.redo; editorApi.format = $event.format; editorApi.search = $event.search; editorApi.polish = $event.polish; editorApi.insertAtCursor = $event.insertAtCursor; editorApi.replaceRange = $event.replaceRange" />
+      <!-- SIS-AI-1：AI 问答侧栏（ToolBar「AI 面板」开关，可折叠） -->
+      <AiPanel v-if="aiPanelOpen" />
     </div>
     <StatusBar :cursor="cursor" />
 
@@ -295,7 +316,12 @@ onBeforeUnmount(() => {
 .editor-area {
   flex: 1;
   min-height: 0;
+  display: flex;
   background: #fff;
+}
+.editor-area > :first-child {
+  flex: 1;
+  min-width: 0;
 }
 .compare-src-options {
   display: flex;

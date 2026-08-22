@@ -19,7 +19,9 @@
     "test:compare": "node scripts/compare-smoke.mjs",
     "test:theme": "node scripts/theme-smoke.mjs",
     "test:recent": "node scripts/recent-smoke.mjs",
-    "test:draft": "node scripts/draft-smoke.mjs"
+    "test:draft": "node scripts/draft-smoke.mjs",
+    "test:ai": "node scripts/ai-smoke.mjs",
+    "test:ai-mermaid": "node scripts/ai-mermaid-smoke.mjs"
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.12",

@@ -23,7 +23,19 @@ import { Decoration, WidgetType, type EditorView } from "@codemirror/view";
 import type { EditorState } from "@codemirror/state";
 import type { SyntaxNode } from "@lezer/common";
 import type { MermaidConfig } from "mermaid";
+import { useAiStore } from "../stores/aiStore";
 import "./mermaidWysiwyg.css";
+
+/** AI 修复所需上下文（widget DOM 上携带，供错误占位按钮替换源码）。 */
+interface FixCtx {
+  view: EditorView;
+  /** 围栏块起始位置（node.from） */
+  from: number;
+  /** 围栏块完整文本（含 ```mermaid 围栏） */
+  src: string;
+  /** 图表源码（CodeText，不含围栏） */
+  diagram: string;
+}
 
 /** mermaid render id 唯一序号（mermaid 要求 render id 全局唯一）。 */
 let seq = 0;
@@ -104,6 +116,8 @@ export class MermaidWidget extends WidgetType {
     wrap.className = "cm-md-mermaid";
     wrap.dataset.state = "loading";
     wrap.dataset.diagram = this.diagram; // 渲染数据源 + AI 修复数据契约
+    // AI 修复上下文（错误占位按钮据此替换源码；见 buildErrorBox）
+    (wrap as unknown as { __fixCtx?: FixCtx }).__fixCtx = { view, from: this.from, src: this.src, diagram: this.diagram };
     wrap.textContent = "渲染中…";
     // 点击图表 -> 光标进入块源码态（与 FUNC-3 表格/分隔线同款交互，UI-2 §2.1）
     wrap.addEventListener("mousedown", (e) => {
@@ -253,15 +267,35 @@ function buildErrorBox(wrap: HTMLElement, err: unknown): HTMLElement {
   });
   actions.appendChild(edit);
 
-  // AI 修复入口占位：数据传递约定 = 出错源码存 dataset.diagram，逻辑归 AI-1
+  // AI 修复入口（SIS-AI-1：将错误源码交 AI 修正后替换，成功则重新渲染）。
+  // 数据契约：错误源码存 dataset.diagram + __fixCtx（view/from/src/diagram）。
   const aiFix = document.createElement("button");
   aiFix.type = "button";
   aiFix.textContent = "AI 修复";
   aiFix.dataset.source = wrap.dataset.diagram ?? "";
-  aiFix.addEventListener("click", () => {
-    // AI-1 未接入：占位提示（AI 修复逻辑归 AI-1 实现，本 SIS 仅预留入口与数据契约）
-    aiFix.textContent = "AI 修复归 AI-1 接入（未配置）";
+  aiFix.addEventListener("click", async () => {
+    const ctx = (wrap as unknown as { __fixCtx?: FixCtx }).__fixCtx;
+    if (!ctx) return;
     aiFix.disabled = true;
+    aiFix.textContent = "AI 修复中…";
+    try {
+      const fixed = await useAiStore().fixMermaid(ctx.diagram);
+      if (!fixed.trim()) {
+        aiFix.textContent = "AI 未返回有效代码";
+        aiFix.disabled = false;
+        return;
+      }
+      // 定位图表源码在文档中的绝对区间，整体替换 -> CM6 重建装饰触发重新渲染
+      const idx = ctx.src.indexOf(ctx.diagram);
+      const start = idx >= 0 ? ctx.from + idx : ctx.from;
+      ctx.view.dispatch({
+        changes: { from: start, to: start + ctx.diagram.length, insert: fixed.replace(/^```mermaid\s*\n?|```$/g, "").trim() },
+      });
+    } catch (e) {
+      aiFix.textContent = e instanceof Error ? e.message : String(e);
+      aiFix.disabled = false; // 允许重试
+      setTimeout(() => { if (aiFix.textContent !== "AI 修复中…") aiFix.textContent = "AI 修复"; }, 4000);
+    }
   });
   actions.appendChild(aiFix);
 

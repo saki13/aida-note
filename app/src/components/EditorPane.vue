@@ -20,23 +20,36 @@ import { EditorView, keymap } from "@codemirror/view";
 import { EditorState, Compartment, Prec, type Extension } from "@codemirror/state";
 import { indentWithTab, undo, redo } from "@codemirror/commands";
 import { oneDark } from "@codemirror/theme-one-dark";
+import { diffChars, type Change } from "diff";
 import { languageExtension } from "../services/languageRegistry";
 import { isFormatSupported, formatContent } from "../services/formatService";
 import { searchCountExtension } from "../services/searchCount";
 import { useTabsStore, type Tab } from "../stores/tabsStore";
 import { useSettingsStore } from "../stores/settingsStore";
+import { useAiStore, type PolishMode } from "../stores/aiStore";
 import type { LanguageId } from "../services/language";
 
 const emit = defineEmits<{
   (e: "cursor", c: { line: number; col: number }): void;
-  (e: "ready", api: { undo: () => void; redo: () => void; format: () => Promise<void>; search: () => void }): void;
+  (e: "ready", api: { undo: () => void; redo: () => void; format: () => Promise<void>; search: () => void; polish: (mode: PolishMode) => void; insertAtCursor: (text: string) => void; replaceRange: (from: number, to: number, text: string) => void }): void;
 }>();
 
 const tabsStore = useTabsStore();
 const settingsStore = useSettingsStore();
+const aiStore = useAiStore();
 const message = useMessage();
 const editorHost = ref<HTMLDivElement | null>(null);
 let view: EditorView | null = null;
+
+// ---- AI 润色选区浮条（SIS-AI-1 §3：选中文本现场触发四动作 + 结果气泡） ----
+const selBar = ref<{ from: number; to: number; text: string; x: number; y: number } | null>(null);
+/** 发起润色时的选区范围（接受/放弃用；请求期间选区可能变化，锁定发起值） */
+let polishRange: { from: number; to: number } | null = null;
+/** 右键润色菜单（SIS-AI-1 §2 入口 = 右键菜单 + 工具栏）：有选区时右键显示四动作。 */
+const ctxMenu = ref<{ x: number; y: number } | null>(null);
+function onWindowClick(): void {
+  ctxMenu.value = null;
+}
 
 // Compartment：语言、主题与软换行的独立扩展槽，运行时可整体替换，不影响文档/历史。
 const languageCompartment = new Compartment();
@@ -105,6 +118,24 @@ function formatKeydownHandler(): Extension {
   );
 }
 
+/** AI 右键润色菜单（SIS-AI-1 §2：有选区时右键显示四动作；无选区放行默认菜单）。 */
+function aiMenuHandler(): Extension {
+  return Prec.highest(
+    EditorView.domEventHandlers({
+      contextmenu: (e, v) => {
+        const sel = v.state.selection.main;
+        const text = v.state.sliceDoc(sel.from, sel.to);
+        if (sel.from === sel.to || !text.trim()) return false; // 无选区：保留系统菜单
+        e.preventDefault();
+        const hostRect = editorHost.value?.getBoundingClientRect();
+        if (!hostRect) return true;
+        ctxMenu.value = { x: e.clientX - hostRect.left, y: e.clientY - hostRect.top };
+        return true;
+      },
+    })
+  );
+}
+
 /** 空编辑器 state：注册 theme/language 两个 Compartment 槽位。
  *  注意：必须在所有创建的 state 中都注册同一对 compartment 实例，
  *  否则后续 reconfigure 找不到配置槽会被静默忽略（本组件关键坑，FUNC-2 排查所得）。 */
@@ -119,6 +150,7 @@ function emptyState(): EditorState {
       search({ top: true }),
       searchCountExtension,
       formatKeydownHandler(),
+      aiMenuHandler(),
       keymap.of([indentWithTab]),
     ],
   });
@@ -136,6 +168,7 @@ function createState(tab: Tab): EditorState {
       search({ top: true }),
       searchCountExtension,
       formatKeydownHandler(),
+      aiMenuHandler(),
       keymap.of([indentWithTab]),
       EditorView.updateListener.of((u) => {
         if (u.docChanged) {
@@ -147,6 +180,7 @@ function createState(tab: Tab): EditorState {
             t.cmState = markRaw(u.state);
           }
         }
+        if (u.docChanged || u.selectionSet) updateSelBar(); // AI 润色选区浮条
         const head = u.state.selection.main.head;
         const line = u.state.doc.lineAt(head);
         emit("cursor", { line: line.number, col: head - line.from + 1 });
@@ -184,6 +218,94 @@ function applyWrap() {
   view?.dispatch({
     effects: wrapCompartment.reconfigure(settingsStore.wordWrap ? EditorView.lineWrapping : []),
   });
+}
+
+// ---- AI 润色选区浮条（SIS-AI-1 §3） ----
+
+/** 更新选区浮条：非空选区 -> 定位（跟随选区尾端）；无选区 -> 隐藏 + 清空问答上下文。 */
+function updateSelBar() {
+  if (!view) return;
+  const sel = view.state.selection.main;
+  const text = view.state.sliceDoc(sel.from, sel.to);
+  (window as unknown as { __aidaSelection?: string }).__aidaSelection = text; // AiPanel 问答上下文
+  if (sel.from === sel.to || !text.trim()) {
+    selBar.value = null;
+    return;
+  }
+  const hostRect = editorHost.value?.getBoundingClientRect();
+  const coords = view.coordsAtPos(sel.head);
+  if (!coords || !hostRect) return;
+  selBar.value = {
+    from: sel.from,
+    to: sel.to,
+    text,
+    x: coords.left - hostRect.left,
+    y: coords.bottom - hostRect.top + 4,
+  };
+}
+
+/** 发起润色（选区浮条四动作 / 右键菜单 / 工具栏调用）：锁定选区 -> aiStore 流式。 */
+function startPolish(mode: PolishMode): void {
+  if (!view) return;
+  if (!selBar.value) {
+    message.warning("请先在编辑器中选中文本");
+    return;
+  }
+  polishRange = { from: selBar.value.from, to: selBar.value.to };
+  void aiStore.polishStart(mode, selBar.value.text);
+}
+
+/** 四动作中文标签（结果气泡标题）。 */
+function modeLabel(mode: PolishMode): string {
+  return { rewrite: "改写", polish: "润色", shorten: "缩短", expand: "扩写" }[mode];
+}
+
+/** 接受润色结果：替换原选区（一次事务进 history，Ctrl+Z 可撤销）。 */
+function acceptPolish(): void {
+  const p = aiStore.polish;
+  if (!p || !view || !polishRange) return;
+  view.dispatch({
+    changes: { from: polishRange.from, to: polishRange.to, insert: p.streamText },
+    selection: { anchor: polishRange.from + p.streamText.length },
+  });
+  aiStore.polishClear();
+  polishRange = null;
+}
+
+/** 放弃润色结果：原文不动，仅关闭气泡。 */
+function discardPolish(): void {
+  aiStore.polishClear();
+  polishRange = null;
+}
+
+/** 结果气泡 diff 渲染（vs 原文，字符级：新增绿底/删除红底删除线）。 */
+function renderPolishDiff(original: string, result: string): string {
+  const changes: Change[] = diffChars(original, result);
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return changes
+    .map((c) => {
+      const cls = c.added ? "char-added" : c.removed ? "char-removed" : "";
+      return cls ? `<span class="${cls}">${esc(c.value)}</span>` : esc(c.value);
+    })
+    .join("");
+}
+
+/** 问答回答插入当前光标（无选区插入光标处，有选区替换）。 */
+function insertAtCursor(text: string): void {
+  if (!view) return;
+  const sel = view.state.selection.main;
+  view.dispatch({
+    changes: { from: sel.from, to: sel.to, insert: text },
+    selection: { anchor: sel.from + text.length },
+  });
+  view.focus();
+}
+
+/** 指定范围替换（工具栏「修复 mermaid」等整块替换用；进撤销栈）。 */
+function replaceRange(from: number, to: number, text: string): void {
+  if (!view) return;
+  view.dispatch({ changes: { from, to, insert: text } });
+  view.focus();
 }
 
 /** 切换到当前激活标签：恢复其 cmState 或新建；无标签则置空。 */
@@ -230,10 +352,15 @@ onMounted(() => {
       view?.focus();
       if (view) openSearchPanel(view);
     },
+    polish: (mode) => startPolish(mode),
+    insertAtCursor: (text) => insertAtCursor(text),
+    replaceRange: (from, to, text) => replaceRange(from, to, text),
   });
+  window.addEventListener("click", onWindowClick); // 点击任意处关闭右键菜单
 });
 
 onBeforeUnmount(() => {
+  window.removeEventListener("click", onWindowClick);
   view?.destroy();
   view = null;
 });
@@ -265,6 +392,38 @@ watch(
 <template>
   <div class="editor-pane">
     <div ref="editorHost" class="editor-host"></div>
+    <!-- SIS-AI-1 §3：选区浮条（选中文本后显示，四动作现场触发润色） -->
+    <div v-if="selBar" class="sel-bar" :style="{ left: selBar.x + 'px', top: selBar.y + 'px' }">
+      <span class="sel-bar-text">{{ selBar.text.length > 24 ? selBar.text.slice(0, 24) + "…" : selBar.text }}</span>
+      <button class="sel-bar-btn" title="改写" @click="startPolish('rewrite')">改写</button>
+      <button class="sel-bar-btn" title="润色" @click="startPolish('polish')">润色</button>
+      <button class="sel-bar-btn" title="缩短" @click="startPolish('shorten')">缩短</button>
+      <button class="sel-bar-btn" title="扩写" @click="startPolish('expand')">扩写</button>
+    </div>
+    <!-- SIS-AI-1 §2：右键润色菜单（选中文本后右键显示四动作） -->
+    <div v-if="ctxMenu" class="ctx-menu" :style="{ left: ctxMenu.x + 'px', top: ctxMenu.y + 'px' }" @click.stop>
+      <div class="ctx-title">AI 润色</div>
+      <button class="ctx-btn" @click="startPolish('rewrite'); ctxMenu = null">改写</button>
+      <button class="ctx-btn" @click="startPolish('polish'); ctxMenu = null">润色</button>
+      <button class="ctx-btn" @click="startPolish('shorten'); ctxMenu = null">缩短</button>
+      <button class="ctx-btn" @click="startPolish('expand'); ctxMenu = null">扩写</button>
+    </div>
+    <!-- SIS-AI-1 §3：润色结果气泡（流式累积 + 字符级 diff 高亮 + 接受/放弃） -->
+    <div v-if="aiStore.polish" class="polish-bubble">
+      <div class="polish-head">
+        <span class="polish-title">AI {{ modeLabel(aiStore.polish.mode) }}</span>
+        <span v-if="aiStore.polish.loading" class="polish-loading">生成中…</span>
+      </div>
+      <div v-if="aiStore.polish.error" class="polish-error">{{ aiStore.polish.error }}</div>
+      <div v-else class="polish-body" v-html="renderPolishDiff(aiStore.polish.source, aiStore.polish.streamText)"></div>
+      <div v-if="!aiStore.polish.loading && !aiStore.polish.error" class="polish-actions">
+        <button class="polish-btn primary" @click="acceptPolish">接受</button>
+        <button class="polish-btn" @click="discardPolish">放弃</button>
+      </div>
+      <div v-if="aiStore.polish.loading" class="polish-actions">
+        <button class="polish-btn" @click="aiStore.polishStop()">停止</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -334,6 +493,207 @@ watch(
   .editor-host :deep(.cm-search .cm-textfield) {
     background: #252526;
     color: #e0e0e0;
+    border-color: #3c3c3c;
+  }
+}
+/* ---- SIS-AI-1 §3：选区浮条 + 润色结果气泡 ---- */
+/* 注意：.editor-pane 必须为包含块（position:relative），否则浮条/气泡/右键菜单
+ * 以视口为参照会覆盖到工具栏（PO 冒烟实测：气泡盖住「AI 面板」按钮）。 */
+.editor-pane {
+  position: relative;
+}
+.ctx-menu {
+  position: absolute;
+  z-index: 41;
+  min-width: 130px;
+  padding: 4px;
+  background: var(--floating-bg, #ffffff);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+.ctx-title {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #999;
+  border-bottom: 1px solid var(--border-color, #eee);
+  margin-bottom: 2px;
+}
+.ctx-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 5px 8px;
+  font-size: 13px;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--text-color, #333);
+}
+.ctx-btn:hover {
+  background: var(--primary-color, #2080f0);
+  color: #fff;
+}
+@media (prefers-color-scheme: dark) {
+  .ctx-menu {
+    background: #252526;
+    border-color: #3c3c3c;
+  }
+  .ctx-btn {
+    color: #e0e0e0;
+  }
+  .ctx-title {
+    color: #888;
+    border-color: #3c3c3c;
+  }
+}
+.sel-bar {
+  position: absolute;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: var(--floating-bg, #ffffff);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  font-size: 12px;
+  max-width: 420px;
+}
+.sel-bar-text {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-color, #333);
+  margin-right: 2px;
+}
+.sel-bar-btn {
+  border: 1px solid var(--border-color, #ddd);
+  background: var(--btn-bg, #f5f5f5);
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text-color, #333);
+  white-space: nowrap;
+}
+.sel-bar-btn:hover {
+  border-color: var(--primary-color, #2080f0);
+  color: var(--primary-color, #2080f0);
+}
+.polish-bubble {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  z-index: 40;
+  width: 380px;
+  max-height: 320px;
+  display: flex;
+  flex-direction: column;
+  background: var(--floating-bg, #ffffff);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+.polish-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color, #eee);
+  background: var(--head-bg, #fafafa);
+}
+.polish-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-color, #333);
+}
+.polish-loading {
+  font-size: 12px;
+  color: #999;
+}
+.polish-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-color, #333);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.polish-body :deep(.char-added) {
+  background: rgba(24, 160, 88, 0.22);
+  color: #18a058;
+  border-radius: 2px;
+}
+.polish-body :deep(.char-removed) {
+  background: rgba(208, 48, 80, 0.18);
+  color: #d03050;
+  text-decoration: line-through;
+  border-radius: 2px;
+}
+.polish-error {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #d03050;
+  white-space: pre-wrap;
+}
+.polish-actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border-color, #eee);
+}
+.polish-btn {
+  border: 1px solid var(--border-color, #ddd);
+  background: var(--btn-bg, #f5f5f5);
+  border-radius: 6px;
+  padding: 4px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-color, #333);
+}
+.polish-btn:hover {
+  border-color: var(--primary-color, #2080f0);
+}
+.polish-btn.primary {
+  background: var(--primary-color, #2080f0);
+  border-color: var(--primary-color, #2080f0);
+  color: #fff;
+}
+.polish-btn.primary:hover {
+  opacity: 0.9;
+}
+@media (prefers-color-scheme: dark) {
+  .sel-bar {
+    background: #252526;
+    border-color: #3c3c3c;
+  }
+  .sel-bar-text,
+  .sel-bar-btn,
+  .polish-title,
+  .polish-body {
+    color: #e0e0e0;
+  }
+  .sel-bar-btn,
+  .polish-btn {
+    background: #333;
+    border-color: #3c3c3c;
+  }
+  .polish-bubble {
+    background: #1e1e1e;
+    border-color: #3c3c3c;
+  }
+  .polish-head {
+    background: #252526;
+    border-color: #3c3c3c;
+  }
+  .polish-actions {
     border-color: #3c3c3c;
   }
 }
