@@ -12,11 +12,11 @@
 | 字段 | 值 |
 |------|-----|
 | `current_sprint` | `Sprint 3（增强）` |
-| `current_stage` | `执行（阶段 4，FUNC-8 完成，FUNC-6 待开工）` |
+| `current_stage` | `执行（阶段 4，Sprint 3 六项 FUNC-3~8 全部完成，待 Sprint 收口）` |
 | `current_theme` | `增强（FUNC-3~8）` |
-| `current_task` | `FUNC-6 文件对比` |
+| `current_task` | `Sprint 3 收口（阶段 4→5→6→7→8）` |
 | `task_status` | `pending` |
-| `task_progress` | `Sprint 1/2 已闭环（授权 2/4，decision-011/015）；Sprint 3 启动收口完成（六项 FUNC-3~8 锁定，顺序 3->4->5->7->8->6，授权 3/4 余 1 次）；FUNC-3（28/28，decision-016）；FUNC-4（13/13，decision-017）；FUNC-5（11/11，decision-018）；FUNC-7（16/16，decision-019）；FUNC-8（10/10，decision-020：lineWrapping+Compartment，settingsService/store 最小子集落地 ARCH-2 schema） |
+| `task_progress` | `Sprint 1/2 已闭环（授权 2/4，decision-011/015）；Sprint 3 启动收口完成（六项 FUNC-3~8 锁定，顺序 3->4->5->7->8->6，授权 3/4 余 1 次）；FUNC-3（28/28，decision-016）；FUNC-4（13/13，decision-017）；FUNC-5（11/11，decision-018）；FUNC-7（16/16，decision-019）；FUNC-8（10/10，decision-020）；FUNC-6（12/12，decision-021：jsdiff 行级+字符级双栏 diff，配对块 rightText 漏更修复 + CRLF 行尾归一 + switchToTab 以 content 为准）——Sprint 3 六项全部闭环 |
 
 ---
 
@@ -99,4 +99,4 @@
 ## 待完善 / 下一步
 
 - **当前阶段**：Sprint 3 执行（AS-8 授权模式：4 次短 Sprint，已用 3 次余 1 次）
-- 下一步：FUNC-6（文件对比）-> Sprint 3 收口 -> Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）-> 项目交付
+- 下一步：Sprint 3 收口（阶段 4→5→6→7→8，DoD 对照表 + Review + Retrospective 轻量并入 Evolution Log）-> Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）-> 项目交付

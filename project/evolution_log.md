@@ -194,6 +194,21 @@
 - **改进项清单（回流方向）**：
   1. settings 基础设施后续扩展规范：Sprint 4 settingsStore 完整化（theme/recentFiles/aiConfig）时复用现有 load/save 通道，不新建平行实现
 
+### 2026-08-22 · 任务经验 · FUNC-6 落地：双栏 diff 的「右栏空白」与「外部写回后重挂载显示旧内容」双根因排查
+
+- **背景**：Sprint 3 第六项（收尾）FUNC-6（文件对比）实现，Playwright 自测从 2/6 追到 12/12 全绿（FUNC-3/4/5/7/8 回归保持）。前几项经验（CM6 装饰/串行渲染/快捷键/搜索面板/settings）在本任务零踩坑，本次新坑集中在「数据模型对称性」与「store 与编辑器内容一致性」。
+- **关联 decision**：decision-021
+- **影响范围**：diffService.ts、CompareView.vue（新建）；MainView.vue、ToolBar.vue、EditorPane.vue（switchToTab 一致性判定）、package.json（test:compare）；Sprint 3 收口与 Sprint 4 复用
+- **经验与教训**：
+  1. **「右栏空白」根因 = 配对块的对称字段漏更新**：pairs 构建时 removed 块先入队（rightText=""），added 配对只写 `prev.added = c` 忘了 `prev.rightText = c.value` → 配对块渲染右侧行数 0（右栏空白、计数 0/1、行级高亮只剩 removed 侧）。**通用教训：成对对象的对称字段（leftText/rightText、leftFrom/rightTo 等）赋值必须成对核对**——这类 bug 不报错、纯靠渲染现象反推
+  2. **外部文本源的 CRLF 污染**：Edge 剪贴板 readText 自动把 LF 存为 CRLF，jsdiff 整行不匹配 → 整篇算差异。任何「外部文本 vs 编辑器文本」对比前必须归一行尾（`\r\n?` → `\n`），且归一应发生在对比计算层（不污染原文本）
+  3. **store 外部写回 vs cmState 缓存的一致性**：对比合并只改 tab.content，EditorPane 重挂载 switchToTab 恢复旧 cmState 显示旧内容。曾尝试 store 内 `cmState.update({changes})` 同步，结果 Pinia 深度代理使新 state 在 setState 抛 `state.facet is not a function`（Vue 代理破坏 EditorState 内部引用，markRaw 包 update 返回值也没用）——**最终以 content 为唯一事实源：switchToTab 比较 `cmState.doc.toString() === tab.content`，不一致重建**。cmState 降级为「未过期缓存」而非事实源
+  4. **按需导入缺件的「局部性」**：MainView 补 NModal 后弹窗出现，但 CompareView 的 n-button 仍是未知组件（template 原样输出 `<n-button>` 标签、无 button 元素、工具栏按钮不可点）。**按需导入模式下每个 SFC 的 n-xxx 必须自查**——修一处 import 只解决该组件的标签
+  5. **滚动类断言先确认「有滚动空间」**：3~4 行内容时 scrollTop 恒 0（jumpTo 设值被 clamp），功能正常但断言 FAIL；改 31 行数据后跳转/联动验证成立（before=0/after=87/rightTop=30）。判断启发：测试数据长度要覆盖断言依赖的物理条件
+- **改进项清单（回流方向）**：
+  1. 自测 skill 立项评估清单增补：滚动类断言的空间前提、外部文本源 CRLF 归一、按需导入组件自查清单
+  2. Sprint 3 六项全部闭环 → 走阶段 4→5→6→7→8（DoD 对照表 + Review 报告 + Retrospective 轻量并入本日志）；Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）复用 settings 通道（theme/recentFiles/aiConfig 字段已就位）
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要

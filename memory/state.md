@@ -2,7 +2,7 @@
 
 > 用途：记录当前项目的最小运行状态快照（L2 状态快照）。
 > 版本：v0.1.0
-> 状态：Sprint 3 执行中（AS-8 授权用量 3/4，余 1 次），FUNC-8 完成，FUNC-6 待开工
+> 状态：Sprint 3 六项全部闭环（FUNC-3~8），待走阶段 4→5→6→7→8 收口（AS-8 授权用量 3/4，余 1 次）
 
 ---
 
@@ -11,20 +11,20 @@
 - `skill_version`：`v0.1.0`
 - `current_sprint`：`Sprint 3`
 - `current_theme`：`增强（FUNC-3~8）`
-- `current_stage`：`执行（阶段 4，FUNC-8 完成，FUNC-6 待开工）`
+- `current_stage`：`执行（阶段 4，Sprint 3 六项 FUNC-3~8 全部完成，待 Sprint 收口）`
 - `current_stage_flow_doc`：`product/agents/aida/stage_flows/04_执行.md`
 - `last_run_at`：`2026-08-22`
-- `last_run_status`：`FUNC-8 完成（wrap-smoke 10/10 PASS，build 通过）；FUNC-6 待开工`
+- `last_run_status`：`FUNC-6 完成（compare-smoke 12/12 PASS，build 通过，commit d57ddc9）；Sprint 3 六项全部闭环，待走阶段 4→5→6→7→8`
 - `execution_mode`：`AS-8 短 Sprint 自主执行（授权 4 次，Sprint 1/2 已闭环记 2 次，Sprint 3 记第 3 次，余 1 次）`
 
 ---
 
 ## 2. 当前任务追踪
 
-- `current_task`：`FUNC-6 文件对比`
+- `current_task`：`Sprint 3 收口（DoD 对照表 + Review 报告 + Retrospective 轻量并入 Evolution Log + 四边同步）`
 - `task_status`：`pending`
-- `task_progress`：`FUNC-3（28/28）、FUNC-4（13/13）、FUNC-5（11/11）、FUNC-7（16/16）、FUNC-8（10/10）已闭环（decision-016~020）；Sprint 3 执行顺序：FUNC-5 -> FUNC-7 -> FUNC-8 -> FUNC-6`
-- `next_action`：`FUNC-6（文件对比）-> Sprint 3 收口`
+- `task_progress`：`FUNC-3（28/28）、FUNC-4（13/13）、FUNC-5（11/11）、FUNC-7（16/16）、FUNC-8（10/10）、FUNC-6（12/12）全部闭环（decision-016~021）；Sprint 3 六项完成`
+- `next_action`：`Sprint 3 收口（阶段 4→5→6→7→8）-> Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）-> 项目交付`
 
 ---
 

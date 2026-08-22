@@ -209,15 +209,17 @@
 - **依据**：SIS-FUNC-8 七项验收（wrap-smoke.mjs 10/10 PASS）；ARCH-2 §4.2（state-architecture.md AppSettings schema + 兼容策略）；CM6 view dist 源码（lineWrapping = contentAttributes）。
 - **影响范围**：settingsService.ts、settingsStore.ts（新建）、EditorPane.vue（wrapCompartment/applyWrap/init）、ToolBar.vue（换行按钮）、wrap-smoke.mjs、package.json（test:wrap）；FUNC-9 主题/设置视图复用 settings 通道（theme 字段已就位）。
 
----
+### decision-021 · 2026-08-22 · FUNC-6 完成（文件对比）+ 双栏 diff 四条经验
 
-<!-- 后续在此追加，格式：
-
-### decision-00X · YYYY-MM-DD · 决策摘要
-
-- **背景**：
+- **背景**：Sprint 3 第六项 FUNC-6 实现（双栏 diff：行级+行内字符级高亮 / 滚动联动 / 跳转计数 / 接受左或右合并 / 剪贴板只读），Playwright 自测 12/12 全绿，build 通过。
 - **决策**：
-- **依据**：
-- **影响范围**：
+  1. **对比能力 = jsdiff（diffLines+diffChars）+ 自研行模型**：配对 removed+added 块内做行内字符级 diff；行模型按左右两栏分别产出（lineNo 0=占位），差异块记录双栏行索引区间供跳转与合并。**合并 = 按行号区间替换目标侧**（全占位块追加末尾），写回经 emit 交 MainView 更新 tabsStore 并置脏。
+  2. **配对块 rightText 漏更（首个运行时 bug）**：pairs 构建时 removed 先入队（rightText=""），added 配对只写了 `prev.added = c`，**未同步 `prev.rightText`**——导致 paired 块渲染时右侧行数为 0（右栏空白、计数 0/1、行级高亮只有 removed）。修复：配对时补 `prev.rightText = c.value`。经验：对象字段的「对称更新」必须成对检查，单侧赋值必埋坑。
+  3. **剪贴板 CRLF 需归一**：Edge 剪贴板 readText 会把 LF 存为 CRLF，jsdiff 整行不匹配 → 整篇视为差异。computeDiff 入口统一行尾（`\r\n?` → `\n`）。判断启发：任何「外部文本源 vs 编辑器文本」对比前先归一行尾。
+  4. **cmState 与 content 一致性以 content 为准**：外部写回（对比合并）只改 tab.content，EditorPane 重挂载时 switchToTab 恢复的是**旧 cmState**（内容过期）。曾尝试在 store 里 `cmState.update({changes})` 同步，但 Pinia 响应式代理使更新后的 state 在 setState 时抛 `state.facet is not a function`（Vue 深度代理破坏 EditorState 内部引用，markRaw 包裹 update 返回值仍无法还原实例身份）。最终方案：**switchToTab 比较 `cmState.doc.toString() === tab.content`，不一致则以 content 重建 state**——内容一致性以 store 的 content 为唯一事实源，cmState 仅是「未过期的缓存」。
+  5. **Naive UI 按需导入缺 NButton（对比弹窗第二次不显示的根因之一）**：MainView 补 NModal 后弹窗出现，但 CompareView 的 `n-button` 仍是未知组件（template 原样输出 `<n-button>` 标签、无 button 元素）→ 工具栏按钮不可点击。修复：CompareView 显式 `import { NButton }`。经验：**按需导入模式下，每个用到 n-xxx 的 SFC 必须自己 import**（MainView 修复只解决 MainView 的标签）。
+  6. **自测数据要「够长」**：跳转/滚动联动断言依赖内容超出面板高度产生可滚动空间；首版 3~4 行内容 scrollTop 恒 0（jumpTo 设值被 clamp），改 31 行数据后 before=0/after=87/rightTop=30 验证成立。经验：滚动类断言先确认有滚动空间，否则「功能正常」会被误判 FAIL。
+- **依据**：SIS-FUNC-6 九项验收（compare-smoke.mjs 12/12 PASS）；jsdiff dist 源码实证（diffLines 整行含行尾匹配、token 化含 \n）；CM6 view dist（ViewState 构造读 state.facet）。
+- **影响范围**：diffService.ts（新建）、CompareView.vue（新建）、MainView.vue（对比编排+NModal/NButton）、ToolBar.vue（对比入口）、EditorPane.vue（switchToTab 一致性判定）、tabsStore.ts（内容事实源不变）、compare-smoke.mjs、package.json（test:compare）；FUNC-9/11/AI-1 无直接依赖，Sprint 3 六项至此全部闭环。
 
--->
+---

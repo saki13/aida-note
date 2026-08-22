@@ -5,8 +5,8 @@
     "sprint": "Sprint 3",
     "stage": "执行（阶段 4）",
     "stage_main": "Sprint In Progress",
-    "status": "FUNC-8 完成（10/10 自测全绿），FUNC-6 待开工（授权 3/4 余 1 次）",
-    "next": "FUNC-6 -> Sprint 3 收口",
+    "status": "Sprint 3 六项全部完成（FUNC-6 12/12 自测全绿），待 Sprint 3 收口（授权 3/4 余 1 次）",
+    "next": "Sprint 3 收口（阶段 4→5→6→7→8）-> Sprint 4",
     "blocked": "无"
   },
   "backlog": [
@@ -99,7 +99,7 @@
       "title": "文件对比（双栏 diff + 剪贴板对比）",
       "category": "功能实现",
       "priority": "P0",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "FUNC-7",
@@ -395,6 +395,13 @@
       "type": "任务完成",
       "summary": "FUNC-8 软换行展示完成（DoD 10/10 过）：默认开启/工具栏切换即时生效/全局共享/不写入换行符/重启记住/折行下光标选择正常全验收，build 通过",
       "detail": "EditorView.lineWrapping + Compartment 动态切换（FUNC-2 槽位模式复用）；settingsService/settingsStore 最小子集落地（ARCH-2 §4.2 schema，wordWrap 字段，Tauri plugin-store + 浏览器 localStorage 兜底）；switchToTab 恢复 state 后 applyWrap 校正（防 wrap 配置过期）"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "FUNC-6 文件对比完成（DoD 12/12 过）：双栏 diff 行级+行内字符级高亮/滚动联动/差异跳转计数/接受左或右合并写回置脏/剪贴板只读/两文件源入口全验收，build 通过；Sprint 3 六项全部闭环",
+      "detail": "diffService（jsdiff 行级+字符级）+ CompareView 双栏 + MainView 源选择弹窗（两文件/剪贴板）合并写回 tabsStore；关键排障（decision-021）：配对块 rightText 漏更致右栏空白、剪贴板 CRLF 需归一、switchToTab 以 tab.content 为准（cmState 内容过期时重建）、CompareView 缺 NButton 导入、自测数据需够长才有滚动空间；commit d57ddc9"
     }
   ],
   "checklist": {
