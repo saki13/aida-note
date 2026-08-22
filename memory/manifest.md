@@ -11,12 +11,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| `current_sprint` | `Sprint 3`（已闭环；下一轮 Sprint 4） |
-| `current_stage` | `Planning Input Ready（阶段 8，Sprint 3 闭环，Sprint 4 候选清单就绪）` |
-| `current_theme` | `增强（FUNC-3~8）`（已闭环；下一轮「体验/AI」FUNC-9~11、AI-1） |
-| `current_task` | `Sprint 4 Planning（阶段 3，最后一次授权燃尽）` |
-| `task_status` | `pending` |
-| `task_progress` | `Sprint 1/2/3 全部闭环（decision-001~021，授权 3/4 余 1 次）；Sprint 3 六项 FUNC-3（28/28）FUNC-4（13/13）FUNC-5（11/11，55e4da4）FUNC-7（16/16，a72d3db）FUNC-8（10/10，652d2e6）FUNC-6（12/12，d57ddc9，decision-016~021）；Backlog 15/19 完成，余 4 项（FUNC-9/10/11、AI-1） |
+| `current_sprint` | `Sprint 4（体验/AI，最后一次授权燃尽）` |
+| `current_stage` | `执行（阶段 4，Sprint 4 启动收口完成，FUNC-9 执行中）` |
+| `current_theme` | `体验/AI（FUNC-9~11、AI-1）` |
+| `current_task` | `FUNC-9 主题切换` |
+| `task_status` | `in_progress` |
+| `task_progress` | `Sprint 1/2/3 全部闭环（decision-001~021，授权 3/4）；Backlog 15/19 完成；Sprint 4 启动收口完成（顺序 FUNC-9->11->10->AI-1，授权 4/4=最后一次）；FUNC-9（主题三态+强调色，settings.theme 通道就绪） |
 
 ---
 
@@ -98,5 +98,5 @@
 
 ## 待完善 / 下一步
 
-- **当前阶段**：Planning Input Ready（Sprint 3 闭环，AS-8 授权 3/4 余 1 次 = Sprint 4）
-- 下一步：Sprint 4 Planning（阶段 3）-> 执行（FUNC-9 主题切换 -> FUNC-11 最近文件 -> FUNC-10 自动保存 -> AI-1 主峰）-> 项目交付（Backlog 燃尽）
+- **当前阶段**：Sprint 4 执行（AS-8 授权 4/4 = 最后一次，燃尽即交付）
+- 下一步：FUNC-9（主题切换）-> FUNC-11（最近文件）-> FUNC-10（自动保存）-> AI-1（主峰）-> 项目交付（Backlog 燃尽 + 项目报告征询 PO）
