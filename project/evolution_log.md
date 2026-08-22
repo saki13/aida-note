@@ -255,6 +255,20 @@
   1. 自测 skill 立项评估清单增补：UI 行为变更的测试前提盘点步骤、Pinia store 直调模板（evaluate 拿 $pinia + useStore(pinia)）
   2. Sprint 4 收口时评估：9 个 smoke 脚本（ui/multitab/wysiwyg/mermaid/format/search/wrap/compare/theme/recent）统一模式已成熟，模板化/skill 化正式立项
 
+### 2026-08-22 · 任务经验 · FUNC-10 落地：草稿生命周期三态清理 + 「成功信号所在函数」的清理挂载点
+
+- **背景**：Sprint 4 第三项 FUNC-10（自动保存/崩溃恢复草稿）实现，Playwright 自测 9/9 全绿 + 回归保持。核心经验在草稿生命周期管理与「清理动作挂在哪」。
+- **关联 decision**：decision-024
+- **影响范围**：draftService.ts（新建）、tabsStore.ts（scheduleDraft/markSaved/removeTab/restoreDraft/openTab markDirty）、MainView.vue（启动恢复弹窗 + 退出清理）、draft-smoke.mjs；AI-1 复用 tabsStore
+- **经验与教训**：
+  1. **清理动作必须挂在「成功信号」所在的函数**：保存成功走 markSaved（不经 updateContent）——若草稿清理只放 updateContent 非脏分支则永不触发。正确挂点：markSaved（保存后清，含另存新旧 key）、removeTab（关闭/丢弃清）、updateContent 非脏分支（内容回退到 saved 兜底）。**通用教训：副作用挂点先画「数据流图」找成功信号，不凭直觉**
+  2. **崩溃恢复的双实现（Tauri 文件 / 浏览器 localStorage）**：同 decision-020 分流思路，浏览器模拟层让「崩溃→重启→恢复弹窗」全链路可自测（reload 模拟崩溃）；Tauri 真实退出清理留 PO 验证（浏览器无退出事件）——「不可自测的 Tauri 专属项显式留 PO」已成 Sprint 4 惯例（FUNC-6 两文件对比同款）
+  3. **恢复置脏 = openTab markDirty 参数**（savedContent 置空派生 dirty）：恢复的草稿语义是「未保存内容」，基线置空比「手动改 dirty 标志」更符合 ARCH-2 §1.3 派生态
+  4. **过期残留清理放启动扫描（checkRecover）**：TTL 判定（7 天）后删除并重写——「不留碎片」硬约束在启动时点统一执行
+- **改进项清单（回流方向）**：
+  1. 自测 skill 立项评估清单增补：双实现模拟层（浏览器 fallback 让 Tauri 能力可自测）、reload 模拟崩溃的模式
+  2. Sprint 4 收口在即：AI-1 后走项目交付，全部 10 个 smoke 脚本模式沉淀
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要

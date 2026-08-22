@@ -5,8 +5,8 @@
     "sprint": "Sprint 4",
     "stage": "执行（阶段 4）",
     "stage_main": "Sprint In Progress",
-    "status": "FUNC-11 最近文件完成（9/9 自测全绿），FUNC-10 待开工（授权 4/4=最后一次燃尽）",
-    "next": "FUNC-10 -> AI-1 -> 项目交付",
+    "status": "FUNC-10 自动保存完成（9/9 自测全绿），AI-1 待开工（授权 4/4=最后一次燃尽）",
+    "next": "AI-1（主峰）-> 项目交付",
     "blocked": "无"
   },
   "backlog": [
@@ -127,7 +127,7 @@
       "title": "自动保存 / 崩溃恢复草稿（临时目录，不留碎片）",
       "category": "功能实现",
       "priority": "P1",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "FUNC-11",
@@ -430,6 +430,13 @@
       "type": "任务完成",
       "summary": "FUNC-11 最近文件列表完成（DoD 9/9 过）：打开/保存记录 + 空态列表 + 工具栏下拉 + 去重置顶上限 20 + 失效提示移除 + settings.json 持久化全验收，build 通过",
       "detail": "recordRecent 非侵入钩子（tabsStore.openTab/markSaved 成功后调 settingsStore.addRecentFile，去重置顶上限 20）；MainView 空态接管无标签主区（RecentEmpty）；连带适配 8 个旧 smoke 脚本（建标签前置，MainView 行为变更盘点测试前提）；commit 757f0fa"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "FUNC-10 自动保存/崩溃恢复草稿完成（DoD 9/9 过）：脏标签防抖写草稿/启动恢复弹窗/恢复置脏/丢弃清理/保存后清理/过期残留清理全验收，build 通过",
+      "detail": "draftService 双实现（Tauri appDataDir/drafts + 浏览器 localStorage 模拟）；草稿三态清理（退出 destroy 前 / 恢复丢弃后 / 过期 7 天 TTL）；openTab markDirty 恢复置脏；Tauri 真实退出清理留 PO 验证；commit 54a048f"
     }
   ],
   "checklist": {

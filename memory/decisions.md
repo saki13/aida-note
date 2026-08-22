@@ -244,4 +244,16 @@
 - **依据**：SIS-FUNC-11 八项验收（recent-smoke.mjs 9/9 PASS）；ARCH-2 §4.2（recentFiles 字段）+ decision-020（settings 通道复用）。
 - **影响范围**：settingsStore.ts（recentFiles/addRecentFile/removeRecentFile）、tabsStore.ts（recordRecent/openPath 钩子）、RecentEmpty.vue（新建空态）、ToolBar.vue（最近下拉）、MainView.vue（空态接管）、recent-smoke.mjs + 8 个旧 smoke 脚本适配（建标签前置）、package.json（test:recent）；FUNC-10/AI-1 复用 tabsStore.openPath 与 settings 通道。
 
+### decision-024 · 2026-08-22 · FUNC-10 完成（自动保存/崩溃恢复草稿）+ 草稿生命周期与双实现
+
+- **背景**：Sprint 4 第三项 FUNC-10 实现（脏标签防抖写草稿 + 启动恢复/丢弃弹窗 + 退出/恢复后/过期三态清理，草稿不替代手动保存），Playwright 自测 9/9 全绿，build 通过（recent/wrap 回归保持）。
+- **决策**：
+  1. **draftService 独立双实现**：Tauri 用 appDataDir/drafts 真实文件（依 ARCH-2 契约 #7），浏览器（前端自测）用 localStorage 模拟同一接口——decision-020 同款分流思路，全前端自测链路可验证崩溃恢复。
+  2. **草稿生命周期三态清理**：①正常退出（MainView onCloseRequested 确认通过后 destroy 前 clearAllDrafts）②恢复/丢弃后（restoreDraft/removeDraft）③过期残留（checkRecover 启动扫描，7 天 TTL）——不留碎片是验收硬约束。
+  3. **写入口 = tabsStore.updateContent 脏分支 + markSaved/removeTab 清理**：保存成功是 markSaved（不经 updateContent），草稿清理必须放 markSaved（新旧 key 均清）与 removeTab（关闭/丢弃）；updateContent 非脏分支兜底「内容回退到 saved」场景。**关键：找对「成功信号」所在的函数**，不能只挂在 updateContent。
+  4. **恢复置脏 = openTab markDirty 参数**：savedContent 置空派生 dirty（内容为草稿、基线为空 -> 置脏），未命名草稿走 openTab({title})+updateContent 同效。
+  5. **草稿标识**：有路径用绝对路径（恢复后文件路径保留，保存覆盖原文件）；未命名用 `__untitled_<title>`。
+- **依据**：SIS-FUNC-10 十项验收（draft-smoke.mjs 9/9 PASS，Tauri 真实退出清理留 PO）；ARCH-2 契约 #7 + 崩溃恢复流程。
+- **影响范围**：draftService.ts（新建）、tabsStore.ts（scheduleDraft/markSaved/removeTab/restoreDraft/openTab markDirty）、MainView.vue（启动恢复弹窗 + 退出清理）、draft-smoke.mjs、package.json（test:draft）；AI-1 无直接依赖，Sprint 4 余 AI-1 最后一项。
+
 ---

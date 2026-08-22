@@ -12,11 +12,11 @@
 | 字段 | 值 |
 |------|-----|
 | `current_sprint` | `Sprint 4（体验/AI，最后一次授权燃尽）` |
-| `current_stage` | `执行（阶段 4，FUNC-11 完成，FUNC-10 待开工）` |
+| `current_stage` | `执行（阶段 4，FUNC-10 完成，AI-1 待开工）` |
 | `current_theme` | `体验/AI（FUNC-9~11、AI-1）` |
-| `current_task` | `FUNC-10 自动保存 / 崩溃恢复草稿` |
+| `current_task` | `AI-1 AI 接入（润色/问答/mermaid 修复）` |
 | `task_status` | `pending` |
-| `task_progress` | `Sprint 1/2/3 全部闭环（decision-001~021，授权 3/4）；Backlog 17/19；Sprint 4：FUNC-9（8/8，decision-022，7c9334b）、FUNC-11（9/9，decision-023：recordRecent 非侵入钩子 + 空态接管连动 8 脚本适配 + evaluate 直调 store 法，757f0fa） |
+| `task_progress` | `Sprint 1/2/3 全部闭环（decision-001~021，授权 3/4）；Backlog 18/19；Sprint 4：FUNC-9（8/8，022，7c9334b）、FUNC-11（9/9，023，757f0fa）、FUNC-10（9/9，024：draftService 双实现 + 草稿三态清理 + openTab markDirty，54a048f）；AI-1 主峰最后一项 |
 
 ---
 
