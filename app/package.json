@@ -14,7 +14,8 @@
     "test:wysiwyg": "node scripts/wysiwyg-smoke.mjs",
     "test:mermaid": "node scripts/mermaid-smoke.mjs",
     "test:format": "node scripts/format-smoke.mjs",
-    "test:search": "node scripts/search-smoke.mjs"
+    "test:search": "node scripts/search-smoke.mjs",
+    "test:wrap": "node scripts/wrap-smoke.mjs"
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.12",

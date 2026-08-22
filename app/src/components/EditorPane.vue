@@ -24,6 +24,7 @@ import { languageExtension } from "../services/languageRegistry";
 import { isFormatSupported, formatContent } from "../services/formatService";
 import { searchCountExtension } from "../services/searchCount";
 import { useTabsStore, type Tab } from "../stores/tabsStore";
+import { useSettingsStore } from "../stores/settingsStore";
 import type { LanguageId } from "../services/language";
 
 const emit = defineEmits<{
@@ -32,13 +33,15 @@ const emit = defineEmits<{
 }>();
 
 const tabsStore = useTabsStore();
+const settingsStore = useSettingsStore();
 const message = useMessage();
 const editorHost = ref<HTMLDivElement | null>(null);
 let view: EditorView | null = null;
 
-// Compartment：语言与主题的独立扩展槽，运行时可整体替换，不影响文档/历史。
+// Compartment：语言、主题与软换行的独立扩展槽，运行时可整体替换，不影响文档/历史。
 const languageCompartment = new Compartment();
 const themeCompartment = new Compartment();
+const wrapCompartment = new Compartment();
 let mediaQuery: MediaQueryList | null = null;
 
 /** 当前明暗主题扩展：跟随系统 prefers-color-scheme（SIS-FUNC-2 主题联动）。 */
@@ -113,6 +116,7 @@ function emptyState(): EditorState {
       basicSetup,
       themeCompartment.of(themeExtension()),
       languageCompartment.of([]),
+      wrapCompartment.of(settingsStore.wordWrap ? EditorView.lineWrapping : []),
       search({ top: true }),
       searchCountExtension,
       formatKeydownHandler(),
@@ -129,6 +133,7 @@ function createState(tab: Tab): EditorState {
       basicSetup,
       themeCompartment.of(themeExtension()),
       languageCompartment.of(languageExtensions(tab.language)),
+      wrapCompartment.of(settingsStore.wordWrap ? EditorView.lineWrapping : []),
       search({ top: true }),
       searchCountExtension,
       formatKeydownHandler(),
@@ -175,6 +180,13 @@ function applyTheme() {
   });
 }
 
+/** 切换软换行（SIS-FUNC-8）：替换 wrap Compartment；lineWrapping 仅影响显示，不写入文档。 */
+function applyWrap() {
+  view?.dispatch({
+    effects: wrapCompartment.reconfigure(settingsStore.wordWrap ? EditorView.lineWrapping : []),
+  });
+}
+
 /** 切换到当前激活标签：恢复其 cmState 或新建；无标签则置空。 */
 function switchToTab() {
   if (!view) return;
@@ -187,6 +199,7 @@ function switchToTab() {
     view.setState(tab.cmState);
     emitCursor(tab.cmState);
     applyTheme(); // 恢复旧 state 后重推当前主题（避免主题过期）
+    applyWrap(); // 恢复旧 state 后重推当前软换行（wrap 配置可能过期）
     applyLanguage(tab.language); // 恢复后对齐语言（cmState 缓存可能过期）
   } else {
     const state = createState(tab);
@@ -203,6 +216,7 @@ onMounted(() => {
     state: emptyState(),
   });
   switchToTab();
+  void settingsStore.init(); // 加载持久化设置；wordWrap 变化由下方 watch 同步到编辑器
   mediaQuery.addEventListener("change", applyTheme);
   emit("ready", {
     undo: () => {
@@ -229,6 +243,13 @@ onBeforeUnmount(() => {
 });
 
 watch(() => tabsStore.activeTabId, switchToTab);
+// 软换行开关（全局共享，SIS-FUNC-8）：状态变化即时作用于编辑器显示。
+watch(
+  () => settingsStore.wordWrap,
+  (v, prev) => {
+    if (v !== prev) applyWrap();
+  }
+);
 // 语言变化（含手动切换 setLanguage）时同步替换扩展；cmState 会随 updateListener 更新。
 watch(
   () => tabsStore.activeTab?.language,

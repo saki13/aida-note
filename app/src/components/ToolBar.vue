@@ -9,6 +9,7 @@
 import { inject, computed } from "vue";
 import { NTooltip, NButton } from "naive-ui";
 import { useTabsStore } from "../stores/tabsStore";
+import { useSettingsStore } from "../stores/settingsStore";
 import { isFormatSupported } from "../services/formatService";
 
 interface EditorApi {
@@ -19,6 +20,7 @@ interface EditorApi {
 }
 
 const tabsStore = useTabsStore();
+const settingsStore = useSettingsStore();
 const editorApi = inject<EditorApi | null>("editorApi", null);
 
 const hasActive = computed(() => tabsStore.activeTab !== null);
@@ -54,6 +56,10 @@ async function onFormat(): Promise<void> {
 function onSearch(): void {
   editorApi?.search();
 }
+
+async function onWrap(): Promise<void> {
+  await settingsStore.setWordWrap(!settingsStore.wordWrap);
+}
 </script>
 
 <template>
@@ -73,7 +79,7 @@ function onSearch(): void {
     <!-- 以下为后续 Sprint 占位（UI-1 映射防对不齐，禁用） -->
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onSearch" :disabled="!hasActive">搜索</n-button></template>FUNC-7（Sprint 3，Ctrl+F）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onFormat" :disabled="!canFormat">格式化</n-button></template>FUNC-5（Sprint 3，Ctrl+Shift+F）</n-tooltip>
-    <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>软换行</n-button></template>FUNC-8（Sprint 3）</n-tooltip>
+    <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onWrap" :type="settingsStore.wordWrap ? 'primary' : 'default'">换行{{ settingsStore.wordWrap ? "：开" : "：关" }}</n-button></template>软换行（FUNC-8，Sprint 3，全局共享）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>对比</n-button></template>FUNC-6（Sprint 3）</n-tooltip>
 
     <span class="sep"></span>

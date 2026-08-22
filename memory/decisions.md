@@ -198,6 +198,17 @@
 - **依据**：SIS-FUNC-7 八项验收（search-smoke.mjs 16/16 PASS）；CM6 search dist 源码实证（SearchPanel commit/onkeyup、openSearchPanel appendConfig、SearchQuery.getCursor、searchConfigFacet 默认 top:false）。
 - **影响范围**：EditorPane.vue（search({top:true}) + searchCountExtension + ready.search + 面板样式）、searchCount.ts、ToolBar.vue（搜索按钮解锁）、MainView.vue（EditorApi.search）、search-smoke.mjs、package.json（test:search）；FUNC-8 软换行同理在 extensions 加配置。
 
+### decision-020 · 2026-08-22 · FUNC-8 完成（软换行）+ settings 基础设施最小子集落地
+
+- **背景**：Sprint 3 第五项 FUNC-8 实现（CM6 lineWrapping + 全局开关 + 持久化），Playwright 自测 10/10 全绿，build 通过。
+- **决策**：
+  1. **软换行 = `EditorView.lineWrapping` + Compartment 动态切换**：lineWrapping 本质是 `contentAttributes({class:"cm-lineWrapping"})`（.cm-content 加 class），reconfigure 即时生效、不触碰文档（折行不写入 \n，验收由内容不变断言覆盖）；复用 FUNC-2 槽位模式（所有 state 注册同一 wrapCompartment 实例）。
+  2. **switchToTab 恢复旧 state 后 applyWrap 校正**：cmState 缓存的 wrap 配置可能过期（与 applyLanguage/applyTheme 同款防过期模式）。
+  3. **settingsService/settingsStore 最小子集**：按 ARCH-2 §4.2 schema（AppSettings：theme/wordWrap/recentFiles/aiConfig + DEFAULT_SETTINGS 兜底 + aiConfig 深合并 + 未知字段忽略前向兼容）；Tauri 用 plugin-store（settings.json），浏览器（前端自测）localStorage 兜底；save 为读-合-写整体回写。**字段命名取 ARCH-2 的 `wordWrap`**（SIS-FUNC-8 建议 wrapLines，可改字段命名，架构对齐优先避免 Sprint 4 返工）。
+  4. **设置项 = 工具栏按钮（最简形态）**：FUNC-8 无独立设置视图（ARCH-2 settingsStore 完整视图在 Sprint 4），工具栏「换行」开关即设置项入口（全局生效 + 持久化），Sprint 4 设置视图复用 settingsStore.wordWrap。
+- **依据**：SIS-FUNC-8 七项验收（wrap-smoke.mjs 10/10 PASS）；ARCH-2 §4.2（state-architecture.md AppSettings schema + 兼容策略）；CM6 view dist 源码（lineWrapping = contentAttributes）。
+- **影响范围**：settingsService.ts、settingsStore.ts（新建）、EditorPane.vue（wrapCompartment/applyWrap/init）、ToolBar.vue（换行按钮）、wrap-smoke.mjs、package.json（test:wrap）；FUNC-9 主题/设置视图复用 settings 通道（theme 字段已就位）。
+
 ---
 
 <!-- 后续在此追加，格式：

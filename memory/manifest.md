@@ -12,11 +12,11 @@
 | 字段 | 值 |
 |------|-----|
 | `current_sprint` | `Sprint 3（增强）` |
-| `current_stage` | `执行（阶段 4，FUNC-7 完成，FUNC-8 待开工）` |
+| `current_stage` | `执行（阶段 4，FUNC-8 完成，FUNC-6 待开工）` |
 | `current_theme` | `增强（FUNC-3~8）` |
-| `current_task` | `FUNC-8 软换行展示` |
+| `current_task` | `FUNC-6 文件对比` |
 | `task_status` | `pending` |
-| `task_progress` | `Sprint 1/2 已闭环（授权 2/4，decision-011/015）；Sprint 3 启动收口完成（六项 FUNC-3~8 锁定，顺序 3->4->5->7->8->6，授权 3/4 余 1 次）；FUNC-3（28/28，decision-016）；FUNC-4（13/13，decision-017）；FUNC-5（11/11，decision-018）；FUNC-7（16/16，decision-019：CM6 搜索无视觉计数→自研 SearchCount；fill 二次打开不触发 commit 改 type；替换撤销需先聚焦编辑器） |
+| `task_progress` | `Sprint 1/2 已闭环（授权 2/4，decision-011/015）；Sprint 3 启动收口完成（六项 FUNC-3~8 锁定，顺序 3->4->5->7->8->6，授权 3/4 余 1 次）；FUNC-3（28/28，decision-016）；FUNC-4（13/13，decision-017）；FUNC-5（11/11，decision-018）；FUNC-7（16/16，decision-019）；FUNC-8（10/10，decision-020：lineWrapping+Compartment，settingsService/store 最小子集落地 ARCH-2 schema） |
 
 ---
 
@@ -99,4 +99,4 @@
 ## 待完善 / 下一步
 
 - **当前阶段**：Sprint 3 执行（AS-8 授权模式：4 次短 Sprint，已用 3 次余 1 次）
-- 下一步：FUNC-8（软换行）-> FUNC-6 -> Sprint 3 收口 -> Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）-> 项目交付
+- 下一步：FUNC-6（文件对比）-> Sprint 3 收口 -> Sprint 4（FUNC-9~11、AI-1，第 4 次授权燃尽）-> 项目交付

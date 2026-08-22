@@ -181,6 +181,19 @@
 - **改进项清单（回流方向）**：
   1. 自测 skill 立项评估清单增补：内置能力缺口核对（逐条对验收找缺件）+ 面板类 UI 操作后焦点 scope 断言规范
 
+### 2026-08-22 · 任务经验 · FUNC-8 落地：settings 基础设施的「按需最小子集」与 Compartment 槽位复用
+
+- **背景**：FUNC-8（软换行）实现，Playwright 自测 10/10 全绿。功能本体极简（lineWrapping + Compartment），主要工作量在补「ARCH-2 已设计但 Sprint 4 才实现」的 settings 持久化最小子集。
+- **关联 decision**：decision-020
+- **影响范围**：settingsService.ts/settingsStore.ts（新建，ARCH-2 schema 落地）、EditorPane.vue（wrapCompartment）、ToolBar.vue（换行按钮）；FUNC-9/11/AI-1 复用 settings 通道
+- **经验与教训**：
+  1. **跨 Sprint 依赖的「按需最小子集」策略**：ARCH-2 settings 完整实现在 Sprint 4，但 FUNC-8 需要持久化——按 ARCH-2 §4.2 schema 只落 wordWrap 字段（含 DEFAULT_SETTINGS 兜底 + 兼容合并），Sprint 4 在预留字段上扩展，零返工。判断启发：前置架构文档定义好 schema 时，消费方按最小子集落地比等完整实现更优
+  2. **字段命名以架构文档为准**：SIS-FUNC-8 建议 wrapLines，ARCH-2 定 wordWrap——SIS §4 允许改字段命名，取架构字段避免 Sprint 4 不一致
+  3. **测试环境差异（Tauri plugin-store vs 浏览器）**：settingsService 用 isTauri() 分流（plugin-store / localStorage），前端自测（localhost 浏览器）走 localStorage 兜底，reload 可验证持久化——基础设施服务的浏览器 fallback 是「全前端自测」路线的前提
+  4. **CM6 扩展本质是配置而非黑盒**：lineWrapping 就是 contentAttributes({class})，reconfigure 即时生效、不写文档——以 DOM class 为断言锚点（.cm-lineWrapping），简洁可靠
+- **改进项清单（回流方向）**：
+  1. settings 基础设施后续扩展规范：Sprint 4 settingsStore 完整化（theme/recentFiles/aiConfig）时复用现有 load/save 通道，不新建平行实现
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要
