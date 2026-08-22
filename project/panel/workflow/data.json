@@ -3,10 +3,10 @@
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
     "sprint": "Sprint 4",
-    "stage": "执行（阶段 4）",
+    "stage": "执行（阶段 4）完成，AI-1 闭环；待 Sprint 4 收口（阶段 5-8）与项目交付（阶段 11）",
     "stage_main": "Sprint In Progress",
-    "status": "FUNC-10 自动保存完成（9/9 自测全绿），AI-1 待开工（授权 4/4=最后一次燃尽）",
-    "next": "AI-1（主峰）-> 项目交付",
+    "status": "AI-1 完成（ai-smoke 9/9 + ai-mermaid-smoke 4/4，build 通过，commit bf335f7）；Backlog 19/19 全部完成（燃尽）",
+    "next": "Sprint 4 整体收口（阶段 4→5→6→7→8）-> 项目交付（阶段 11，项目报告征询 PO）",
     "blocked": "无"
   },
   "backlog": [
@@ -141,7 +141,7 @@
       "title": "AI 接入（润色 / 问答 / mermaid 修复）",
       "category": "AI 接入",
       "priority": "P1",
-      "status": "pending"
+      "status": "done"
     }
   ],
   "sprints": [
@@ -191,7 +191,27 @@
   ],
   "burnout": {
     "total": 19,
-    "points": []
+    "points": [
+      "ENV-1",
+      "ENV-2",
+      "ARCH-1",
+      "ARCH-2",
+      "UI-1",
+      "UI-2",
+      "UI-3",
+      "FUNC-1",
+      "FUNC-2",
+      "FUNC-3",
+      "FUNC-4",
+      "FUNC-5",
+      "FUNC-6",
+      "FUNC-7",
+      "FUNC-8",
+      "FUNC-9",
+      "FUNC-10",
+      "FUNC-11",
+      "AI-1"
+    ]
   },
   "events": [
     {
@@ -437,6 +457,13 @@
       "type": "任务完成",
       "summary": "FUNC-10 自动保存/崩溃恢复草稿完成（DoD 9/9 过）：脏标签防抖写草稿/启动恢复弹窗/恢复置脏/丢弃清理/保存后清理/过期残留清理全验收，build 通过",
       "detail": "draftService 双实现（Tauri appDataDir/drafts + 浏览器 localStorage 模拟）；草稿三态清理（退出 destroy 前 / 恢复丢弃后 / 过期 7 天 TTL）；openTab markDirty 恢复置脏；Tauri 真实退出清理留 PO 验证；commit 54a048f"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "AI-1 AI 接入完成（SIS-AI-1 十项验收，ai-smoke 9/9 + ai-mermaid-smoke 4/4，build 通过）；Backlog 19/19 全部完成（燃尽）",
+      "detail": "aiService/aiStore/AiPanel 新建（OpenAI 兼容流式 SSE + 润色四选 + 问答侧栏仅选中上下文 + mermaid 修复）；EditorPane 选区浮条+右键菜单+diff 结果气泡接受/撤销；ToolBar AI 面板/AI 润色/修复 mermaid 入口；mermaid 错误占位 AI 修复接线；关键修复：AiPanel 选区 computed 缓存 Bug（window 非响应式）；沙箱限制对策：SSE 长连接被静默击杀 → page.route 模拟流式验证全链路，真实流式冒烟列 PO 验证项；commit bf335f7；decision-025"
     }
   ],
   "checklist": {

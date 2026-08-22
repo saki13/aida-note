@@ -11,12 +11,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| `current_sprint` | `Sprint 4（体验/AI，最后一次授权燃尽）` |
-| `current_stage` | `执行（阶段 4，FUNC-10 完成，AI-1 待开工）` |
+| `current_sprint` | `Sprint 4（体验/AI，授权燃尽）` |
+| `current_stage` | `执行（阶段 4）完成，AI-1 闭环；待 Sprint 4 收口（阶段 5-8）与项目交付（阶段 11）` |
 | `current_theme` | `体验/AI（FUNC-9~11、AI-1）` |
-| `current_task` | `AI-1 AI 接入（润色/问答/mermaid 修复）` |
+| `current_task` | `Sprint 4 整体收口 + 项目交付征询 PO` |
 | `task_status` | `pending` |
-| `task_progress` | `Sprint 1/2/3 全部闭环（decision-001~021，授权 3/4）；Backlog 18/19；Sprint 4：FUNC-9（8/8，022，7c9334b）、FUNC-11（9/9，023，757f0fa）、FUNC-10（9/9，024：draftService 双实现 + 草稿三态清理 + openTab markDirty，54a048f）；AI-1 主峰最后一项 |
+| `task_progress` | `Sprint 1/2/3/4 全部闭环（decision-001~025，授权 4/4 燃尽）；Backlog 19/19 完成：ENV-1/2、ARCH-1/2、UI-1/2/3、FUNC-1~11、AI-1（AI-1：ai-smoke 9/9 + ai-mermaid-smoke 4/4，commit bf335f7） |
 
 ---
 
@@ -98,5 +98,5 @@
 
 ## 待完善 / 下一步
 
-- **当前阶段**：Sprint 4 执行（AS-8 授权 4/4 = 最后一次，燃尽即交付）
-- 下一步：FUNC-9（主题切换）-> FUNC-11（最近文件）-> FUNC-10（自动保存）-> AI-1（主峰）-> 项目交付（Backlog 燃尽 + 项目报告征询 PO）
+- **当前阶段**：Sprint 4 执行完成（Backlog 19/19 燃尽，授权 4/4 燃尽）
+- 下一步：Sprint 4 整体收口（阶段 5 DoD 对照表 -> 6 Review -> 7 Retrospective 轻量并入 Evolution Log -> 8 Planning Input Ready）-> 项目交付（阶段 11，项目报告征询 PO）

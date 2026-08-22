@@ -63,7 +63,7 @@
 
 ### 类别 E：AI 接入（AI）
 
-- [ ] P1 AI-1：可配置第三方 API（OpenAI 兼容协议，可配 baseURL / key / model，支持 DeepSeek 等）+ 润色 + 问答 + mermaid 修复（已排期，SIS-AI-1）
+- [x] P1 AI-1：可配置第三方 API（OpenAI 兼容协议，可配 baseURL / key / model，支持 DeepSeek 等）+ 润色 + 问答 + mermaid 修复（已完成 2026-08-22，SIS-AI-1，Sprint 4；commit bf335f7）
 
 ---
 

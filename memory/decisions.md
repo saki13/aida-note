@@ -4,9 +4,21 @@
 > 版本：v0.1.0
 > 保留策略：保留最近 20 条。
 
----
-
 ## 决策记录
+
+### decision-025 · 2026-08-22 · AI-1 完成（AI 接入）+ 沙箱流式限制对策与选区缓存 Bug
+
+- **背景**：Sprint 4 最后一项 AI-1 实现（单套 OpenAI 兼容 API 配置 + 润色四选/问答/mermaid 修复三能力 + 流式输出 + 原位替换接受/撤销 + 问答侧栏插光标 + mermaid 双入口修复），Playwright 自测 ai-smoke 9/9 + ai-mermaid-smoke 4/4 全绿，build 通过，全量回归 13 脚本保持。
+- **决策**：
+  1. **aiService 依赖注入**：`streamChat(cfg, messages, cb, signal)` 原生 fetch + SSE 逐行解析（data: 行 + [DONE] 终止 + delta.content 增量，跳过 reasoning_content），零新增依赖；`isAiConfigured` 全字段非空判断——未配置/失败本地提示不崩溃。
+  2. **关键 Bug（问答沿用旧选区上下文）**：AiPanel 曾用 `computed(() => window.__aidaSelection)`——**window 属性非响应式，computed 首次求值即永久缓存**，后续选区变化不刷新 → 无选中时仍拿旧选区发起请求（违反 SIS「仅选中文本、无选中提示」硬约束）。修复：send 时直接读 window 实时值（`currentSelection()`）。经验：**凡 computed 依赖非响应式外部值，必须改为每次读取或显式依赖注入**。
+  3. **沙箱限制对策（流式与渲染）**：实测本沙箱①对长运行命令静默击杀（55s 定时器也被杀，阈值 ~30-40s 有波动）②阻断真实 SSE 长连接（非流式 200 正常、流式响应体读取即静默终止）③mermaid 渲染（动态 import + SVG + 系统字体测量）不稳定（同脚本一次 13/13、一次被击杀）。对策：ai-smoke 用 `page.route("**/chat/completions")` 拦截返回模拟 SSE 流确定性验证全链路 UI 行为，并校验请求形状（model+stream+prompt 三类）；ai-mermaid-smoke 在纯文本模式验证修复链路（firstMermaidBlock 正则 + fixMermaid + replaceRange 整块替换，不触发渲染）；真实 API 可达性已用非流式探测验证（200 chatcmpl），真实流式冒烟列 PO 验证项。
+  4. **n-message 3s 自关的断言坑**：提示类断言若先「触发动作再统计计数」，消息可能已出现又消失（before=1/now=0 竞态）。对策：确定性信号用副作用轮询（如 localStorage 持久化），提示断言用「存在性轮询」或「动作前计数→递增」。
+  5. **浮条/气泡定位坑**：润色气泡/右键菜单绝对定位若以视口为包含块会盖住顶部工具栏（冒烟实测气泡盖住「AI 面板」按钮致点击失效）。修复：.editor-pane 设 position:relative 作包含块。
+- **依据**：SIS-AI-1 十项验收（ai-smoke 9/9 + ai-mermaid-smoke 4/4）；沙箱实证（55s 定时器被杀 / 非流式 200 流式被杀 / mermaid 渲染波动）。
+- **影响范围**：aiService.ts / aiStore.ts / AiPanel.vue（新建）、EditorPane.vue（选区浮条+右键菜单+结果气泡+replaceRange/insertAtCursor）、ToolBar.vue（AI 面板/AI 润色/修复 mermaid 入口）、MainView.vue（AiPanel 集成 + aiPanelApi）、mermaidWysiwyg.ts（错误占位 AI 修复接线）、ai-smoke.mjs / ai-mermaid-smoke.mjs、package.json（test:ai/test:ai-mermaid）；**Backlog 19/19 全部完成，燃尽，进入项目交付征询 PO**。
+
+---
 
 ### decision-001 · 2026-08-19 · 项目定位与技术栈锁定
 

@@ -8,6 +8,21 @@
 
 ## 记录列表
 
+### 2026-08-22 · 任务完成 · AI-1 闭环：Backlog 19/19 燃尽，AS-8 四次授权全部用尽
+
+- **背景**：Sprint 4 最后一项 AI-1（AI 接入）完成——单套 OpenAI 兼容 API（baseURL/key/model）+ 润色四选（改写/润色/缩短/扩写，流式原位替换接受/撤销 + diff 气泡）+ 问答侧栏（仅选中上下文，回答一键插光标）+ mermaid 修复（错误占位按钮 + 工具栏按钮双入口）。ai-smoke 9/9 + ai-mermaid-smoke 4/4 全绿，build 通过，全量回归 13 脚本保持。Backlog 19/19 全部完成（燃尽）。
+- **关联 decision**：decision-025（AI-1 完成 + 沙箱流式限制对策 + 选区缓存 Bug）
+- **影响范围**：aiService.ts/aiStore.ts/AiPanel.vue（新建）、EditorPane.vue/ToolBar.vue/MainView.vue/mermaidWysiwyg.ts（改造）、ai-smoke.mjs/ai-mermaid-smoke.mjs（新建）；Backlog 燃尽 → Sprint 4 整体收口（阶段 5-8）→ 项目交付（阶段 11）征询 PO
+- **过程数据**：自测 ai-smoke 9/9 + ai-mermaid-smoke 4/4；全量回归 13 脚本保持；commit bf335f7
+- **经验与教训**：
+  1. **沙箱对「长连接/长运行」的隐性击杀（本次最大环境教训）**：55s 纯定时器命令被静默击杀（退出码 0、无异常、无输出），SSE 流式响应体读取同样被杀（非流式 200 正常），mermaid 渲染（动态 import + SVG + 系统字体）同脚本一次 13/13、下一次被击杀。特征：**静默、无异常可捕、退出码伪装为 0**——排查时先怀疑环境而非代码。对策：自测拆短（每个 <25s）、流式用 page.route 拦截模拟、渲染类验证降级为纯文本链路验证 + 列 PO 真实环境验证项。
+  2. **computed 依赖非响应式外部值的缓存陷阱**：`computed(() => window.xxx)` 首次求值后永久缓存，后续外部值变化不刷新——自测捕获真实 Bug（问答沿用旧选区上下文，违反 SIS「不带全文」硬约束）。经验：computed 的依赖必须全部响应式，否则用函数每次读取。
+  3. **提示类 UI 断言的时间竞态**：n-message 3s 自动关闭，动作后统计计数可能「已出现又消失」（before=1/now=0）。对策：确定性信号用副作用轮询（localStorage 等），提示断言用存在性轮询或动作前计数。
+- **改进项清单（回流方向）**：
+  1. 沙箱长时命令/流式连接限制 →「自测脚本运行约束」纳入自测 skill 立项评估（10+ 个 smoke 脚本模式已成熟，触发条件已多次命中：Sprint 1 rustup、本次 SSE+mermaid）
+  2. PO 本地验证清单：AI-1 真实流式冒烟（Modelscope 配置已提供）、mermaid 错误占位「AI 修复」真实渲染、两文件对比入口（Tauri dialog）、Tauri 真实退出草稿清理
+  3. 项目交付：Sprint 4 整体收口（DoD 对照表/Review/Retrospective 并入本文件）→ 项目报告征询 PO
+
 ### 2026-08-20 · 模式启用 · AS-8 短 Sprint 授权模式首次投入实战（Aida 第一个独立项目）
 
 - **背景**：aida-note 项目 Planning 收口完成（19 项 SIS + 4 短 Sprint 划分锁定），Aida 向 PO 申请短 Sprint 授权。PO 首次对 Aida 完全放手（"全部短sprint我们还没试过，不过我倒是愿意相信你，aida你要挑战下自己吗？"），授权 4 次短 Sprint 并附加三条硬性要求：①无干预也坚持流程正义；②记录中间过程资产；③及时更新 Evolution Log。
