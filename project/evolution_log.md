@@ -226,6 +226,21 @@
   2. Sprint 4 观察：AI-1 真实 API 调用的沙箱限制应对（mock 层或 PO 提供测试配置）；FUNC-10 关闭三选边界复验；两文件对比入口 PO Tauri 手动验证
   3. Sprint 4 复用清单：settings 通道完整化（theme/recentFiles/aiConfig 字段已就位）、markRaw/Compartment 原则、自测脚本模板模式、六任务经验（decision-016~021）
 
+### 2026-08-22 · 任务经验 · FUNC-9 落地：主题三态解析单点收敛与「库默认值想当然」之坑
+
+- **背景**：Sprint 4 第一项 FUNC-9（主题切换）实现，Playwright 自测 8/8 全绿（wrap/compare 回归保持）。功能本体中等，主要经验集中在「三态解析架构收敛」与「库默认值」两处。
+- **关联 decision**：decision-022
+- **影响范围**：settingsStore.ts（resolvedTheme/systemDark/ACCENT_OVERRIDES）、settingsService.ts（accentColor）、App.vue（NConfigProvider）、EditorPane.vue（themeExtension 读 store）、ToolBar.vue（主题下拉）、theme-smoke.mjs；FUNC-11/AI-1 复用 settings 通道
+- **经验与教训**：
+  1. **「库默认值想当然」：Naive UI 默认 primary 是绿 #18a058，不是蓝**——「blue 用官方默认、只需覆盖绿/紫」的直觉错误，首版 blue 实际显示绿色。修复：三套强调色全部显式覆盖。**通用教训：任何「复用默认值」的假设先查库文档/源码实测，尤其颜色这类视觉默认**
+  2. **三态解析（resolvedTheme）收敛到 settingsStore 单点**：theme 偏好 + systemDark（matchMedia）+ computed resolvedTheme，App provider / CM themeCompartment / 工具栏下拉全部只读派生，各层不再各自维护 matchMedia——FUNC-2 的 EditorPane 内 mediaQuery 逻辑整体移除。**架构原则：全局偏好类状态（主题/换行/AI 配置）由 store 统一解析与分发，消费方只读派生**
+  3. **matchMedia 监听防重**：EditorPane 会因 CompareView v-else 卸载重挂载导致多次 init，监听器注册需防重（init 内 `if (mediaQuery) return`）——FUNC-6 的「外部写回」经验延伸：共享单例型资源注册要幂等
+  4. **自测锚点设计**：Naive provider 无稳定 class 可断言，给根元素挂 `data-theme`/`data-accent` 属性（同时服务调试）；CM oneDark 背景 rgb(40,44,52)；primary 按钮 `--n-ripple-color` 反映强调色
+  5. **Naive UI dropdown 快速点击关闭的库内部竞态**：`handleMouseMoveOutside` 引用已卸载节点抛 null.contains（库 bug，功能无影响），自测 pageerror 检查需过滤已知库噪声——**库 bug 与实现 bug 的区分：功能断言全过后才判定为库噪声**
+  6. **Playwright API 小坑**：`emulateMedia` 在 page 上（非 context）；.mjs 里函数参数不能用 TS 类型标注
+- **改进项清单（回流方向）**：
+  1. settings 通道继续供 FUNC-11（recentFiles）/ AI-1（aiConfig）扩展；自测锚点模式（data-* 属性 + CSS 变量）可入自测 skill 模板
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要

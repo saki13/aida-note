@@ -5,8 +5,8 @@
     "sprint": "Sprint 4",
     "stage": "执行（阶段 4）",
     "stage_main": "Sprint In Progress",
-    "status": "Sprint 4 启动收口完成（FUNC-9 主题切换执行中，授权 4/4=最后一次燃尽）",
-    "next": "FUNC-9 -> FUNC-11 -> FUNC-10 -> AI-1 -> 项目交付",
+    "status": "FUNC-9 主题切换完成（8/8 自测全绿），FUNC-11 待开工（授权 4/4=最后一次燃尽）",
+    "next": "FUNC-11 -> FUNC-10 -> AI-1 -> 项目交付",
     "blocked": "无"
   },
   "backlog": [
@@ -120,7 +120,7 @@
       "title": "主题切换",
       "category": "功能实现",
       "priority": "P1",
-      "status": "pending"
+      "status": "done"
     },
     {
       "id": "FUNC-10",
@@ -416,6 +416,13 @@
       "type": "阶段切换",
       "summary": "Sprint 4 启动收口完成（阶段 3 Planning -> 阶段 4 执行），AS-8 第 4 次（最后一次）授权，燃尽即交付",
       "detail": "四任务锁定 FUNC-9->FUNC-11->FUNC-10->AI-1；settings 通道完整化为首任务（theme/recentFiles/aiConfig 全字段复用 decision-020 load/save）；风险卡点：AI-1 主峰真实 API 沙箱受限（aiService 依赖注入 + mock 流式，真实冒烟列 PO 验证项）；零新增依赖"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "FUNC-9 主题切换完成（DoD 8/8 过）：明/暗/跟随系统三态 + 蓝/绿/紫强调色 + 工具栏下拉 + 持久化 + CM 高亮联动全验收，build 通过",
+      "detail": "resolvedTheme 三态解析收敛 settingsStore 单点（system 跟随 matchMedia 实时联动，FUNC-2 的 EditorPane 内 mediaQuery 移除）；强调色 = Naive UI themeOverrides primary 三套显式覆盖（关键坑：Naive 默认 primary 是绿 #18a058，blue 必须显式覆盖）；根元素 data-theme/data-accent 自测锚点；commit 7c9334b"
     }
   ],
   "checklist": {

@@ -12,11 +12,11 @@
 | 字段 | 值 |
 |------|-----|
 | `current_sprint` | `Sprint 4（体验/AI，最后一次授权燃尽）` |
-| `current_stage` | `执行（阶段 4，Sprint 4 启动收口完成，FUNC-9 执行中）` |
+| `current_stage` | `执行（阶段 4，FUNC-9 完成，FUNC-11 待开工）` |
 | `current_theme` | `体验/AI（FUNC-9~11、AI-1）` |
-| `current_task` | `FUNC-9 主题切换` |
-| `task_status` | `in_progress` |
-| `task_progress` | `Sprint 1/2/3 全部闭环（decision-001~021，授权 3/4）；Backlog 15/19 完成；Sprint 4 启动收口完成（顺序 FUNC-9->11->10->AI-1，授权 4/4=最后一次）；FUNC-9（主题三态+强调色，settings.theme 通道就绪） |
+| `current_task` | `FUNC-11 打开最近文件列表` |
+| `task_status` | `pending` |
+| `task_progress` | `Sprint 1/2/3 全部闭环（decision-001~021，授权 3/4）；Backlog 16/19；Sprint 4 启动收口完成（顺序 FUNC-9->11->10->AI-1，授权 4/4=最后一次）；FUNC-9（8/8，decision-022：resolvedTheme 三态解析单点 + 强调色三套显式覆盖，commit 7c9334b） |
 
 ---
 

@@ -222,4 +222,15 @@
 - **依据**：SIS-FUNC-6 九项验收（compare-smoke.mjs 12/12 PASS）；jsdiff dist 源码实证（diffLines 整行含行尾匹配、token 化含 \n）；CM6 view dist（ViewState 构造读 state.facet）。
 - **影响范围**：diffService.ts（新建）、CompareView.vue（新建）、MainView.vue（对比编排+NModal/NButton）、ToolBar.vue（对比入口）、EditorPane.vue（switchToTab 一致性判定）、tabsStore.ts（内容事实源不变）、compare-smoke.mjs、package.json（test:compare）；FUNC-9/11/AI-1 无直接依赖，Sprint 3 六项至此全部闭环。
 
+### decision-022 · 2026-08-22 · FUNC-9 完成（主题切换）+ 三态解析与库默认值四条经验
+
+- **背景**：Sprint 4 第一项 FUNC-9 实现（明/暗/跟随系统三态 + 蓝/绿/紫强调色 + 工具栏下拉 + 持久化 + CM 联动），Playwright 自测 8/8 全绿，build 通过（wrap/compare 回归 10/10、12/12 保持）。
+- **决策**：
+  1. **resolvedTheme 解析层收敛到 settingsStore 单点**：settingsStore 持有 theme 偏好（light/dark/system）+ systemDark（matchMedia 监听，init 单次注册防重挂载重复监听），computed 派生 resolvedTheme；App.vue（Naive UI provider）、EditorPane（CM themeCompartment）、ToolBar（下拉状态）全部只读派生，不各自维护 matchMedia。system 模式实时联动由 store 的 mediaListener 统一驱动（FUNC-2 的 EditorPane 内 mediaQuery 逻辑移除）。
+  2. **强调色 = Naive UI themeOverrides primary 色系**：蓝/绿/紫三套显式定义 primaryColor/Hover/Pressed/Suppl，经 NConfigProvider :theme-overrides 注入。**关键坑：Naive UI 官方默认 primary 是绿 #18a058，不是蓝**——「blue 用默认」想当然错误，三套都必须显式覆盖（首版 blue 无 override 实际显示绿色）。
+  3. **settingsStore 完整化**：AppSettings 加 accentColor 字段（SIS 允许字段命名微调；theme/wordWrap/recentFiles/aiConfig 已有），DEFAULT_SETTINGS 兜底 + 兼容合并（decision-020 通道复用，Sprint 4 首任务即完整化）。
+  4. **自测锚点**：根元素 `.app-root` 挂 `data-theme`/`data-accent` 属性作断言锚点（Naive provider 无稳定 class）；CM oneDark 背景 rgb(40,44,52)；primary 按钮 `--n-ripple-color` 反映强调色。已知库噪声：Naive UI dropdown 快速点击关闭时 handleMouseMoveOutside null.contains 内部竞态（库 bug，功能无影响），自测过滤。
+- **依据**：SIS-FUNC-9 八项验收（theme-smoke.mjs 8/8 PASS）；Naive UI dist 源码（dropdown option class 为 .n-dropdown-option；default primary #18a058）；ui-visual.md §1/§2（三态解析规则 + CM 联动）。
+- **影响范围**：settingsService.ts（accentColor 字段）、settingsStore.ts（resolvedTheme/systemDark/ACCENT_OVERRIDES）、App.vue（NConfigProvider）、EditorPane.vue（themeExtension 读 store）、ToolBar.vue（主题下拉）、theme-smoke.mjs、package.json（test:theme）；FUNC-11/AI-1 复用 settings 通道（recentFiles/aiConfig 字段待扩展）。
+
 ---
