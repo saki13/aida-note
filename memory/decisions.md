@@ -141,6 +141,18 @@
 - **依据**：SIS-UI-2 §5 验收 7/7、SIS-UI-3 §5 验收 6/6（2026-08-21）；decision-011 合并收口先例；PO 自主决策授权。
 - **影响范围**：app/docs/ui-interactions.md、app/docs/ui-visual.md；Backlog / data.json / state / manifest（四边同步）；FUNC-3/FUNC-4/FUNC-6/FUNC-9/AI-1 的实现依据。
 
+### decision-015 · 2026-08-21 · Sprint 2 闭环（UI/核心五任务完成 + Review 通过 + 授权用量 2/4）
+
+- **背景**：Sprint 2 五任务全部完成（UI-1 1169dc4 / FUNC-1 4648820+52494ea / FUNC-2 8383d5f+afb510d / UI-2+UI-3 5658ab8），逐任务 DoD 已过，走阶段 4-8 闭环。期间 PO 两个关键介入均闭环：①FUNC-1 关窗口修复验证（「ok 这回行了」）；②自测能力指令（「后边的功能都是前端的内容你完全可以自己测试」-> Playwright 资产落地）。
+- **决策**：
+  1. Sprint 2 DoD 总体复查 36/36 过（Sprint_2_DoD对照表）。
+  2. Sprint 2 Review 结论：**Passed With Observation**（3 观察项：窗口关闭三选边界待复验 / 自测资产 skill 化评估 / 打开文件闪退一次留观）。Aida 代行判定，PO 保留翻案权，events[] 广播。
+  3. 阶段 7 轻量 Retrospective：反思并入 evolution_log.md（Sprint 2 收口回填记录，含 markRaw 三重根因方法论 + Playwright 自测链路两条本 Sprint 重大经验）。
+  4. 阶段 8 产出 Sprint 3 候选清单（FUNC-3~8 六项，执行顺序 FUNC-3 -> 4 -> 5 -> 7 -> 8 -> 6）。
+  5. 授权用量：**2/4**，余 2 次。Backlog 累计 9/19，按流程进入 Sprint 3 Planning。
+- **依据**：SIS-UI-1/2/3、SIS-FUNC-1/2 验收标准全过（2026-08-20~21）；Sprint_2_DoD对照表（36/36）；AS-8 阶段 3-8 闭环要求；Sprint_2_Review报告。
+- **影响范围**：project/sprint/（DoD 对照表 / Review 报告 / Sprint 3 候选清单）；Backlog / data.json / state / manifest（四边同步收口）；evolution_log.md；Sprint 3 执行全程。
+
 ---
 
 <!-- 后续在此追加，格式：

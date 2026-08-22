@@ -5,8 +5,8 @@
     "sprint": "Sprint 2",
     "stage": "Planning",
     "stage_main": "Sprint In Progress",
-    "status": "Sprint 2 全部 5 任务完成（UI-1/2/3 + FUNC-1/2），进入 Sprint 收口（DoD 复查 + Review）",
-    "next": "Sprint 2 收口（阶段 4-8 闭环）-> Sprint 3（增强：FUNC-3~8）",
+    "status": "Sprint 2 闭环完成（Passed With Observation，授权 2/4 余 2 次）；Sprint 3 Planning 就绪",
+    "next": "Sprint 3 Planning（阶段 3 启动，FUNC-3~8 六项）-> 执行 -> 收口",
     "blocked": "无"
   },
   "backlog": [
@@ -179,6 +179,27 @@
       "type": "任务完成",
       "summary": "UI-2 交互设计 + UI-3 视觉设计完成（DoD 7/7 + 6/6 过，合并收口循 decision-011 同型任务先例）：ui-interactions.md 四链路 + ui-visual.md 双主题，commit 5658ab8",
       "detail": "UI-2：所见即所得块级双态（光标块源码/其余渲染）/mermaid 原位渲染+AI 修复入口/AI 润色选区现场四动作+diff 气泡/问答侧栏插光标/对比双栏行映射联动+差异跳转；UI-3：明暗双主题三态解析/CM 主题复用 FUNC-2 themeCompartment/xicons 图标语义锁定/系统字体栈。Sprint 2 全部 5 任务完成，进入收口"
+    },
+    {
+      "date": "2026-08-21",
+      "level": "P1",
+      "type": "阶段切换",
+      "summary": "Sprint In Progress -> Sprint Completed（总体 DoD 复查 36/36 过）",
+      "detail": "Sprint_2_DoD对照表产出：UI-1 7项 / FUNC-1 9项 / FUNC-2 7项 / UI-2 7项 / UI-3 6项全过；验证分层：PO 终端（关窗口）+ Playwright 自测（高亮/主题）+ 一致性核查（文档）"
+    },
+    {
+      "date": "2026-08-21",
+      "level": "P1",
+      "type": "阶段切换",
+      "summary": "Sprint Completed -> Review -> Planning Input Ready（Retrospective 轻量并入 Evolution Log）",
+      "detail": "Review 结论 Passed With Observation（3 观察项：窗口三选边界复验/自测 skill 化评估/闪退留观）；Aida 代行判定，PO 保留翻案权；Sprint 3 候选清单产出（FUNC-3~8）"
+    },
+    {
+      "date": "2026-08-21",
+      "level": "P1",
+      "type": "Sprint 闭环",
+      "summary": "Sprint 2 闭环完成（阶段 3-8），授权用量 2/4，余 2 次",
+      "detail": "Backlog 累计 9/19；Sprint 3 成员（FUNC-3~8 六项增强功能，全前端可自测零新增依赖）为下一轮 Planning 输入候选"
     }
   ]
 }

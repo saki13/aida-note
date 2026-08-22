@@ -110,6 +110,21 @@
   1. markRaw 原则 + Compartment 槽位原则 + watch 时序原则写入 app/docs/ 技术备忘（Sprint 2 收口时随 Review 报告归并）
   2. 27 个诊断脚本的渐进式排查法可模板化（独立复现/对照/内部结构/一致性四步），候选进前端自测 skill
 
+### 2026-08-21 · Sprint 闭环 · Sprint 2 收口回填（轻量 Retrospective，AS-8 第 2 次授权闭环）
+
+- **背景**：Sprint 2（核心）五任务全部完成（UI-1 1169dc4 / FUNC-1 4648820+52494ea / FUNC-2 8383d5f+afb510d / UI-2+UI-3 5658ab8），走完阶段 4->5->6->7->8 完整闭环。Review 结论 Passed With Observation（Aida 代行判定，events[] 广播 PO）。本记录承担阶段 7 反思纪要职能（轻量形态，沿 Sprint 1 先例）。
+- **关联 decision**：decision-012（FUNC-1 三类坑）、decision-013（FUNC-2 markRaw 原则+自测能力）、decision-014（UI-2/3 合并收口）、decision-015（Sprint 2 闭环）
+- **影响范围**：project/sprint/（Sprint_2_DoD对照表 + Sprint_2_Review报告 + Sprint_3_Planning输入候选清单）；Sprint 3 执行模式
+- **过程数据**：任务 5/5 DoD 通过（36/36 子项）；events 本 Sprint 新增 7 条（任务级 4 + 能力建设 1 + 阶段切换 2 + 闭环 1 计入收口批次）；git commit 主线 8 个（1169dc4/4648820/ef68836/f2d7a55/87334d2/52494ea/8383d5f/afb510d + 收口 3 个）；PO 转交 1 次（FUNC-1 关窗口验证，FUNC-2 起 0 次）；新增正式测试资产 2 个（test:ui/test:multitab）
+- **经验与教训**：
+  1. **AS-8 观察点 5（自主执行边界）Sprint 2 期结论：自测能力是自主性的分水岭**--FUNC-1 验证转交 PO 1 次，Playwright 自测链路建立后 FUNC-2/UI-2/3 验证零转交。「转交 PO 是降级方案」在验证环节的最终解不是转交模板，而是把验证能力自建（PO 的「你可以自己测试」指令本质是授权 Aida 扩张能力边界）
+  2. **同型任务合并收口先例稳定复用**：UI-2/3 循 decision-011 标准合并（同型纯文档+同日+无 PO 交互），收口成本从 2 次降为 1 次，判定标准无需修订
+  3. **重大技术坑的前置化**：FUNC-2 的 markRaw 坑若发生在 Sprint 3（FUNC-3 所见即所得装饰机制更复杂）成本会更高；教训是「外部对象入 reactive store」类风险应在引入时即评估，而非失效后排查（本 Sprint 用了 27 个诊断脚本）
+  4. **PO 实时反馈的处理节奏**：PO 在排障中途的观察（「白屏的时候可以关闭」「会不会配置了进程守护」）是高价值线索，应在 decision/日志中显式记录用户原话与推断价值
+- **改进项清单（回流方向）**：
+  1. Sprint 3 观察：窗口关闭三选边界复验（顺带）；自测脚本 skill 化立项评估（Sprint 3 六任务全前端，高频复用触发条件）；闪退留观
+  2. FUNC-3 实现前置宣贯三原则（markRaw/Compartment 槽位/watch 单点写缓存），写进 Sprint 3 启动收口风险卡点
+
 <!-- 后续在此追加记录，格式：
 
 ### YYYY-MM-DD · 类型 · 摘要

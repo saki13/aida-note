@@ -2,29 +2,29 @@
 
 > 用途：记录当前项目的最小运行状态快照（L2 状态快照）。
 > 版本：v0.1.0
-> 状态：Sprint 2 In Progress（AS-8 授权模式，Sprint 1 已闭环，授权用量 1/4，Sprint 2 闭环时记 2/4）
+> 状态：Sprint 2 已闭环（AS-8 授权用量 2/4，余 2 次），Sprint 3 Planning 就绪
 
 ---
 
 ## 1. 当前状态
 
 - `skill_version`：`v0.1.0`
-- `current_sprint`：`Sprint 2`
-- `current_theme`：`核心（UI-1/2/3 + FUNC-1/2）`
-- `current_stage`：`Sprint In Progress`
-- `current_stage_flow_doc`：`product/agents/aida/stage_flows/04_Sprint_In_Progress.md`
+- `current_sprint`：`Sprint 3`
+- `current_theme`：`增强（FUNC-3~8）`
+- `current_stage`：`Planning（Sprint 3 启动，候选清单已产出）`
+- `current_stage_flow_doc`：`product/agents/aida/stage_flows/03_Planning.md`
 - `last_run_at`：`2026-08-21`
-- `last_run_status`：`Sprint 2 全部 5 任务完成（UI-1/2/3 + FUNC-1/2），进入收口（DoD 复查 + Review）`
-- `execution_mode`：`AS-8 短 Sprint 自主执行（授权 4 次，Sprint 1 已闭环记 1 次，Sprint 2 闭环时记 2 次）`
+- `last_run_status`：`Sprint 2 闭环完成（Passed With Observation，36/36 DoD 过，decision-015）；Sprint 3 Planning 就绪`
+- `execution_mode`：`AS-8 短 Sprint 自主执行（授权 4 次，Sprint 1/2 已闭环记 2 次，余 2 次）`
 
 ---
 
 ## 2. 当前任务追踪
 
-- `current_task`：`Sprint 2 收口（阶段 4-8：总体 DoD 复查 -> Review -> 四边同步 -> Sprint 3 Planning）`
-- `task_status`：`in_progress`
-- `task_progress`：`Sprint 2 全部任务完成：UI-1（1169dc4）、FUNC-1（4648820+52494ea）、FUNC-2（afb510d）、UI-2/UI-3（5658ab8，合并收口循 decision-011 先例）；自测资产 test:ui/test:multitab 就绪`
-- `next_action`：`Sprint 2 DoD 对照表 -> Review 报告 -> 闭环（授权记 2/4）-> Sprint 3（FUNC-3~8）`
+- `current_task`：`Sprint 3 Planning（FUNC-3~8 六项，候选清单已产出，待启动收口）`
+- `task_status`：`pending_start`
+- `task_progress`：`Sprint 2 已闭环（decision-015）：五任务全过 + Review Passed With Observation；自测资产 test:ui/test:multitab 就绪`
+- `next_action`：`Sprint 3 启动收口 -> FUNC-3（所见即所得，主峰）-> FUNC-4 -> FUNC-5 -> FUNC-7 -> FUNC-8 -> FUNC-6 -> Sprint 3 收口`
 
 ---
 

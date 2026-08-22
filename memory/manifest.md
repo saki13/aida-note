@@ -11,12 +11,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| `current_sprint` | `Sprint 2（核心）` |
-| `current_stage` | `Sprint In Progress` |
-| `current_theme` | `核心（UI-1/2/3 + FUNC-1/2）` |
-| `current_task` | `Sprint 2 收口（阶段 4-8）` |
-| `task_status` | `in_progress` |
-| `task_progress` | `Sprint 1 已闭环；Sprint 2 全部 5 任务完成：UI-1（1169dc4）、FUNC-1（4648820+52494ea）、FUNC-2（afb510d，decision-013）、UI-2/UI-3（5658ab8，合并收口循 decision-011 先例，decision-014）；自测资产 test:ui/test:multitab 就绪 |
+| `current_sprint` | `Sprint 3（增强）` |
+| `current_stage` | `Planning（候选清单已产出，待启动收口）` |
+| `current_theme` | `增强（FUNC-3~8）` |
+| `current_task` | `Sprint 3 Planning（FUNC-3~8 六项）` |
+| `task_status` | `pending_start` |
+| `task_progress` | `Sprint 1/2 已闭环（授权 2/4 余 2 次，decision-011/015）；Sprint 2 交付：UI-1/2/3 布局交互视觉三文档 + FUNC-1 多标签 + FUNC-2 高亮（markRaw 原则 decision-013）；自测资产 test:ui/test:multitab 就绪；Sprint 3 候选清单已产出 |
 
 ---
 
@@ -98,5 +98,5 @@
 
 ## 待完善 / 下一步
 
-- **当前阶段**：Sprint 2 In Progress（AS-8 授权模式：4 次短 Sprint，已用 1 次余 3 次）
-- 下一步：FUNC-2（多语法高亮）-> UI-2 -> UI-3 -> Sprint 2 收口 -> Sprint 3/4 依锁定顺序执行 -> 燃尽转项目交付
+- **当前阶段**：Sprint 3 Planning（AS-8 授权模式：4 次短 Sprint，已用 2 次余 2 次）
+- 下一步：Sprint 3 启动收口 -> FUNC-3（所见即所得）-> FUNC-4 -> FUNC-5 -> FUNC-7 -> FUNC-8 -> FUNC-6 -> Sprint 3 收口 -> Sprint 4（FUNC-9~11、AI-1）-> 燃尽转项目交付
