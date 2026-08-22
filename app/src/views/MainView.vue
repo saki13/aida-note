@@ -16,6 +16,7 @@ import CompareView from "../components/CompareView.vue";
 import RecentEmpty from "../components/RecentEmpty.vue";
 import { useTabsStore } from "../stores/tabsStore";
 import { readFile, pickFiles, basename } from "../services/fileService";
+import { checkRecover, removeDraft, clearAllDrafts, type DraftRecord } from "../services/draftService";
 
 const tabsStore = useTabsStore();
 const dialog = useDialog();
@@ -158,7 +159,10 @@ async function setupTauriEvents(): Promise<void> {
       event.preventDefault();
       try {
         const ok = await tabsStore.confirmCloseAllDirty(dialog);
-        if (ok) await getCurrentWindow().destroy();
+        if (ok) {
+          await clearAllDrafts(); // 正常退出清理全部草稿（SIS-FUNC-10：不留碎片）
+          await getCurrentWindow().destroy();
+        }
       } catch (e) {
         console.error("close confirm failed:", e);
         await getCurrentWindow().destroy(); // 异常兜底：强制销毁，避免窗口无法关闭
@@ -167,6 +171,39 @@ async function setupTauriEvents(): Promise<void> {
   } catch (e) {
     console.error("setup tauri events failed:", e);
   }
+}
+
+/**
+ * 崩溃恢复（SIS-FUNC-10）：启动扫描草稿目录，有残留则弹窗「恢复 / 丢弃」。
+ * 过期残留由 draftService.checkRecover 内部清理（不留碎片）。
+ */
+const recoverDrafts = ref<DraftRecord[]>([]);
+const recoverModalOpen = ref(false);
+
+async function setupRecovery(): Promise<void> {
+  const drafts = await checkRecover();
+  if (drafts.length) {
+    recoverDrafts.value = drafts;
+    recoverModalOpen.value = true;
+  }
+}
+
+function onRecover(draft: DraftRecord): void {
+  tabsStore.restoreDraft(draft);
+  recoverDrafts.value = recoverDrafts.value.filter((d) => d.key !== draft.key);
+  if (!recoverDrafts.value.length) recoverModalOpen.value = false;
+}
+
+function onDiscard(draft: DraftRecord): void {
+  void removeDraft(draft.key);
+  recoverDrafts.value = recoverDrafts.value.filter((d) => d.key !== draft.key);
+  if (!recoverDrafts.value.length) recoverModalOpen.value = false;
+}
+
+function onDiscardAll(): void {
+  for (const d of recoverDrafts.value) void removeDraft(d.key);
+  recoverDrafts.value = [];
+  recoverModalOpen.value = false;
 }
 
 function onKeydown(e: KeyboardEvent): void {
@@ -188,6 +225,7 @@ function onKeydown(e: KeyboardEvent): void {
 onMounted(() => {
   window.addEventListener("keydown", onKeydown);
   void setupTauriEvents();
+  void setupRecovery(); // 启动扫描崩溃残留草稿（SIS-FUNC-10）
 });
 
 onBeforeUnmount(() => {
@@ -225,6 +263,25 @@ onBeforeUnmount(() => {
         <n-button block @click="startCompareClipboard" :disabled="!tabsStore.activeTab">当前文件 vs 剪贴板</n-button>
       </div>
     </n-modal>
+
+    <!-- 崩溃恢复草稿弹窗（SIS-FUNC-10：残留草稿恢复/丢弃） -->
+    <n-modal v-model:show="recoverModalOpen" preset="card" title="检测到未保存的草稿" style="width: 480px">
+      <div class="recover-list">
+        <div v-for="d in recoverDrafts" :key="d.key" class="recover-item">
+          <div class="recover-info">
+            <div class="recover-title">{{ d.title }}</div>
+            <div class="recover-path">{{ d.key }}</div>
+          </div>
+          <div class="recover-actions">
+            <n-button size="small" @click="onRecover(d)">恢复</n-button>
+            <n-button size="small" @click="onDiscard(d)">丢弃</n-button>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <n-button size="small" @click="onDiscardAll">全部丢弃</n-button>
+      </template>
+    </n-modal>
   </div>
 </template>
 
@@ -244,5 +301,40 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+.recover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow: auto;
+}
+.recover-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color, #eee);
+  border-radius: 4px;
+}
+.recover-info {
+  flex: 1;
+  min-width: 0;
+}
+.recover-title {
+  font-size: 13px;
+  font-weight: 500;
+}
+.recover-path {
+  font-size: 11px;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.recover-actions {
+  display: flex;
+  gap: 6px;
+  flex: none;
 }
 </style>

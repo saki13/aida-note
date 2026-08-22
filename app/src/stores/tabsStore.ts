@@ -20,6 +20,7 @@ import {
 } from "../services/fileService";
 import { detectLanguage, type LanguageId } from "../services/language";
 import { useSettingsStore } from "./settingsStore";
+import { scheduleDraft, cancelScheduled, removeDraft, type DraftRecord } from "../services/draftService";
 
 export interface Tab {
   id: number;
@@ -55,11 +56,22 @@ export const useTabsStore = defineStore("tabs", () => {
     void useSettingsStore().addRecentFile(path);
   }
 
+  /** 草稿标识（SIS-FUNC-10）：有路径用绝对路径；未命名标签用 __untitled_<title>。 */
+  function draftKeyOf(tab: Tab): string {
+    return tab.filePath ?? `__untitled_${tab.title}`;
+  }
+
   function findTabById(tabId: number): Tab | undefined {
     return tabs.value.find((t) => t.id === tabId);
   }
 
   function removeTab(tabId: number): void {
+    const tab = findTabById(tabId);
+    if (tab) {
+      // 关闭/丢弃标签 -> 清理草稿（SIS-FUNC-10：不留碎片）
+      cancelScheduled(draftKeyOf(tab));
+      void removeDraft(draftKeyOf(tab));
+    }
     const idx = tabs.value.findIndex((t) => t.id === tabId);
     if (idx === -1) return;
     tabs.value.splice(idx, 1);
@@ -83,11 +95,13 @@ export const useTabsStore = defineStore("tabs", () => {
 
   /**
    * 打开标签。文件已打开时直接激活对应标签（去重）。
+   * opts.markDirty：崩溃恢复场景——草稿内容恢复到标签并置脏（SIS-FUNC-10 恢复语义）。
    */
   function openTab(
     input:
       | { filePath: string; content: string; hadBom: boolean }
-      | { title: string }
+      | { title: string },
+    opts?: { markDirty?: boolean },
   ): number {
     if ("filePath" in input && input.filePath) {
       const existing = tabs.value.find((t) => t.filePath === input.filePath);
@@ -102,9 +116,9 @@ export const useTabsStore = defineStore("tabs", () => {
         filePath: input.filePath,
         title: basename(input.filePath),
         content: input.content,
-        savedContent: input.content,
+        savedContent: opts?.markDirty ? "" : input.content, // 恢复草稿：savedContent 置空 -> 立即置脏
         language,
-        dirty: false,
+        dirty: opts?.markDirty ?? false,
         isNewFile: false,
         hadBom: input.hadBom,
         cmState: null,
@@ -143,11 +157,19 @@ export const useTabsStore = defineStore("tabs", () => {
     if (!tab) return;
     tab.content = content;
     tab.dirty = content !== tab.savedContent; // 立即置位/复位（ARCH-2 §1.3）
+    // 自动保存草稿（SIS-FUNC-10）：仅脏标签防抖写；非脏（保存后）不写
+    if (tab.dirty) {
+      scheduleDraft(draftKeyOf(tab), { title: tab.title, content, dirty: true });
+    } else {
+      cancelScheduled(draftKeyOf(tab));
+      void removeDraft(draftKeyOf(tab)); // 保存后清理对应草稿
+    }
   }
 
   function markSaved(tabId: number, filePath?: string): void {
     const tab = findTabById(tabId);
     if (!tab) return;
+    const oldKey = draftKeyOf(tab); // 保存前草稿 key（另存新路径时旧 key 需清理）
     if (filePath !== undefined) {
       tab.filePath = filePath;
       tab.title = basename(filePath);
@@ -157,6 +179,16 @@ export const useTabsStore = defineStore("tabs", () => {
     }
     tab.savedContent = tab.content;
     tab.dirty = false;
+    // 保存成功 -> 清理草稿（SIS-FUNC-10：不留碎片）；另存新路径时新旧 key 均清理
+    cancelScheduled(oldKey);
+    void removeDraft(oldKey);
+    if (filePath !== undefined) {
+      const newKey = draftKeyOf(tab);
+      if (newKey !== oldKey) {
+        cancelScheduled(newKey);
+        void removeDraft(newKey);
+      }
+    }
   }
 
   /** 按路径打开（SIS-FUNC-11 最近文件入口）：读文件失败（文件不存在等）返回 false 由调用方提示移除。 */
@@ -169,6 +201,19 @@ export const useTabsStore = defineStore("tabs", () => {
       console.error(`openPath failed: ${path}`, e);
       return false;
     }
+  }
+
+  /** 崩溃恢复（SIS-FUNC-10）：按草稿建标签并置脏，恢复后删除草稿。 */
+  function restoreDraft(draft: DraftRecord): number {
+    let tabId: number;
+    if (draft.key.startsWith("__untitled_")) {
+      tabId = openTab({ title: draft.title });
+      updateContent(tabId, draft.content); // 未命名：空 savedContent + 内容 -> dirty
+    } else {
+      tabId = openTab({ filePath: draft.key, content: draft.content, hadBom: false }, { markDirty: true });
+    }
+    void removeDraft(draft.key); // 恢复后清理（SIS-FUNC-10）
+    return tabId;
   }
 
   /** 手动覆盖语言（SIS-FUNC-2 状态栏语言选择器；自动识别由 openTab 负责）。 */
@@ -321,6 +366,7 @@ export const useTabsStore = defineStore("tabs", () => {
     activeTab,
     openTab,
     openPath,
+    restoreDraft,
     createUntitled,
     setActive,
     moveTab,
