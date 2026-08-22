@@ -2,39 +2,192 @@
   "updated_at": "2026-08-21",
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
-    "sprint": "Sprint 2",
-    "stage": "Planning",
+    "sprint": "Sprint 3",
+    "stage": "执行（阶段 4）",
     "stage_main": "Sprint In Progress",
-    "status": "Sprint 2 闭环完成（Passed With Observation，授权 2/4 余 2 次）；Sprint 3 Planning 就绪",
-    "next": "Sprint 3 Planning（阶段 3 启动，FUNC-3~8 六项）-> 执行 -> 收口",
+    "status": "Sprint 3 启动收口完成（三原则风险卡点已宣贯），FUNC-3 开工（授权 3/4 余 1 次）",
+    "next": "FUNC-3 -> FUNC-4 -> FUNC-5 -> FUNC-7 -> FUNC-8 -> FUNC-6 -> Sprint 3 收口",
     "blocked": "无"
   },
   "backlog": [
-    { "id": "ENV-1", "title": "项目脚手架搭建", "category": "工程基础", "priority": "P0", "status": "done" },
-    { "id": "ENV-2", "title": "核心依赖接入", "category": "工程基础", "priority": "P0", "status": "done" },
-    { "id": "ARCH-1", "title": "系统架构设计", "category": "架构设计", "priority": "P0", "status": "done" },
-    { "id": "ARCH-2", "title": "文件与状态管理架构", "category": "架构设计", "priority": "P0", "status": "done" },
-    { "id": "UI-1", "title": "界面布局设计", "category": "UI 设计", "priority": "P0", "status": "done" },
-    { "id": "UI-2", "title": "交互设计", "category": "UI 设计", "priority": "P0", "status": "done" },
-    { "id": "UI-3", "title": "视觉设计", "category": "UI 设计", "priority": "P1", "status": "done" },
-    { "id": "FUNC-1", "title": "多标签文件编辑", "category": "功能实现", "priority": "P0", "status": "done" },
-    { "id": "FUNC-2", "title": "多语法高亮", "category": "功能实现", "priority": "P0", "status": "done" },
-    { "id": "FUNC-3", "title": "Markdown 同屏所见即所得", "category": "功能实现", "priority": "P0", "status": "pending" },
-    { "id": "FUNC-4", "title": "mermaid 编写 + 实时渲染", "category": "功能实现", "priority": "P0", "status": "pending" },
-    { "id": "FUNC-5", "title": "代码格式化（4 种语言，SQL 暂不支持）", "category": "功能实现", "priority": "P0", "status": "pending" },
-    { "id": "FUNC-6", "title": "文件对比（双栏 diff + 剪贴板对比）", "category": "功能实现", "priority": "P0", "status": "pending" },
-    { "id": "FUNC-7", "title": "搜索 / 替换", "category": "功能实现", "priority": "P0", "status": "pending" },
-    { "id": "FUNC-8", "title": "软换行展示", "category": "功能实现", "priority": "P0", "status": "pending" },
-    { "id": "FUNC-9", "title": "主题切换", "category": "功能实现", "priority": "P1", "status": "pending" },
-    { "id": "FUNC-10", "title": "自动保存 / 崩溃恢复草稿（临时目录，不留碎片）", "category": "功能实现", "priority": "P1", "status": "pending" },
-    { "id": "FUNC-11", "title": "最近文件列表", "category": "功能实现", "priority": "P1", "status": "pending" },
-    { "id": "AI-1", "title": "AI 接入（润色 / 问答 / mermaid 修复）", "category": "AI 接入", "priority": "P1", "status": "pending" }
+    {
+      "id": "ENV-1",
+      "title": "项目脚手架搭建",
+      "category": "工程基础",
+      "priority": "P0",
+      "status": "done"
+    },
+    {
+      "id": "ENV-2",
+      "title": "核心依赖接入",
+      "category": "工程基础",
+      "priority": "P0",
+      "status": "done"
+    },
+    {
+      "id": "ARCH-1",
+      "title": "系统架构设计",
+      "category": "架构设计",
+      "priority": "P0",
+      "status": "done"
+    },
+    {
+      "id": "ARCH-2",
+      "title": "文件与状态管理架构",
+      "category": "架构设计",
+      "priority": "P0",
+      "status": "done"
+    },
+    {
+      "id": "UI-1",
+      "title": "界面布局设计",
+      "category": "UI 设计",
+      "priority": "P0",
+      "status": "done"
+    },
+    {
+      "id": "UI-2",
+      "title": "交互设计",
+      "category": "UI 设计",
+      "priority": "P0",
+      "status": "done"
+    },
+    {
+      "id": "UI-3",
+      "title": "视觉设计",
+      "category": "UI 设计",
+      "priority": "P1",
+      "status": "done"
+    },
+    {
+      "id": "FUNC-1",
+      "title": "多标签文件编辑",
+      "category": "功能实现",
+      "priority": "P0",
+      "status": "done"
+    },
+    {
+      "id": "FUNC-2",
+      "title": "多语法高亮",
+      "category": "功能实现",
+      "priority": "P0",
+      "status": "done"
+    },
+    {
+      "id": "FUNC-3",
+      "title": "Markdown 同屏所见即所得",
+      "category": "功能实现",
+      "priority": "P0",
+      "status": "pending"
+    },
+    {
+      "id": "FUNC-4",
+      "title": "mermaid 编写 + 实时渲染",
+      "category": "功能实现",
+      "priority": "P0",
+      "status": "pending"
+    },
+    {
+      "id": "FUNC-5",
+      "title": "代码格式化（4 种语言，SQL 暂不支持）",
+      "category": "功能实现",
+      "priority": "P0",
+      "status": "pending"
+    },
+    {
+      "id": "FUNC-6",
+      "title": "文件对比（双栏 diff + 剪贴板对比）",
+      "category": "功能实现",
+      "priority": "P0",
+      "status": "pending"
+    },
+    {
+      "id": "FUNC-7",
+      "title": "搜索 / 替换",
+      "category": "功能实现",
+      "priority": "P0",
+      "status": "pending"
+    },
+    {
+      "id": "FUNC-8",
+      "title": "软换行展示",
+      "category": "功能实现",
+      "priority": "P0",
+      "status": "pending"
+    },
+    {
+      "id": "FUNC-9",
+      "title": "主题切换",
+      "category": "功能实现",
+      "priority": "P1",
+      "status": "pending"
+    },
+    {
+      "id": "FUNC-10",
+      "title": "自动保存 / 崩溃恢复草稿（临时目录，不留碎片）",
+      "category": "功能实现",
+      "priority": "P1",
+      "status": "pending"
+    },
+    {
+      "id": "FUNC-11",
+      "title": "最近文件列表",
+      "category": "功能实现",
+      "priority": "P1",
+      "status": "pending"
+    },
+    {
+      "id": "AI-1",
+      "title": "AI 接入（润色 / 问答 / mermaid 修复）",
+      "category": "AI 接入",
+      "priority": "P1",
+      "status": "pending"
+    }
   ],
   "sprints": [
-    { "id": "Sprint 1", "theme": "地基", "items": ["ENV-1", "ENV-2", "ARCH-1", "ARCH-2"] },
-    { "id": "Sprint 2", "theme": "核心", "items": ["UI-1", "UI-2", "UI-3", "FUNC-1", "FUNC-2"] },
-    { "id": "Sprint 3", "theme": "增强", "items": ["FUNC-3", "FUNC-4", "FUNC-5", "FUNC-6", "FUNC-7", "FUNC-8"] },
-    { "id": "Sprint 4", "theme": "体验/AI", "items": ["FUNC-9", "FUNC-10", "FUNC-11", "AI-1"] }
+    {
+      "id": "Sprint 1",
+      "theme": "地基",
+      "items": [
+        "ENV-1",
+        "ENV-2",
+        "ARCH-1",
+        "ARCH-2"
+      ]
+    },
+    {
+      "id": "Sprint 2",
+      "theme": "核心",
+      "items": [
+        "UI-1",
+        "UI-2",
+        "UI-3",
+        "FUNC-1",
+        "FUNC-2"
+      ]
+    },
+    {
+      "id": "Sprint 3",
+      "theme": "增强",
+      "items": [
+        "FUNC-3",
+        "FUNC-4",
+        "FUNC-5",
+        "FUNC-6",
+        "FUNC-7",
+        "FUNC-8"
+      ]
+    },
+    {
+      "id": "Sprint 4",
+      "theme": "体验/AI",
+      "items": [
+        "FUNC-9",
+        "FUNC-10",
+        "FUNC-11",
+        "AI-1"
+      ]
+    }
   ],
   "burnout": {
     "total": 19,
@@ -200,6 +353,13 @@
       "type": "Sprint 闭环",
       "summary": "Sprint 2 闭环完成（阶段 3-8），授权用量 2/4，余 2 次",
       "detail": "Backlog 累计 9/19；Sprint 3 成员（FUNC-3~8 六项增强功能，全前端可自测零新增依赖）为下一轮 Planning 输入候选"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P1",
+      "type": "阶段切换",
+      "summary": "Sprint 3 启动收口完成（阶段 3 Planning -> 阶段 4 执行），AS-8 第 3 次授权",
+      "detail": "六项锁定 FUNC-3~8；执行顺序 FUNC-3->4->5->7->8->6；FUNC-3 前置宣贯三原则（markRaw/Compartment 槽位/watch 单点写缓存，Evolution Log 改进项 2 回流）；零新增依赖"
     }
   ]
 }
