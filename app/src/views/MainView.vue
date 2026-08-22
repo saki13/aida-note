@@ -7,16 +7,18 @@
  */
 
 import { onMounted, onBeforeUnmount, provide, ref } from "vue";
-import { useDialog } from "naive-ui";
+import { useDialog, useMessage, NModal, NButton } from "naive-ui";
 import ToolBar from "../components/ToolBar.vue";
 import TabBar from "../components/TabBar.vue";
 import EditorPane from "../components/EditorPane.vue";
 import StatusBar from "../components/StatusBar.vue";
+import CompareView from "../components/CompareView.vue";
 import { useTabsStore } from "../stores/tabsStore";
-import { readFile } from "../services/fileService";
+import { readFile, pickFiles, basename } from "../services/fileService";
 
 const tabsStore = useTabsStore();
 const dialog = useDialog();
+const message = useMessage();
 const cursor = ref({ line: 1, col: 1 });
 
 interface EditorApi {
@@ -27,6 +29,94 @@ interface EditorApi {
 }
 const editorApi: EditorApi = { undo: () => undefined, redo: () => undefined, format: () => Promise.resolve(), search: () => undefined };
 provide<EditorApi>("editorApi", editorApi);
+
+// ---- 文件对比（SIS-FUNC-6）----
+interface CompareState {
+  leftTitle: string;
+  rightTitle: string;
+  leftText: string;
+  rightText: string;
+  leftWritable: boolean;
+  rightWritable: boolean;
+  leftTabId: number | null;
+  rightTabId: number | null;
+}
+const compareState = ref<CompareState | null>(null);
+const compareModalOpen = ref(false);
+
+/** 工具栏「对比」入口（注入 ToolBar）。 */
+provide("compareApi", { open: () => { compareModalOpen.value = true; } });
+
+/** 对比源 1：打开两个独立文件（自动开标签，合并写回标签并置脏标记）。 */
+async function startCompareTwoFiles(): Promise<void> {
+  const paths = await pickFiles();
+  if (paths.length < 2) {
+    message.warning("请选择两个文件进行对比");
+    return;
+  }
+  const [p1, p2] = paths;
+  try {
+    const f1 = await readFile(p1);
+    const f2 = await readFile(p2);
+    const t1 = tabsStore.openTab({ filePath: p1, content: f1.content, hadBom: f1.hadBom });
+    const t2 = tabsStore.openTab({ filePath: p2, content: f2.content, hadBom: f2.hadBom });
+    compareState.value = {
+      leftTitle: basename(p1),
+      rightTitle: basename(p2),
+      leftText: f1.content,
+      rightText: f2.content,
+      leftWritable: true,
+      rightWritable: true,
+      leftTabId: t1,
+      rightTabId: t2,
+    };
+    compareModalOpen.value = false;
+  } catch (e) {
+    message.error(`读取文件失败：${e instanceof Error ? e.message : String(e)}`);
+  }
+}
+
+/** 对比源 2：当前文件 vs 剪贴板（剪贴板为只读一侧，合并方向=剪贴板→文件）。 */
+async function startCompareClipboard(): Promise<void> {
+  const tab = tabsStore.activeTab;
+  if (!tab) {
+    message.warning("当前没有活动文件");
+    return;
+  }
+  let clip = "";
+  try {
+    clip = await navigator.clipboard.readText();
+  } catch (e) {
+    message.error("读取剪贴板失败（浏览器需授权剪贴板读取）");
+    console.error("clipboard read failed:", e);
+    return;
+  }
+  compareState.value = {
+    leftTitle: tab.title,
+    rightTitle: "剪贴板",
+    leftText: tab.content,
+    rightText: clip,
+    leftWritable: true,
+    rightWritable: false,
+    leftTabId: tab.id,
+    rightTabId: null,
+  };
+  compareModalOpen.value = false;
+}
+
+/** 合并结果写回对应文件标签并置脏标记（CompareView emit）。 */
+function onCompareApply(side: "left" | "right", text: string): void {
+  const s = compareState.value;
+  if (!s) return;
+  const tabId = side === "left" ? s.leftTabId : s.rightTabId;
+  if (tabId !== null) tabsStore.updateContent(tabId, text);
+  if (side === "left") s.leftText = text;
+  else s.rightText = text;
+}
+
+function onCompareClose(): void {
+  compareState.value = null;
+}
 
 function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -111,9 +201,28 @@ onBeforeUnmount(() => {
     <ToolBar />
     <TabBar />
     <div class="editor-area">
-      <EditorPane @cursor="cursor = $event" @ready="editorApi.undo = $event.undo; editorApi.redo = $event.redo; editorApi.format = $event.format; editorApi.search = $event.search" />
+      <CompareView
+        v-if="compareState"
+        :left-title="compareState.leftTitle"
+        :right-title="compareState.rightTitle"
+        :left-text="compareState.leftText"
+        :right-text="compareState.rightText"
+        :left-writable="compareState.leftWritable"
+        :right-writable="compareState.rightWritable"
+        @close="onCompareClose"
+        @apply="onCompareApply"
+      />
+      <EditorPane v-else @cursor="cursor = $event" @ready="editorApi.undo = $event.undo; editorApi.redo = $event.redo; editorApi.format = $event.format; editorApi.search = $event.search" />
     </div>
     <StatusBar :cursor="cursor" />
+
+    <!-- 对比源选择弹窗（SIS-FUNC-6） -->
+    <n-modal v-model:show="compareModalOpen" preset="card" title="选择对比源" style="width: 420px">
+      <div class="compare-src-options">
+        <n-button block @click="startCompareTwoFiles">打开两个文件对比</n-button>
+        <n-button block @click="startCompareClipboard" :disabled="!tabsStore.activeTab">当前文件 vs 剪贴板</n-button>
+      </div>
+    </n-modal>
   </div>
 </template>
 
@@ -128,5 +237,10 @@ onBeforeUnmount(() => {
   flex: 1;
   min-height: 0;
   background: #fff;
+}
+.compare-src-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 </style>

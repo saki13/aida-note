@@ -195,13 +195,14 @@ function switchToTab() {
     view.setState(emptyState());
     return;
   }
-  if (tab.cmState) {
+  if (tab.cmState && tab.cmState.doc.toString() === tab.content) {
     view.setState(tab.cmState);
     emitCursor(tab.cmState);
     applyTheme(); // 恢复旧 state 后重推当前主题（避免主题过期）
     applyWrap(); // 恢复旧 state 后重推当前软换行（wrap 配置可能过期）
     applyLanguage(tab.language); // 恢复后对齐语言（cmState 缓存可能过期）
   } else {
+    // cmState 缺失或内容过期（如 FUNC-6 对比合并外部写回）→ 以 tab.content 重建
     const state = createState(tab);
     view.setState(state);
     tab.cmState = markRaw(state); // 同 updateListener：避免 Vue 代理破坏 Compartment 身份

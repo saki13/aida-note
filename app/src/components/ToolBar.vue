@@ -60,6 +60,12 @@ function onSearch(): void {
 async function onWrap(): Promise<void> {
   await settingsStore.setWordWrap(!settingsStore.wordWrap);
 }
+
+/** 打开对比源选择（SIS-FUNC-6，MainView 注入 compareApi）。 */
+const compareApi = inject<{ open: () => void } | null>("compareApi", null);
+function onCompare(): void {
+  compareApi?.open();
+}
 </script>
 
 <template>
@@ -80,7 +86,7 @@ async function onWrap(): Promise<void> {
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onSearch" :disabled="!hasActive">搜索</n-button></template>FUNC-7（Sprint 3，Ctrl+F）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onFormat" :disabled="!canFormat">格式化</n-button></template>FUNC-5（Sprint 3，Ctrl+Shift+F）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onWrap" :type="settingsStore.wordWrap ? 'primary' : 'default'">换行{{ settingsStore.wordWrap ? "：开" : "：关" }}</n-button></template>软换行（FUNC-8，Sprint 3，全局共享）</n-tooltip>
-    <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>对比</n-button></template>FUNC-6（Sprint 3）</n-tooltip>
+    <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onCompare" :disabled="!hasActive">对比</n-button></template>FUNC-6（Sprint 3）</n-tooltip>
 
     <span class="sep"></span>
 
