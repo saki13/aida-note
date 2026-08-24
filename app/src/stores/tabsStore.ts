@@ -7,7 +7,7 @@
  * 扩展字段：hadBom（ARCH-2 §3.1）、cmState（CodeMirror 状态，含历史，切标签保留）。
  */
 
-import { ref, computed, markRaw } from "vue";
+import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import type { DialogApi } from "naive-ui";
 import type { EditorState } from "@codemirror/state";

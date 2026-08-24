@@ -361,7 +361,7 @@ function buildDecorations(state: EditorState): DecorationSet {
     }
   }
 
-  ranges.sort((a, b) => a.from - b.from || a.startSide - b.startSide);
+  ranges.sort((a, b) => a.from - b.from || a.value.startSide - b.value.startSide);
   return Decoration.set(ranges, true);
 }
 

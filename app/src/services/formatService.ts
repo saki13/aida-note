@@ -37,9 +37,9 @@ async function formatWith(parser: string, pluginKind: string, content: string): 
   const prettier = await import("prettier/standalone");
   const opts = {
     parser,
-    plugins: (await resolvePlugins(pluginKind)) as unknown as Parameters<
-      typeof prettier.format
-    >[1]["plugins"],
+    plugins: (await resolvePlugins(pluginKind)) as unknown as NonNullable<
+      Parameters<typeof prettier.format>[1]
+    >["plugins"],
   };
   return prettier.format(content, opts);
 }

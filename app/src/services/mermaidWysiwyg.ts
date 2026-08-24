@@ -137,10 +137,10 @@ export class MermaidWidget extends WidgetType {
 }
 
 /** 渲染图表到容器（防抖回调 / 主题变更重渲染共用；串行队列 + 超时保护）。 */
-function renderDiagram(wrap: HTMLElement): Promise<void> {
+function renderDiagram(wrap: HTMLElement): void {
   const diagram = wrap.dataset.diagram ?? "";
   const id = `aida-mermaid-${++seq}`;
-  return enqueueRender(async () => {
+  enqueueRender(async () => {
     if (!wrap.isConnected) return;
     try {
       const mermaid = (await import("mermaid")).default;

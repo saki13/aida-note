@@ -2,11 +2,11 @@
   "updated_at": "2026-08-22",
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
-    "sprint": "Sprint 5（已闭环：使用手册 + 安装包，PO 追加授权第 5 次）",
-    "stage": "项目交付（阶段 11，PO 已确认交付 + Sprint 5 追加收尾完成）",
+    "sprint": "Sprint 5（已闭环：使用手册 + 安装包全交付，含 MSI/NSIS）",
+    "stage": "项目交付（阶段 11，PO 已确认交付 + Sprint 5 追加收尾全部完成）",
     "stage_main": "项目交付",
-    "status": "Sprint 5 收口完成：使用手册 5/5 ✅ + 绿色版 ZIP（app/dist-install/aida-note-portable.zip，4.6MB 解压即用）✅ + release exe 启动冒烟 ✅；MSI/NSIS 正式安装包待 PO 本地 npm run tauri build（产物 app/src-tauri/target/release/bundle/）",
-    "next": "PO 本地产出 MSI/NSIS 安装包 + 复验 4 项本地观察项（AI-1 真实流式/mermaid 修复真实渲染/两文件对比入口/Tauri 退出草稿清理）；无流程动作待办",
+    "status": "Sprint 5 全交付：使用手册 5/5 ✅ + 绿色版 ZIP ✅ + MSI/NSIS 正式安装包 ✅（bundle/nsis/aida-note_0.1.0_x64-setup.exe + msi/aida-note_0.1.0_x64_en-US.msi，PO 本地挂梯 npm run tauri build 产出）",
+    "next": "PO 提出新一轮优化（① AI 文档简报+大纲锚点 ② 暗色 UI 修复/强调色 ③ 自定义背景+透明度）→ 开 Sprint 6；另余 4 项本地观察项复验",
     "blocked": "无"
   },
   "backlog": [
@@ -507,6 +507,13 @@
       "type": "Sprint 闭环",
       "summary": "Sprint 5 闭环完成（PO 追加授权第 5 次：使用手册 + 安装包），项目交付收尾全部完成",
       "detail": "DoD 对照表：使用手册 5/5 ✅；安装包 元数据 ✅ + exe ✅ + 启动验证 ✅ + 绿色版 ZIP ✅ + dist 最新 ✅ + MSI/NSIS ⏳（PO 本地 npm run tauri build 一键产出，一切前置就绪）；交付物：project/使用手册.md + app/dist-install/aida-note-portable.zip；commit 收口；等待 PO：MSI/NSIS 产出 + 4 项本地观察项复验"
+    },
+    {
+      "date": "2026-08-22",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "Sprint 5 收官：MSI/NSIS 正式安装包产出（PO 本地挂梯设 HTTPS_PROXY 后 npm run tauri build 成功）",
+      "detail": "产物 bundle/nsis/aida-note_0.1.0_x64-setup.exe + bundle/msi/aida-note_0.1.0_x64_en-US.msi；WiX/NSIS 工具链已缓存 %LOCALAPPDATA%\\tauri\\，后续打包不再下载；Sprint 5 DoD 6/6 全过"
     }
   ],
   "checklist": {

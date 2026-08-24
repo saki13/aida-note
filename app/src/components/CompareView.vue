@@ -175,6 +175,7 @@ function escapeHtml(s: string): string {
     <div v-if="diffCount" class="block-actions">
       <template v-for="(b, i) in diff.blocks" :key="'b' + i">
         <div class="block-action">
+          <span class="block-idx">块 {{ i + 1 }}</span>
           <n-button size="tiny" :disabled="!leftWritable" @click="acceptRightToLeft(b)">接受右 → 左</n-button>
           <n-button size="tiny" :disabled="!rightWritable" @click="acceptLeftToRight(b)">接受左 → 右</n-button>
         </div>
@@ -302,6 +303,11 @@ function escapeHtml(s: string): string {
   display: flex;
   gap: 6px;
   align-items: center;
+}
+.block-idx {
+  font-size: 12px;
+  color: var(--text-color, #333);
+  opacity: 0.7;
 }
 @media (prefers-color-scheme: dark) {
   .compare-view {

@@ -102,7 +102,7 @@ async function formatCurrent(): Promise<void> {
 function formatKeydownHandler(): Extension {
   return Prec.highest(
     EditorView.domEventHandlers({
-      keydown: (e, v) => {
+      keydown: (e) => {
         if (
           (e.ctrlKey || e.metaKey) &&
           e.shiftKey &&

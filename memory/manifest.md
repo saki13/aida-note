@@ -11,12 +11,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| `current_sprint` | `Sprint 5（已闭环：使用手册 + 安装包，PO 追加授权第 5 次）` |
-| `current_stage` | `项目交付（阶段 11，PO 已确认交付；Sprint 5 追加收尾完成）` |
-| `current_theme` | `交付收尾（使用手册 + 安装包）` |
+| `current_sprint` | `Sprint 5（已闭环：使用手册 + 安装包全交付，含 MSI/NSIS 安装包）` |
+| `current_stage` | `项目交付（阶段 11，PO 已确认交付；Sprint 5 追加收尾全部完成）` |
+| `current_theme` | `交付收尾（使用手册 + 安装包）→ 新一轮优化待开（AI 简报+大纲 / 暗色 UI 修复 / 自定义背景）` |
 | `current_task` | `Sprint 5：使用手册 + 安装包（收口完成）` |
 | `task_status` | `done` |
-| `task_progress` | `Sprint 1/2/3/4/5 全部闭环（decision-001~026）；Backlog 19/19 完成；Sprint 5：使用手册 5/5 ✅ + 绿色版 ZIP ✅（app/dist-install/aida-note-portable.zip，4.6MB）+ release exe ✅（12.95MB，冒烟 15s 存活）+ MSI/NSIS ⏳（PO 本地 npm run tauri build）` |
+| `task_progress` | `Sprint 1/2/3/4/5 全部闭环（decision-001~026）；Backlog 19/19 完成；Sprint 5：使用手册 5/5 ✅ + 绿色版 ZIP ✅ + release exe ✅ + MSI/NSIS ✅（bundle/nsis + msi 已产出）` |
 
 ---
 
@@ -98,5 +98,5 @@
 
 ## 待完善 / 下一步
 
-- **当前阶段**：项目交付（Backlog 19/19 燃尽；PO 确认交付；Sprint 5 追加「使用手册 + 安装包」收口完成：手册 5/5 ✅ + 绿色版 ZIP 交付 ✅）
-- 下一步：PO 本地 `npm run tauri build` 产出 MSI/NSIS 正式安装包（`app/src-tauri/target/release/bundle/`）+ 复验 4 项本地观察项；无流程动作待办
+- **当前阶段**：项目交付（Backlog 19/19 燃尽；PO 确认交付；Sprint 5 追加「使用手册 + 安装包」全部交付完成：手册 5/5 ✅ + 绿色版 ZIP ✅ + MSI/NSIS ✅）
+- 下一步：PO 提出新一轮优化（① AI 文档简报+大纲锚点 ② 暗色模式 UI 修复/强调色 ③ 自定义背景+透明度）→ 开 Sprint 6；另余 4 项本地观察项复验
