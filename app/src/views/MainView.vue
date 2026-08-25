@@ -193,6 +193,7 @@ async function openPaths(paths: string[]): Promise<void> {
 
 let unlistenDrag: (() => void) | null = null;
 let unlistenClose: (() => void) | null = null;
+let unlistenOpenFiles: (() => void) | null = null;
 
 async function setupTauriEvents(): Promise<void> {
   if (!isTauri()) return;
@@ -202,6 +203,13 @@ async function setupTauriEvents(): Promise<void> {
       if (event.payload.type === "drop") {
         void openPaths(event.payload.paths);
       }
+    });
+
+    // OPT-4-FIX：单实例合并窗口——第二实例的 argv 经 single-instance 插件转发为
+    // 「aida-open-files」事件，这里打开为标签（openPath 同路径自动去重激活）。
+    const { listen } = await import("@tauri-apps/api/event");
+    unlistenOpenFiles = await listen<string[]>("aida-open-files", (event) => {
+      void openPaths(event.payload);
     });
 
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
@@ -373,6 +381,7 @@ onBeforeUnmount(() => {
   window.removeEventListener("beforeunload", onBeforeUnload);
   unlistenDrag?.();
   unlistenClose?.();
+  unlistenOpenFiles?.();
 });
 </script>
 

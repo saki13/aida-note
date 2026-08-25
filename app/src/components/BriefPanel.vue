@@ -113,18 +113,18 @@ function onGenerate(): void {
 
 <style scoped>
 .brief-panel {
-  position: absolute;
+  position: fixed;
   top: 84px;
   right: 12px;
-  width: 380px;
-  max-height: 70vh;
+  width: 320px;
+  max-height: 60vh;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border-color, #ddd);
   border-radius: 8px;
   background: var(--floating-bg, #fff);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-  z-index: 20;
+  z-index: 100;
   overflow: hidden;
 }
 .brief-head {
@@ -229,7 +229,7 @@ function onGenerate(): void {
 }
 /* 收起态小胶囊 */
 .brief-mini {
-  position: absolute;
+  position: fixed;
   top: 84px;
   right: 12px;
   display: flex;
@@ -243,7 +243,7 @@ function onGenerate(): void {
   font-size: 12px;
   color: var(--text-color, #333);
   cursor: pointer;
-  z-index: 20;
+  z-index: 100;
 }
 .brief-mini:hover {
   color: var(--accent, #2080f0);

@@ -6,6 +6,18 @@
 
 ## 决策记录
 
+### decision-029 · 2026-08-25 · OPT-4-FIX 单实例合并窗口 + 简报悬窗位置修复（Sprint 7 收口后 PO 反馈）
+
+- **背景**：Sprint 7 收口（commit 9a1ed09）后 PO 反馈：① 多次打开文件都是默认开不同窗口（OPT-4 的 `"exe" "%1"` 每次都拉起全新实例），期望合并到同一窗口、仅「拖标签出窗口」才分窗；② 简报悬窗出现在左下角且挤占编辑区，期望右上角弱提醒。
+- **决策**：
+  1. **单实例合并窗口**：注册 `tauri-plugin-single-instance = "2"`；第二实例不再创建窗口，`onNewInstance` 回调里 `filter_file_args` 过滤 argv 后 `app.emit("aida-open-files", files)` 转交主实例；前端 `setupTauriEvents` 中 `listen("aida-open-files")` → `openPaths` → `openPath` 打开为标签（`openTab` 已同路径去重+激活，与 OPT-4 `get_launch_args` 首次启动链路语义一致）。不修改 OPT-4 已注册的右键/文件关联命令——argv 行为天然适配单实例转发。dev 模式与 release 的 mutex 名不同，dev 多开不合并属插件预期行为，不影响安装版。
+  2. **简报悬窗定位**：`.brief-panel` / `.brief-mini` 由 `position: absolute` 改 `position: fixed`（top:84px right:12px；宽 380→320px；max-height 70vh→60vh；z-index 20→100）——锁定视口右上角，脱离编辑区 flex 流，弱提醒不遮挡文字。
+  3. **「拖标签出窗口分窗」不随本轮实现**：涉及 Tauri 动态多窗口 + 前端多编辑器实例（当前 editorApi 为模块级单例）+ 跨窗口状态同步，属独立大工程，建议单独 Sprint 立项（见 data.json backlog 候选）。
+- **依据**：cargo check ✅（32.90s，tauri-plugin-single-instance v2.4.3）；vue-tsc 0 错误；opt5-brief-smoke 13/13 ✅（含「悬窗展示在右上角」断言；首轮 8/9 为 cargo 并行编译占满 CPU 的时序超时，系统空闲后 13/13）；真实多开合并行为（release 安装版）列 PO 本机验证。
+- **影响范围**：Cargo.toml / lib.rs（`use tauri::Emitter`）/ MainView.vue（listen + unlisten）/ BriefPanel.vue（fixed）；CHG-004、state.md、data.json。
+
+---
+
 ### decision-028 · 2026-08-25 · Sprint 7 两任务（OPT-5 AI 简报悬窗+会话缓存 / OPT-6 上次文件标签恢复）
 
 - **背景**：Sprint 6 收口（commit 1d7343b）后 PO 反馈简报体验问题（弹窗随时关闭、无缓存、每次点开重调 API）与 notepad++ 式会话恢复诉求，Sprint 7 启动收口经三轮 Planning 确认：简报缓存**仅当次会话**（重启清空）+ **按文件各存一份**（key=文件路径，未保存用 tab.id）；上次标签恢复 = **已保存文件 + 未保存草稿合并**（启动弹一次「恢复上次会话」确认）。

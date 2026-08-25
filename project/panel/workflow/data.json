@@ -2,11 +2,11 @@
   "updated_at": "2026-08-25",
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
-    "sprint": "Sprint 7（执行中：OPT-5 AI 简报悬窗+会话缓存 / OPT-6 上次文件标签恢复）",
-    "stage": "Sprint In Progress（阶段 4 执行，OPT-5/6 自测全绿 + 全量回归 16 脚本全绿，收口四边同步中）",
+    "sprint": "Sprint 7（收口后修复批次：OPT-4-FIX 单实例合并窗口 + 简报悬窗位置）",
+    "stage": "Sprint In Progress（OPT-5/6 已收口 9a1ed09；OPT-4-FIX 完成自测待提交）",
     "stage_main": "Sprint In Progress",
-    "status": "OPT-5 ✅ opt5-brief-smoke 13/13（悬窗右上角/收起/关闭重开命中缓存/刷新+1/生成中关闭后台完成/按文件独立缓存/未配置提示/锚点定位）；OPT-6 ✅ opt6-session-smoke 7/7（快照优先/回填置脏/丢弃/失败跳过/reload 隔离）；vue-tsc 0 错误；build ✅ 49.90s",
-    "next": "Sprint 7 收口（DoD 对照表已产出）→ commit + push GitHub；PO 本机验证 OPT-6 已保存文件真实重开 + Tauri 真实退出快照写入；OPT-4 遗留验证继续挂账",
+    "status": "OPT-4-FIX ✅ cargo check 32.90s + vue-tsc 0 错误 + opt5-brief-smoke 13/13（含悬窗右上角断言）；真实多开合并行为列 PO 本机验证",
+    "next": "commit + push GitHub；PO 本机验证：真实多开合并（第二个文件右键/双击合入同一窗口标签）+ OPT-6 真实退出/重开 + OPT-4 tauri build 完整打包",
     "blocked": "无"
   },
   "backlog": [
@@ -184,6 +184,13 @@
       "category": "优化",
       "priority": "P1",
       "status": "done"
+    },
+    {
+      "id": "OPT-7",
+      "title": "拖标签出窗口分窗（多窗口编辑，PO 期望「拉出标签才开新窗口」）",
+      "category": "优化",
+      "priority": "P2",
+      "status": "todo"
     }
   ],
   "sprints": [
@@ -637,6 +644,13 @@
       "type": "Sprint 收口",
       "summary": "Sprint 7 收口完成：DoD 对照表 + CHG-003 + decision-028 + 四边同步，commit 9a1ed09 + push GitHub（master）",
       "detail": "OPT-5 10/10 ✅（opt5-brief-smoke 13/13）+ OPT-6 7/7 ✅（opt6-session-smoke 7/7）；全量回归 16 脚本全绿；vue-tsc 0 错误；npm run build 通过（49.90s）；PO 本机验证：OPT-6 已保存文件真实重开 + Tauri 真实退出快照写入；OPT-4 遗留验证（真实右键/双击 + tauri build 完整打包）继续挂账"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "OPT-4-FIX 单实例合并窗口 + 简报悬窗位置修复完成（CHG-004 / decision-029）：第二实例不再开新窗口，argv 转交主实例以标签打开；悬窗改 fixed 右上角弱提醒",
+      "detail": "tauri-plugin-single-instance=2 注册（filter_file_args → app.emit('aida-open-files')）；前端 listen → openPath（同路径去重激活）；BriefPanel .brief-panel/.brief-mini absolute→fixed（top:84px right:12px，宽 380→320px，max-height 60vh，z-index 100）；cargo check ✅ 32.90s；vue-tsc 0 错误；opt5-brief-smoke 13/13（含悬窗右上角断言）；真实多开合并行为列 PO 本机验证"
     }
   ],
   "checklist": {
