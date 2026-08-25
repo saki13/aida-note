@@ -123,7 +123,7 @@ function onToggleAiPanel(): void {
   aiPanelApi?.toggle();
 }
 
-/** SIS-OPT-1：AI 文档简报入口（默认关闭：未配置 API 时点击提示）。 */
+/** SIS-OPT-5：AI 简报悬窗入口（默认关闭：未配置 API 时点击提示；配置后打开悬窗，命中缓存不重复生成）。 */
 function onBrief(): void {
   const tab = tabsStore.activeTab;
   if (!tab) return;
@@ -131,7 +131,7 @@ function onBrief(): void {
     message.warning("请先在 AI 面板配置 API 后使用 AI 简报");
     return;
   }
-  void aiStore.openBrief(tab.content);
+  void aiStore.ensureBrief(tab);
 }
 
 // ---- SIS-OPT-3：自定义背景（工具栏「背景」下拉 + 参数弹窗） ----
@@ -319,7 +319,7 @@ async function onFixMermaid(): Promise<void> {
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onToggleAiPanel">AI 面板</n-button></template>AI 问答侧栏（AI-1，Sprint 4，可折叠）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger>
       <n-button size="small" :disabled="!hasActive" @click="onBrief">AI 简报</n-button>
-    </template>AI 文档简报 + 大纲锚点（OPT-1，Sprint 6）</n-tooltip>
+    </template>AI 简报悬窗（OPT-5，Sprint 7：右上角悬窗 + 按文件缓存 + 刷新）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>设置</n-button></template>ARCH-2 settingsStore（Sprint 4）</n-tooltip>
 
     <span class="spacer"></span>

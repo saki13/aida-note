@@ -8,6 +8,20 @@
 
 ## 记录列表
 
+### 2026-08-25 · Sprint 收口 · Sprint 7（OPT-5 AI 简报悬窗+会话缓存 / OPT-6 上次文件标签恢复）收口回填（轻量 Retrospective，随收口合并）
+
+- **背景**：Sprint 6 收口后 PO 反馈简报体验问题（弹窗随时关闭、无缓存、每次点开重调 API）与 notepad++ 式会话恢复诉求；Sprint 7 启动收口经三轮 Planning 确认（简报缓存仅当次会话 + 按文件各存一份；恢复=已保存+未保存合并）后执行。OPT-5/6 均完成自测与全量回归，收口中。
+- **关联 decision**：decision-028（Sprint 7 两任务）
+- **影响范围**：aiStore.ts / BriefPanel.vue（新，BriefModal.vue 删）/ MainView.vue / sessionService.ts（新）/ EditorPane 联动；scripts（opt5-brief-smoke / opt6-session-smoke 新，opt1-brief-smoke 删，run-all-smoke 扩至 16 项）；package.json（test:opt5-brief + test:opt6-session）；Sprint_7_DoD对照表.md；change_log CHG-003
+- **过程数据**：opt5-brief-smoke 13/13；opt6-session-smoke 7/7（含重跑）；全量回归 16 脚本全绿；vue-tsc 0 错误；npm run build 通过（49.90s / 4218 modules）；git commit 收口中
+- **经验与教训（Sprint 7 专项）**：
+  1. **beforeunload 在 reload 时也触发 → 会话恢复不能无脑弹**：OPT-6 初期「reload 触发 beforeunload 写快照 → 每次都弹恢复框」会破坏常规刷新与既有回归。解法：`sessionStorage` 标记区分「首次加载/真实重启」与「同页 reload」——首次加载才检查快照，reload 跳过快照检查直接走草稿恢复；自测用 close+newPage 模拟真实重启（避免 beforeunload 覆盖快照）。
+  2. **追加式回归日志甄别新旧轮**：run-all-smoke 的 regression.log 用 `*>>` 追加，多轮内容混存；判断「本轮是否跑完」看 regression-done.txt 的修改时间与内容（含 opt5/opt6 即新轮），别被旧轮 opt1-brief-smoke=0 误导。
+  3. **删除旧脚本要同步回归清单与 package.json**：opt1-brief-smoke.mjs 被 opt5 替代删除，run-all-smoke.ps1 同步去掉该名（否则 MODULE_NOT_FOUND 假失败，延续 Sprint 6 教训）；npm scripts 同步增删 test:opt5-brief / test:opt6-session。
+- **改进项清单（回流方向）**：
+  1. PO 本机验证清单（Sprint 7）：OPT-6 已保存文件真实重开（Tauri）+ 真实窗口退出快照写入（沙箱仅模拟）；OPT-5 真实 AI 简报体验（真实 API 流式）；OPT-4 遗留（真实右键/双击 + `npm run tauri build` 完整打包）
+  2. 悬窗自由拖拽定位、简报缓存跨会话持久化（PO 明确暂缓，后续按需立项）
+
 ### 2026-08-25 · Sprint 执行中 · Sprint 6（OPT-1 简报+锚点 / OPT-2 暗色修复+强调色 / OPT-3 自定义背景 / OPT-4 Shell 集成）收口前回填（轻量 Retrospective，随收口合并）
 
 - **背景**：PO 在 Sprint 5 交付后发起新一轮优化，Sprint 6 启动收口经严格 Planning（PO 两次流程纠偏：必须先 Planning 产出 SIS 再执行、Planning 未确认不得跑回归）确认 4 任务。OPT-2/3/1 完成自测全绿，OPT-4 代码完成（cargo check 通过）列 PO 本机验证，收口中。

@@ -2,11 +2,11 @@
   "updated_at": "2026-08-25",
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
-    "sprint": "Sprint 6（执行中：OPT-1 简报+锚点 / OPT-2 暗色修复+强调色 / OPT-3 自定义背景 / OPT-4 Shell 集成）",
-    "stage": "Sprint In Progress（阶段 4 执行，OPT-1/2/3 自测全绿，OPT-4 代码完成待 PO 本机验证，收口中）",
+    "sprint": "Sprint 7（执行中：OPT-5 AI 简报悬窗+会话缓存 / OPT-6 上次文件标签恢复）",
+    "stage": "Sprint In Progress（阶段 4 执行，OPT-5/6 自测全绿 + 全量回归 16 脚本全绿，收口四边同步中）",
     "stage_main": "Sprint In Progress",
-    "status": "OPT-2 ✅ theme-smoke 11/11；OPT-3 ✅ opt3-bg-smoke 14/14（双模式/分区对比度色温/按图保存）；OPT-1 ✅ opt1-brief-smoke 7/7（默认关闭）；OPT-4 ⏳ cargo check ✅（HKCU 注册+argv 打开），真实右键/双击 + tauri build 列 PO 本机验证；全量回归 15 脚本全绿；vue-tsc 0 错误",
-    "next": "Sprint 6 收口（DoD 对照表已产出）→ commit + push GitHub；PO 本机验证 OPT-4 Shell 集成 + npm run tauri build 完整打包",
+    "status": "OPT-5 ✅ opt5-brief-smoke 13/13（悬窗右上角/收起/关闭重开命中缓存/刷新+1/生成中关闭后台完成/按文件独立缓存/未配置提示/锚点定位）；OPT-6 ✅ opt6-session-smoke 7/7（快照优先/回填置脏/丢弃/失败跳过/reload 隔离）；vue-tsc 0 错误；build ✅ 49.90s",
+    "next": "Sprint 7 收口（DoD 对照表已产出）→ commit + push GitHub；PO 本机验证 OPT-6 已保存文件真实重开 + Tauri 真实退出快照写入；OPT-4 遗留验证继续挂账",
     "blocked": "无"
   },
   "backlog": [
@@ -170,6 +170,20 @@
       "category": "优化",
       "priority": "P1",
       "status": "in_progress"
+    },
+    {
+      "id": "OPT-5",
+      "title": "AI 简报悬窗 + 会话缓存（按文件、刷新、后台生成）",
+      "category": "优化",
+      "priority": "P1",
+      "status": "done"
+    },
+    {
+      "id": "OPT-6",
+      "title": "上次文件标签恢复（notepad++ 式会话恢复）",
+      "category": "优化",
+      "priority": "P1",
+      "status": "done"
     }
   ],
   "sprints": [
@@ -232,6 +246,14 @@
         "OPT-2",
         "OPT-3",
         "OPT-4"
+      ]
+    },
+    {
+      "id": "Sprint 7",
+      "theme": "体验优化（AI 简报悬窗+会话缓存 / 上次文件标签恢复）",
+      "items": [
+        "OPT-5",
+        "OPT-6"
       ]
     }
   ],
@@ -587,6 +609,27 @@
       "type": "任务完成",
       "summary": "OPT-4 Windows Shell 集成代码完成（cargo check 通过 2m38s）：HKCU 右键菜单 + 9 扩展名文件关联 + 启动 argv 打开",
       "detail": "winreg 0.52 写 HKCU（*\\shell\\aida-note + aida-note.<ext> ProgID + .<ext> 默认值）；setup 自动注册幂等；get_launch_args command + MainView.openLaunchArgs 前端接线；真实右键/双击 + tauri build 列 PO 本机验证"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P1",
+      "type": "Sprint 启动",
+      "summary": "Sprint 7 启动收口完成（PO 确认 2 优化任务 + 各 SIS）：OPT-5 AI 简报悬窗+会话缓存 / OPT-6 上次文件标签恢复",
+      "detail": "PO 反馈简报体验（弹窗无缓存每次重调 API）与 notepad++ 式会话恢复诉求；Planning 三轮确认：简报缓存仅当次会话 + 按文件各存一份（key=文件路径/未保存 tab.id）；恢复=已保存文件+未保存草稿合并（启动弹一次「恢复上次会话」）；PO「确认，开始执行（推荐）」"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "OPT-5 AI 简报悬窗 + 会话缓存完成（opt5-brief-smoke 13/13）：右上角悬窗替换弹窗 / 按文件缓存 / 刷新 / 生成中关闭后台完成",
+      "detail": "BriefPanel.vue 替换 BriefModal.vue（右上角绝对定位 + 收起小胶囊状态点 + 文件名 + 刷新/收起/关闭）；aiStore 重构 briefCache（key=文件路径/__untitled__${tabId}）+ briefUi{visible,minimized}；closeBrief 仅置 UI 不 abort（后台完成写缓存）；refreshBrief abort 旧请求重新生成；watch activeTab 切换文件空态+独立缓存；未配置 AI 入口提示不生成；大纲锚点点击真实滚动"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "OPT-6 上次文件标签恢复完成（opt6-session-smoke 7/7）：正常退出写快照 / 启动弹「恢复上次会话」/ 已保存重开+未保存回填置脏",
+      "detail": "sessionService.ts 新建（Tauri appDataDir/session/session.json + 浏览器 localStorage aida-note-session）；退出钩子（beforeunload/onCloseRequested destroy 前）写快照；启动快照优先弹恢复确认，无快照走草稿恢复；恢复后清快照；sessionStorage 标记 aida-session-handled 隔离同页 reload 不误弹；已保存路径不存在跳过提示；全量回归 16 脚本全绿"
     }
   ],
   "checklist": {

@@ -6,6 +6,19 @@
 
 ## 决策记录
 
+### decision-028 · 2026-08-25 · Sprint 7 两任务（OPT-5 AI 简报悬窗+会话缓存 / OPT-6 上次文件标签恢复）
+
+- **背景**：Sprint 6 收口（commit 1d7343b）后 PO 反馈简报体验问题（弹窗随时关闭、无缓存、每次点开重调 API）与 notepad++ 式会话恢复诉求，Sprint 7 启动收口经三轮 Planning 确认：简报缓存**仅当次会话**（重启清空）+ **按文件各存一份**（key=文件路径，未保存用 tab.id）；上次标签恢复 = **已保存文件 + 未保存草稿合并**（启动弹一次「恢复上次会话」确认）。
+- **决策**：
+  1. **OPT-5 简报悬窗 + 会话缓存**：aiStore 重构为 `briefCache: ref<Record<string, BriefRecord>>`（key=文件路径/`__untitled__${tabId}`）+ `briefUi: {visible, minimized}` + `briefActiveKey`；actions = ensureBrief（有缓存 done/loading 直接返回）/generateBrief/refreshBrief（先 `briefController?.abort()` 再 startGenerate）/updateActiveKey/closeBrief（**仅置 UI、不 abort，后台完成写缓存**）/toggleBriefMinimized/startGenerate（写 loading 记录→streamChat 流式累积→done/error；AbortError 返回不覆盖）。悬窗组件 BriefPanel.vue 替换 BriefModal.vue（右上角绝对定位 + 收起小胶囊带状态点 + 文件名 + 刷新/收起/关闭；watch activeTab → updateActiveKey；emit locate 只滚动不关悬窗）。
+  2. **OPT-6 会话恢复（notepad++ 式）**：sessionService.ts 新建（Tauri appDataDir/session/session.json + 浏览器 localStorage `aida-note-session`）；`buildSessionSnapshot` = 已保存 `{path}` + 未保存 `{id, title, content}`；**正常退出写快照**（Tauri onCloseRequested destroy 前 / 浏览器 beforeunload）；**启动快照优先**（有快照弹「恢复上次会话」，无快照走草稿恢复）；恢复 = 已保存 `openPath`（失败跳过提示）+ 未保存 `createUntitled`+`updateContent` 回填置脏 → `clearSession`。
+  3. **关键排障（sessionStorage 标记隔离 reload）**：beforeunload 在浏览器 reload 时也触发写快照 → 同页刷新会误弹「恢复上次会话」破坏常规刷新与既有回归。修复：`setupSessionRecovery` 用 `sessionStorage` 标记 `aida-session-handled`——**首次加载才检查快照；同页 reload 跳过快照检查直接走草稿恢复**；自测用 close+newPage 模拟真实重启（避免 beforeunload 覆盖快照）。
+  4. **回归运行器脚本名 = 文件名去后缀**（延续 Sprint 6 教训）：run-all-smoke.ps1 16 项 = 原 13 + opt3-bg-smoke + opt5-brief-smoke + opt6-session-smoke；旧 opt1-brief-smoke.mjs 删除（被 opt5 替代）；回归 summary 文件是追加式日志，甄别新旧轮看 done.txt 修改时间。
+- **依据**：opt5-brief-smoke 13/13；opt6-session-smoke 7/7（含重跑验证 sessionStorage 标记改动后仍全绿）；全量回归 16 脚本全绿；vue-tsc 0 错误；npm run build 通过（built in 49.90s）；Sprint_7_DoD对照表.md。
+- **影响范围**：aiStore.ts / BriefPanel.vue（新，BriefModal.vue 删）/ MainView.vue / sessionService.ts（新）/ EditorPane 联动；scripts（opt5-brief-smoke.mjs + opt6-session-smoke.mjs 新 / opt1-brief-smoke.mjs 删 / run-all-smoke.ps1 扩至 16 项）；package.json（test:opt5-brief + test:opt6-session）；Sprint_7_DoD对照表.md；change_log CHG-003；**OPT-6 已保存文件真实重开（Tauri）+ 真实窗口退出快照写入列 PO 本机验证**。
+
+---
+
 ### decision-027 · 2026-08-25 · Sprint 6 优化四任务（OPT-1 简报+锚点 / OPT-2 暗色修复+强调色 / OPT-3 自定义背景 / OPT-4 Shell 集成）
 
 - **背景**：Sprint 5 交付后 PO 发起新一轮优化并确认 Sprint 6 启动收口（4 任务 + 各 SIS）：① AI 文档简报+大纲锚点（默认关闭）② 暗色模式 UI 修复 + 强调色生效 ③ 自定义背景图片 + 透明度/对比度/色温（双模式、工具栏区与编辑区分开调）④ Windows Shell 集成（文件右键打开 + 文本扩展名关联双击打开）。

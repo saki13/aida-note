@@ -11,12 +11,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| `current_sprint` | `Sprint 6（优化：OPT-1 简报+锚点 / OPT-2 暗色修复+强调色 / OPT-3 自定义背景 / OPT-4 Shell 集成）` |
-| `current_stage` | `Sprint In Progress（阶段 4 执行；OPT-2/3/1 完成自测，OPT-4 代码完成待 PO 本机验证）` |
-| `current_theme` | `优化（AI 简报+大纲锚点 / 美化系统 / Windows Shell 集成）` |
-| `current_task` | `Sprint 6：OPT-4 Windows Shell 集成（收尾中）` |
-| `task_status` | `in_progress（OPT-1/2/3 done；OPT-4 代码完成）` |
-| `task_progress` | `OPT-2 ✅ theme-smoke 11/11；OPT-3 ✅ opt3-bg-smoke 14/14；OPT-1 ✅ opt1-brief-smoke 7/7；OPT-4 ⏳ cargo check ✅，真实右键/双击 + tauri build 列 PO 验证；全量回归 15 脚本全绿；vue-tsc 0 错误` |
+| `current_sprint` | `Sprint 7（OPT-5 AI 简报悬窗+会话缓存 / OPT-6 上次文件标签恢复）` |
+| `current_stage` | `Sprint In Progress（阶段 4 执行：OPT-5/6 完成自测+全量回归+收口同步，待 commit）` |
+| `current_theme` | `体验优化（简报悬窗+按文件缓存+刷新+后台生成 / notepad++ 式会话恢复）` |
+| `current_task` | `Sprint 7 收口（DoD 对照表已产出；四边同步中）` |
+| `task_status` | `in_progress（OPT-5/6 done）` |
+| `task_progress` | `OPT-5 ✅ opt5-brief-smoke 13/13；OPT-6 ✅ opt6-session-smoke 7/7；全量回归 16 脚本全绿；vue-tsc 0 错误；build ✅（49.90s）` |
 
 ---
 
@@ -98,5 +98,5 @@
 
 ## 待完善 / 下一步
 
-- **当前阶段**：Sprint 6 执行中（OPT-1/2/3 完成自测全绿：opt3-bg-smoke 14/14、opt1-brief-smoke 7/7、theme-smoke 11/11；OPT-4 cargo check 通过）
-- 下一步：Sprint 6 收口（DoD 对照表已产出；commit + push GitHub）；PO 本机验证 OPT-4 真实 Shell 集成 + `npm run tauri build` 完整打包（bundler 工具已缓存，PO 挂梯可跑）
+- **当前阶段**：Sprint 7 执行完成（OPT-5 opt5-brief-smoke 13/13；OPT-6 opt6-session-smoke 7/7；全量回归 16 脚本全绿；vue-tsc 0 错误；build 通过）
+- 下一步：Sprint 7 收口（DoD 对照表已产出；change_log CHG-003 / decision-028 / state / manifest / data.json / evolution_log 同步 → commit + push GitHub）；PO 本机验证 OPT-6 已保存文件真实重开 + Tauri 真实退出快照写入；OPT-4 遗留验证（真实右键/双击 + `npm run tauri build` 完整打包）继续挂账

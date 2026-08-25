@@ -34,4 +34,17 @@
 
 ---
 
+### CHG-003 · 2026-08-25 · Sprint 7 两任务（OPT-5 AI 简报悬窗+会话缓存 / OPT-6 上次文件标签恢复）
+
+| 字段 | 内容 |
+|------|------|
+| 发起人 | PO（Sprint 6 交付后反馈：「简报弹窗无缓存每次重调 API，要右上角悬窗 + 缓存 + 刷新 + 后台生成 + 可隐藏/关闭/再打开」+「像 notepad++ 退出后重开恢复上次文件标签」） |
+| 风险等级 | 中（OPT-5 简报从弹窗重构为悬窗并改造 aiStore 缓存模型；OPT-6 新增会话快照与启动恢复，触及关闭钩子与启动流程） |
+| 评估结论 | OPT-5：aiStore 内存缓存 `briefCache`（key=文件路径，未保存用 tab.id，仅当次会话）+ `briefUi{visible,minimized}` + 刷新（abort 旧请求）+ 关闭不中断后台完成；悬窗组件 BriefPanel 替换 BriefModal。OPT-6：sessionService 快照（Tauri appDataDir/session + 浏览器 localStorage）+ 退出钩子写快照 + 启动快照优先弹「恢复上次会话」（已保存重开 + 未保存回填置脏）+ sessionStorage 标记区分首次加载与同页 reload（不干扰常规刷新与既有回归）。均经自测验证 |
+| 批准人 | PO（Sprint 7 Planning 三轮确认：缓存仅当次会话 + 按文件各存一份 + 已保存文件与未保存草稿合并恢复；启动收口确认「确认，开始执行（推荐）」） |
+| 同步动作 | aiStore.ts / BriefPanel.vue（新建，BriefModal.vue 删除）/ MainView.vue / sessionService.ts（新建）/ EditorPane 联动；scripts（opt5-brief-smoke + opt6-session-smoke 新建，opt1-brief-smoke 删除，run-all-smoke 扩至 16 项）；Sprint_7_DoD对照表、memory/state.md、memory/manifest.md、memory/decisions.md（decision-028）、project/panel/workflow/data.json |
+| 状态 | 已关闭（OPT-5 opt5-brief-smoke 13/13 ✅；OPT-6 opt6-session-smoke 7/7 ✅；全量回归 16 脚本全绿；vue-tsc 0 错误；build 通过；OPT-6 已保存文件真实重开 + Tauri 真实退出快照列 PO 本机验证） |
+
+---
+
 *文件创建：（项目初始化） | Aida v0.1.0*

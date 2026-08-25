@@ -15,12 +15,13 @@ import StatusBar from "../components/StatusBar.vue";
 import CompareView from "../components/CompareView.vue";
 import RecentEmpty from "../components/RecentEmpty.vue";
 import AiPanel from "../components/AiPanel.vue";
-import BriefModal from "../components/BriefModal.vue";
+import BriefPanel from "../components/BriefPanel.vue";
 import { useTabsStore } from "../stores/tabsStore";
 import { useAiStore } from "../stores/aiStore";
 import { useSettingsStore } from "../stores/settingsStore";
 import { readFile, pickFiles, basename } from "../services/fileService";
 import { checkRecover, removeDraft, clearAllDrafts, type DraftRecord } from "../services/draftService";
+import { loadSession, saveSession, clearSession, type SessionTab, type SessionSnapshot } from "../services/sessionService";
 
 const tabsStore = useTabsStore();
 const aiStore = useAiStore();
@@ -78,10 +79,9 @@ const editorApi: EditorApi = {
 };
 provide<EditorApi>("editorApi", editorApi);
 
-/** SIS-OPT-1：大纲锚点点击 -> 编辑器滚动定位 + 关闭简报浮层。 */
+/** SIS-OPT-5：大纲锚点点击 -> 编辑器滚动定位（悬窗保留不关闭）。 */
 function onBriefLocate(line: number): void {
   editorApi.scrollToLine(line);
-  aiStore.closeBrief();
 }
 
 // ---- AI 问答侧栏（SIS-AI-1：可折叠，ToolBar「AI 面板」开关）----
@@ -207,7 +207,10 @@ async function setupTauriEvents(): Promise<void> {
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
     unlistenClose = await getCurrentWindow().onCloseRequested(async (event) => {
       const hasDirty = tabsStore.tabs.some((t) => t.dirty);
-      if (!hasDirty) return; // 无 dirty：直接关闭
+      if (!hasDirty) {
+        await saveSession(buildSessionSnapshot()); // SIS-OPT-6：正常退出写会话快照（无 dirty 直接关闭）
+        return;
+      }
       // Tauri 拦截模式：同步阻止本次关闭；确认通过后用 destroy() 直接销毁窗口。
       // 不能用 close()：close() 会再次触发 onCloseRequested，在首次拦截的时序下仍可能被
       // 再次 preventDefault 导致关不掉。destroy() 不重新触发 close requested，是官方推荐
@@ -216,6 +219,7 @@ async function setupTauriEvents(): Promise<void> {
       try {
         const ok = await tabsStore.confirmCloseAllDirty(dialog);
         if (ok) {
+          await saveSession(buildSessionSnapshot()); // SIS-OPT-6：正常退出写会话快照
           await clearAllDrafts(); // 正常退出清理全部草稿（SIS-FUNC-10：不留碎片）
           await getCurrentWindow().destroy();
         }
@@ -242,6 +246,62 @@ async function setupRecovery(): Promise<void> {
     recoverDrafts.value = drafts;
     recoverModalOpen.value = true;
   }
+}
+
+// ---- SIS-OPT-6：上次文件标签恢复（会话快照） ----
+
+const sessionTabs = ref<SessionTab[]>([]);
+const sessionModalOpen = ref(false);
+
+/** 组装会话快照：已保存记录路径，未保存记录 id/title/全文。 */
+function buildSessionSnapshot(): SessionSnapshot {
+  return {
+    ts: Date.now(),
+    tabs: tabsStore.tabs.map((t) =>
+      t.filePath ? { path: t.filePath } : { id: String(t.id), title: t.title, content: t.content },
+    ),
+  };
+}
+
+/** 启动恢复：有快照先弹「恢复上次会话」；无快照再走草稿检查（互斥共存）。
+ *  注意：sessionStorage 标记用于区分「首次加载（重启/新开页）」与「同页 reload」——
+ *  reload 会触发 beforeunload 写快照，若每次都弹会干扰常规刷新，故 reload 场景跳过快照检查。 */
+const SESSION_HANDLED_KEY = "aida-session-handled";
+async function setupSessionRecovery(): Promise<void> {
+  if (!sessionStorage.getItem(SESSION_HANDLED_KEY)) {
+    const snap = await loadSession();
+    if (snap && snap.tabs.length) {
+      sessionStorage.setItem(SESSION_HANDLED_KEY, "1");
+      sessionTabs.value = snap.tabs;
+      sessionModalOpen.value = true;
+      return;
+    }
+    sessionStorage.setItem(SESSION_HANDLED_KEY, "1"); // 本次标签页会话检查完毕（无快照）
+  }
+  await setupRecovery();
+}
+
+/** 恢复会话：已保存文件重新打开（失败跳过提示）；未保存标签回填置脏；恢复后清快照。 */
+async function onRestoreSession(): Promise<void> {
+  for (const t of sessionTabs.value) {
+    if (t.path) {
+      const ok = await tabsStore.openPath(t.path);
+      if (!ok) message.warning(`文件不存在，已跳过：${t.path}`);
+    } else if (t.content !== undefined) {
+      const id = tabsStore.createUntitled();
+      tabsStore.updateContent(id, t.content); // 回填内容并置脏（草稿语义一致）
+    }
+  }
+  await clearSession();
+  sessionTabs.value = [];
+  sessionModalOpen.value = false;
+}
+
+/** 全部丢弃：清快照不恢复。 */
+async function onDiscardSession(): Promise<void> {
+  await clearSession();
+  sessionTabs.value = [];
+  sessionModalOpen.value = false;
 }
 
 function onRecover(draft: DraftRecord): void {
@@ -280,11 +340,19 @@ function onKeydown(e: KeyboardEvent): void {
 
 onMounted(() => {
   window.addEventListener("keydown", onKeydown);
+  // 浏览器环境正常退出也写会话快照（Tauri 走 onCloseRequested 钩子）
+  window.addEventListener("beforeunload", onBeforeUnload);
   void setupTauriEvents();
-  void setupRecovery(); // 启动扫描崩溃残留草稿（SIS-FUNC-10）
+  void setupSessionRecovery(); // SIS-OPT-6：先会话快照恢复，无快照再走草稿（SIS-FUNC-10）
   void aiStore.init(); // 加载 AI 配置（SIS-AI-1）
   void openLaunchArgs(); // SIS-OPT-4：启动命令行文件参数 -> 打开为标签
 });
+
+/** SIS-OPT-6：浏览器正常退出写会话快照（localStorage 同步写入，卸载前可靠）。 */
+function onBeforeUnload(): void {
+  if (isTauri()) return; // Tauri 走 onCloseRequested（含 destroy 前快照）
+  void saveSession(buildSessionSnapshot());
+}
 
 /** SIS-OPT-4：Tauri 启动带文件参数时逐个打开为标签（复用 openPath 链路，去重/最近文件语义一致）。 */
 async function openLaunchArgs(): Promise<void> {
@@ -302,6 +370,7 @@ async function openLaunchArgs(): Promise<void> {
 
 onBeforeUnmount(() => {
   window.removeEventListener("keydown", onKeydown);
+  window.removeEventListener("beforeunload", onBeforeUnload);
   unlistenDrag?.();
   unlistenClose?.();
 });
@@ -347,8 +416,8 @@ onBeforeUnmount(() => {
     </div>
     <StatusBar :cursor="cursor" />
 
-    <!-- SIS-OPT-1：AI 文档简报 + 大纲锚点浮层 -->
-    <BriefModal @locate="onBriefLocate" />
+    <!-- SIS-OPT-5：AI 简报右上角悬窗（可收起/关闭/再打开，缓存按文件） -->
+    <BriefPanel @locate="onBriefLocate" />
 
     <!-- 对比源选择弹窗（SIS-FUNC-6） -->
     <n-modal v-model:show="compareModalOpen" preset="card" title="选择对比源" style="width: 420px">
@@ -374,6 +443,25 @@ onBeforeUnmount(() => {
       </div>
       <template #footer>
         <n-button size="small" @click="onDiscardAll">全部丢弃</n-button>
+      </template>
+    </n-modal>
+
+    <!-- 上次会话恢复确认（SIS-OPT-6：正常退出快照恢复，已保存文件重开 + 未保存内容回填） -->
+    <n-modal v-model:show="sessionModalOpen" preset="card" title="恢复上次会话" style="width: 480px">
+      <div class="recover-list">
+        <div v-for="(t, i) in sessionTabs" :key="i" class="recover-item">
+          <div class="recover-info">
+            <div class="recover-title">{{ t.path ? basename(t.path) : (t.title ?? "未命名") }}</div>
+            <div class="recover-path">{{ t.path ?? (t.content !== undefined ? "未保存内容" : "") }}</div>
+          </div>
+          <div class="recover-actions">
+            <span class="recover-tag">{{ t.path ? "文件" : "未保存" }}</span>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <n-button size="small" @click="onDiscardSession">全部丢弃</n-button>
+        <n-button size="small" type="primary" @click="onRestoreSession">恢复</n-button>
       </template>
     </n-modal>
   </div>
