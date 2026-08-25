@@ -113,3 +113,63 @@ export function buildFixMermaidMessages(code: string): ChatMsg[] {
     },
   ];
 }
+
+// ---- SIS-OPT-1：AI 文档简报 ----
+
+/** 简报 prompt：对全文生成结构化摘要（只输出简报正文）。 */
+export function buildBriefMessages(content: string): ChatMsg[] {
+  return [
+    {
+      role: "user",
+      content: `请为以下文档生成简报：1) 先用一段话概括文档主题与核心内容（100-200 字）；2) 再列出 3-5 个要点，每点一行、以"- "开头。只输出简报正文，不要任何前言后语。\n\n文档内容：\n"""\n${content.slice(0, 12000)}\n"""`,
+    },
+  ];
+}
+
+/** 大纲项：文档标题结构（锚点定位用）。line 为编辑器 1-based 行号。 */
+export interface OutlineItem {
+  line: number;
+  level: number;
+  title: string;
+}
+
+/** 解析 Markdown front matter 结束行号（首行为 --- 且 20 行内闭合；0 = 无）。 */
+function frontMatterEnd(lines: string[]): number {
+  if (!/^-+$/.test((lines[0] ?? "").trim())) return 0;
+  for (let i = 1; i < Math.min(lines.length, 20); i++) {
+    if (/^-+$/.test((lines[i] ?? "").trim())) return i + 1;
+  }
+  return 0;
+}
+
+/**
+ * 解析文档大纲：Markdown ATX 标题（#~######）+ setext 标题（=== 为 h1、--- 为 h2，紧邻上一文本行）。
+ * --- 分隔线：上一行为空行/标题行时不产生大纲项；front matter 整体跳过。
+ */
+export function parseOutline(content: string): OutlineItem[] {
+  const lines = content.split(/\r?\n/);
+  const items: OutlineItem[] = [];
+  const start = frontMatterEnd(lines);
+  let prev: { text: string; line: number } | null = null;
+  for (let i = start; i < lines.length; i++) {
+    const text = lines[i].trim();
+    if (!text) {
+      prev = null;
+      continue;
+    }
+    const atx = /^(#{1,6})\s+(.+)$/.exec(text);
+    if (atx) {
+      items.push({ line: i + 1, level: atx[1].length, title: atx[2].trim() });
+      prev = null;
+      continue;
+    }
+    const setext = /^(=+|-+)$/.exec(text);
+    if (setext && prev) {
+      items.push({ line: prev.line, level: setext[1].startsWith("=") ? 1 : 2, title: prev.text });
+      prev = null;
+      continue;
+    }
+    prev = { text, line: i + 1 };
+  }
+  return items;
+}

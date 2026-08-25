@@ -242,8 +242,8 @@ function escapeHtml(s: string): string {
 }
 .pane-tag {
   font-size: 11px;
-  color: #999;
-  background: #f0f0f0;
+  color: var(--text-color, #999);
+  background: var(--btn-bg, #f0f0f0);
   border-radius: 3px;
   padding: 0 4px;
 }
@@ -276,20 +276,20 @@ function escapeHtml(s: string): string {
   min-width: 1px;
 }
 .line-removed {
-  background: #fdecec;
+  background: var(--diff-removed-bg, #fdecec);
 }
 .line-added {
-  background: #e8f5e9;
+  background: var(--diff-added-bg, #e8f5e9);
 }
 .line-blank .line-text {
   min-height: 1em;
 }
 .char-removed {
-  background: #f8c6c6;
+  background: var(--diff-removed-char, #f8c6c6);
   text-decoration: line-through;
 }
 .char-added {
-  background: #b8e6b8;
+  background: var(--diff-added-char, #b8e6b8);
 }
 .block-actions {
   display: flex;
@@ -308,31 +308,5 @@ function escapeHtml(s: string): string {
   font-size: 12px;
   color: var(--text-color, #333);
   opacity: 0.7;
-}
-@media (prefers-color-scheme: dark) {
-  .compare-view {
-    background: #1e1e1e;
-    color: #d4d4d4;
-  }
-  .line-no {
-    color: #666;
-    background: #252526;
-  }
-  .line-removed {
-    background: #4a2323;
-  }
-  .line-added {
-    background: #1e3a24;
-  }
-  .char-removed {
-    background: #8a3a3a;
-  }
-  .char-added {
-    background: #2d6a34;
-  }
-  .pane-tag {
-    background: #333;
-    color: #999;
-  }
 }
 </style>

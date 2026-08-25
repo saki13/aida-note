@@ -21,4 +21,17 @@
 
 ---
 
+### CHG-002 · 2026-08-25 · Sprint 6 优化四任务（OPT-1 简报+锚点 / OPT-2 暗色修复+强调色 / OPT-3 自定义背景 / OPT-4 Shell 集成）
+
+| 字段 | 内容 |
+|------|------|
+| 发起人 | PO（Sprint 6 启动收口已确认：「加载已有文档可调用 AI 生成文档简报及大纲锚点（默认关闭）」+「美化系统（暗色修复/强调色/背景图+透明度）」+「文件右键菜单打开」） |
+| 风险等级 | 中（OPT-3 新增背景分层 CSS 触及全局布局；OPT-4 新增 Rust 依赖 winreg 与 HKCU 注册；其余为功能增强无架构变更） |
+| 评估结论 | OPT-2 主题变量全局统一定义（根因=变量从未定义回退亮色）；OPT-3 背景分层（.bg-layer z-index 0 + chrome/编辑区分区参数 + 按图持久化）；OPT-1 简报浮层 + 本地大纲解析 + 锚点定位；OPT-4 HKCU 幂等注册 + argv 打开。均经自测验证 |
+| 批准人 | PO（Sprint 6 Planning 确认 4 任务 + 各 SIS 确认） |
+| 同步动作 | App.vue/MainView.vue/ToolBar.vue/settingsStore.ts/settingsService.ts/BriefModal.vue(新)/aiService.ts/aiStore.ts/EditorPane.vue/src-tauri(Cargo.toml+lib.rs)/package.json/scripts(opt3-bg-smoke+opt1-brief-smoke+run-all-smoke)；Sprint_6_DoD对照表、memory/state.md、memory/manifest.md、memory/decisions.md（decision-027）、project/panel/workflow/data.json |
+| 状态 | 进行中（OPT-2/3/1 自测全绿 + cargo check 通过；OPT-4 真实右键/双击 + `npm run tauri build` 完整打包列 PO 本机验证） |
+
+---
+
 *文件创建：（项目初始化） | Aida v0.1.0*

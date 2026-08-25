@@ -33,3 +33,7 @@ pnpm-debug.log*
 # Backups
 *.zip.bak
 *.bak
+
+# Test artifacts（smoke 脚本产出，DoD 对照表已汇总）
+app/scripts/*-report.txt
+app/regression-*.txt

@@ -13,9 +13,12 @@ import {
   buildPolishMessages,
   buildAskMessages,
   buildFixMermaidMessages,
+  buildBriefMessages,
+  parseOutline,
   isAiConfigured,
   type AiConfig,
   type ChatMsg,
+  type OutlineItem,
 } from "../services/aiService";
 
 export type PolishMode = "rewrite" | "polish" | "shorten" | "expand";
@@ -42,8 +45,19 @@ export const useAiStore = defineStore("ai", () => {
   /** 润色流状态（null = 无进行中/结果） */
   const polish = ref<PolishState | null>(null);
 
+  // ---- SIS-OPT-1：AI 文档简报 + 大纲锚点 ----
+  /** 简报状态：大纲为本地解析（不依赖 AI），简报正文由 AI 流式生成。 */
+  const brief = ref<{ open: boolean; loading: boolean; error: string; summary: string; outline: OutlineItem[] }>({
+    open: false,
+    loading: false,
+    error: "",
+    summary: "",
+    outline: [],
+  });
+
   let qaController: AbortController | null = null;
   let polishController: AbortController | null = null;
+  let briefController: AbortController | null = null;
 
   async function init(): Promise<void> {
     const s = await loadSettings();
@@ -143,6 +157,37 @@ export const useAiStore = defineStore("ai", () => {
     return result.trim();
   }
 
+  /** 打开简报：本地解析大纲 + AI 流式生成简报（未配置时仅展示大纲与错误提示）。 */
+  async function openBrief(content: string): Promise<void> {
+    const cfg = aiConfig.value;
+    brief.value = { open: true, loading: false, error: "", summary: "", outline: parseOutline(content) };
+    if (!isAiConfigured(cfg)) {
+      brief.value.error = "未配置 API（请先在 AI 面板配置 baseURL/key/model）";
+      return;
+    }
+    brief.value.loading = true;
+    briefController = new AbortController();
+    let summary = "";
+    try {
+      await streamChat(cfg, buildBriefMessages(content), {
+        onDelta: (t) => { summary += t; brief.value.summary += t; },
+      }, briefController.signal);
+      brief.value.loading = false;
+    } catch (e) {
+      if ((e as Error).name === "AbortError") return;
+      brief.value.loading = false;
+      brief.value.error = e instanceof Error ? e.message : String(e);
+    } finally {
+      briefController = null;
+    }
+  }
+
+  /** 关闭简报浮层（中断进行中的生成）。 */
+  function closeBrief(): void {
+    briefController?.abort();
+    brief.value.open = false;
+  }
+
   return {
     aiConfig,
     session,
@@ -150,6 +195,7 @@ export const useAiStore = defineStore("ai", () => {
     qaStreamText,
     qaError,
     polish,
+    brief,
     init,
     saveConfig,
     ask,
@@ -158,5 +204,7 @@ export const useAiStore = defineStore("ai", () => {
     polishStop,
     polishClear,
     fixMermaid,
+    openBrief,
+    closeBrief,
   };
 });

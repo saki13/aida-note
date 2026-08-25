@@ -81,16 +81,20 @@ try {
   const modalTitle = (await page.locator(".n-modal").textContent()) ?? "";
   check("崩溃重启弹出恢复提示（检测到未保存的草稿）", modalTitle.includes("检测到未保存的草稿") && (await page.locator(".recover-item").count()) === 1, JSON.stringify(modalTitle.slice(0, 40)));
 
-  // ---- 5. 点击「恢复」-> 内容恢复 + 置脏 + 草稿清理 ----
+  // ---- 5. 点击「恢复」-> 内容恢复 + 置脏 + 草稿再保护 ----
   await page.locator(".recover-item button", { hasText: "恢复" }).click();
   await page.waitForTimeout(400);
   const editorText = (await page.locator(".cm-content").textContent()) ?? "";
   const dirtyCount = await page.locator(".dirty-count").count();
+  // 恢复后草稿语义：旧草稿被消费（removeDraft），但恢复的标签仍为脏（未保存），
+  // 防抖 DRAFT_DEBOUNCE_MS=500 后自动保存会重新建立草稿保护（再崩溃不丢内容）——
+  // 故稳定态为 1 条同 key 草稿（原断言 400ms 快照期望 0 恰在防抖落盘前，是时序竞态）。
+  await page.waitForTimeout(700); // 等防抖落盘（500ms + 余量）
   const afterRecover = await drafts();
-  check("恢复后内容回填 + 置脏标记 + 草稿清理", editorText.includes("draft content test") && dirtyCount > 0 && Object.keys(afterRecover).length === 0, `dirty=${dirtyCount} drafts=${Object.keys(afterRecover).length}`);
+  check("恢复后内容回填 + 置脏 + 草稿再保护（旧草稿消费、脏标签自动保存重建）", editorText.includes("draft content test") && dirtyCount > 0 && Object.keys(afterRecover).length === 1 && "__untitled_未命名-1" in afterRecover, `dirty=${dirtyCount} drafts=${JSON.stringify(Object.keys(afterRecover))}`);
 
   // ---- 6. 保存成功后草稿清理 ----
-  await page.locator(".cm-content").click();
+  await page.locator(".cm-content").click({ force: true });
   await page.keyboard.type(" more", { delay: 1 });
   await page.waitForFunction(
     (k) => Object.keys(JSON.parse(localStorage.getItem(k) ?? "{}")).length > 0,

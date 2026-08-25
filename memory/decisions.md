@@ -6,6 +6,20 @@
 
 ## 决策记录
 
+### decision-027 · 2026-08-25 · Sprint 6 优化四任务（OPT-1 简报+锚点 / OPT-2 暗色修复+强调色 / OPT-3 自定义背景 / OPT-4 Shell 集成）
+
+- **背景**：Sprint 5 交付后 PO 发起新一轮优化并确认 Sprint 6 启动收口（4 任务 + 各 SIS）：① AI 文档简报+大纲锚点（默认关闭）② 暗色模式 UI 修复 + 强调色生效 ③ 自定义背景图片 + 透明度/对比度/色温（双模式、工具栏区与编辑区分开调）④ Windows Shell 集成（文件右键打开 + 文本扩展名关联双击打开）。
+- **决策**：
+  1. **OPT-2 根因与全局变量收敛**：暗色白底白字根因 = 组件用 `var(--toolbar-bg/--border-color/--editor-bg/--text-color/--accent 等)` 但变量**从未定义**，暗色下全部回退亮色。修复 = App.vue 按 `[data-theme]`（明/暗）+ `[data-accent]`（蓝/绿/紫）统一定义全部变量，组件内只用变量并移除 prefers-color-scheme 块；强调色 = CSS 变量 + Naive UI themeOverrides primary 三套显式覆盖（Naive 默认 primary 是绿，blue 必须显式覆盖）。
+  2. **OPT-3 背景分层架构**：`.bg-layer`（z-index 0）铺于内容之下、内容 z-index 1；`has-bg` + `data-bg-mode`（app/outside）；chrome 区（工具栏/标签栏/状态栏/AI 面板）有背景时透明；模式 app 时编辑区透明透出背景，模式 outside 时编辑区保持主题纯色（文字范围纯色）。**工具栏区与编辑区各一套对比度/色温**：对比度 = inset boxShadow 遮罩（暗主题黑遮罩保浅字/亮主题白遮罩保深字）；色温 = sepia+hue-rotate（暖）/ hue-rotate（冷）。**按背景保存参数**：`backgrounds` 以图 key 存记录，换图加载记录/无记录继承当前，切回恢复。图片持久化 = Tauri 走 dialog+fs 读 dataURL（分块 btoa 防大文件栈溢出）/ 浏览器隐藏 file input + FileReader。
+  3. **OPT-1 大纲本地解析 + AI 简报 + 锚点定位**：大纲 = `parseOutline` 本地解析（Markdown ATX `#` 系列 + setext `=`/`-` + front matter 跳过），**不依赖 AI**；简报 = AI 流式生成（复用 streamChat + buildBriefMessages）；锚点 = EditorPane 新增 `scrollToLine`（dispatch selection + `EditorView.scrollIntoView(pos, {y:"center"})`）经 ready api 暴露，点击大纲项真实滚动+光标；默认关闭：未配置 AI 时入口点击提示「请先配置」。
+  4. **OPT-4 Windows Shell 集成**：winreg 0.52 写 HKCU（无需管理员）：右键菜单 `*\shell\aida-note`（「用 aida-note 打开」+ Icon + command `"exe" "%1"`）+ 9 扩展名（md/txt/log/json/yaml/yml/ini/toml/csv）ProgID `aida-note.<ext>` + `.<ext>` 默认值；启动 setup 自动注册（create_subkey 覆盖式幂等）；`get_launch_args` command 收集 argv 存在的文件路径，前端启动 invoke → `tabsStore.openPath` 逐个打开（多文件多标签）。浏览器 dev 环境不注册（Rust 侧 + isTauri 门控）。
+  5. **自测关键排障（三处实现遗漏 + 交互坑）**：① settingsStore 缺 5 个背景 action 函数体（return 引用了未定义函数 → 选图后 ReferenceError 静默，has-bg 永不出现）② ToolBar 缺 `ref`/`NModal`/`NSlider` import（setup 直接 ReferenceError → 白屏）③ MainView 模板漏渲染背景层（script/style 已改、模板没加，tsc unused 捕获）④ Naive UI NSlider 键盘 focus 不转移（ArrowRight 始终作用于第一个滑杆，改 click handle 聚焦 + ArrowRight / 拖拽 handle 两种交互）。
+- **依据**：opt3-bg-smoke 14/14；opt1-brief-smoke 7/7；theme-smoke 11/11；全量回归 15 脚本全绿；vue-tsc 0 错误；cargo check 通过（2m38s）；Sprint_6_DoD对照表.md。
+- **影响范围**：App.vue / MainView.vue / ToolBar.vue / settingsStore.ts / settingsService.ts / BriefModal.vue（新）/ aiService.ts / aiStore.ts / EditorPane.vue / aiStore.ts；src-tauri（Cargo.toml + lib.rs）；scripts（opt3-bg-smoke.mjs 新 / opt1-brief-smoke.mjs 新 / run-all-smoke.ps1 增 2 项）；Sprint_6_DoD对照表.md；change_log CHG-002；**OPT-4 真实右键/双击 + `npm run tauri build` 完整打包列 PO 本机验证**。
+
+---
+
 ### decision-026 · 2026-08-22 · Sprint 5（使用手册 + 安装包）：打包元数据规范化 + 沙箱 bundler 限制对策（绿色版交付 / PO 本地兜底）
 
 - **背景**：项目交付（Backlog 19/19 燃尽、报告 PO 确认）后，PO 追加授权第 5 次短 Sprint：「还需要使用手册 + 安装包」。

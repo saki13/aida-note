@@ -8,6 +8,21 @@
 
 ## 记录列表
 
+### 2026-08-25 · Sprint 执行中 · Sprint 6（OPT-1 简报+锚点 / OPT-2 暗色修复+强调色 / OPT-3 自定义背景 / OPT-4 Shell 集成）收口前回填（轻量 Retrospective，随收口合并）
+
+- **背景**：PO 在 Sprint 5 交付后发起新一轮优化，Sprint 6 启动收口经严格 Planning（PO 两次流程纠偏：必须先 Planning 产出 SIS 再执行、Planning 未确认不得跑回归）确认 4 任务。OPT-2/3/1 完成自测全绿，OPT-4 代码完成（cargo check 通过）列 PO 本机验证，收口中。
+- **关联 decision**：decision-027（Sprint 6 四任务）
+- **影响范围**：App.vue / MainView.vue / ToolBar.vue / settingsStore.ts / settingsService.ts / BriefModal.vue（新）/ aiService.ts / aiStore.ts / EditorPane.vue；src-tauri（Cargo.toml + lib.rs）；scripts（opt3-bg-smoke / opt1-brief-smoke 新，run-all-smoke 扩至 15 项）；Sprint_6_DoD对照表.md；change_log CHG-002
+- **过程数据**：opt3-bg-smoke 14/14；opt1-brief-smoke 7/7；theme-smoke 11/11；全量回归 15 脚本全绿；vue-tsc 0 错误；cargo check 通过（2m38s）；git commit 收口中
+- **经验与教训（Sprint 6 专项）**：
+  1. **「已改完」的代码也可能缺整块**：OPT-3 三处实现遗漏（settingsStore 5 个 action 无函数体、ToolBar 缺 ref/NModal/NSlider import、MainView 模板漏渲染背景层）全部表现为「自测超时/白屏」而非编译错误——**自测超时优先怀疑运行时 ReferenceError（页面白屏），用 pageerror 直接定位**；模板未用 computed 会被 vue-tsc unused 捕获（bgChromeStyle/hasBg never read）。
+  2. **UI 组件库键盘交互不可假设**：Naive UI NSlider 的 ArrowRight 键盘步进只作用于「第一个滑杆」（focus 不转移或 keydown 冒泡处理缺陷），多滑杆表单自测必须用真实鼠标交互（click handle 聚焦 + ArrowRight / 拖拽 handle）替代键盘模拟。
+  3. **page.evaluate 回调不能闭包 node 变量**：evaluate 序列化参数传入（LS_KEY 教训）；reload 会丢未保存标签并触发草稿恢复弹窗，测试注入配置优先走 store action（saveConfig）而非 reload。
+  4. **回归运行器脚本名即文件名**：run-all-smoke.ps1 加脚本时用 `xxx-smoke`（.mjs 文件名去后缀），拼错（opt3-bg）导致 MODULE_NOT_FOUND 假失败——看 done 文件与日志尾部甄别「真失败」与「调度失败」。
+- **改进项清单（回流方向）**：
+  1. PO 本机验证清单（Sprint 6）：OPT-4 真实右键/双击/argv 多文件打开 + `npm run tauri build` 完整打包（bundler 已缓存，挂梯可跑）；OPT-1/3 真实环境体验（真实 AI 简报、真实背景图）
+  2. 自测技能沉淀继续候补：本次「多滑杆键盘不可用」与「page.evaluate 序列化」为新坑，可并入自测 skill 立项评估
+
 ### 2026-08-22 · Sprint 闭环 · Sprint 4 收口回填（轻量 Retrospective，AS-8 第 4 次授权闭环 = 授权燃尽，Backlog 19/19 燃尽）
 
 - **背景**：Sprint 4 四任务全部完成（FUNC-9 7c9334b / FUNC-11 757f0fa / FUNC-10 54a048f / AI-1 bf335f7 + daa706c），走完阶段 4->5->6->7->8 完整闭环。Review 结论 Passed With Observation（Aida 代行判定，已广播 PO）。本记录承担阶段 7 反思纪要职能（轻量形态：反思并入 Evolution Log，不开独立会议）。

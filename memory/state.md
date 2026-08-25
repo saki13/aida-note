@@ -2,36 +2,36 @@
 
 > 用途：记录当前项目的最小运行状态快照（L2 状态快照）。
 > 版本：v0.1.0
-> 状态：项目已交付（Backlog 19/19 燃尽，PO 确认交付，AidaPulse 流程结束；Sprint 5 追加：使用手册 + 安装包交付）
+> 状态：Sprint 6 执行中（优化四任务：OPT-1/2/3 已完成自测，OPT-4 代码完成待 PO 本机验证）
 
 ---
 
 ## 1. 当前状态
 
 - `skill_version`：`v0.1.0`
-- `current_sprint`：`Sprint 5（已闭环：使用手册 + 安装包，PO 追加授权第 5 次）`
-- `current_theme`：`交付收尾（使用手册 + 安装包）`
-- `current_stage`：`项目交付（阶段 11，已确认交付 + Sprint 5 追加收尾完成）`
-- `current_stage_flow_doc`：`product/agents/aida/stage_flows/11_项目交付.md`
-- `last_run_at`：`2026-08-22`
-- `last_run_status`：`Sprint 5 全部交付完成：使用手册 ✅ + 绿色版 ZIP ✅ + MSI/NSIS 正式安装包 ✅（PO 本地挂梯 npm run tauri build 产出）`
-- `execution_mode`：`AS-8 短 Sprint 自主执行（授权 4 次闭环 + Sprint 5 追加授权 1 次，全部闭环）`
+- `current_sprint`：`Sprint 6（优化：OPT-1 简报+锚点 / OPT-2 暗色修复+强调色 / OPT-3 自定义背景 / OPT-4 Shell 集成）`
+- `current_theme`：`优化（AI 简报+大纲锚点 / 美化系统 / Windows Shell 集成）`
+- `current_stage`：`Sprint In Progress（阶段 4 执行，OPT-2/3/1 完成自测，OPT-4 待 PO 本机验证，收口中）`
+- `current_stage_flow_doc`：`product/agents/aida/stage_flows/4_SprintInProgress.md`
+- `last_run_at`：`2026-08-25`
+- `last_run_status`：`OPT-2 回归 13/13 ✅；OPT-3 opt3-bg-smoke 14/14 ✅；OPT-1 opt1-brief-smoke 7/7 ✅；全量回归 15 脚本全绿；vue-tsc 0 错误；cargo check 通过（OPT-4 Rust 侧编译通过）`
+- `execution_mode`：`AS-8 短 Sprint 自主执行（Sprint 6 PO 确认启动）`
 
 ---
 
 ## 2. 当前任务追踪
 
-- `current_task`：`（已完成）Sprint 5：使用手册 + 安装包`
-- `task_status`：`done`
-- `task_progress`：`Sprint 1/2/3/4/5 全部闭环（decision-001~026）；Backlog 19/19 完成；Sprint 5 交付物：使用手册 ✅ / 绿色版 ZIP ✅ / release exe ✅ / MSI+NSIS ✅（bundle/nsis/aida-note_0.1.0_x64-setup.exe + msi/aida-note_0.1.0_x64_en-US.msi）`
-- `next_action`：`PO 提出新一轮优化（AI 文档简报+大纲锚点 / 暗色 UI 修复 / 自定义背景+透明度）→ 待开 Sprint 6`
+- `current_task`：`Sprint 6：OPT-4 Windows Shell 集成（收尾中，PO 本机验证）`
+- `task_status`：`in_progress（OPT-1/2/3 done；OPT-4 代码完成）`
+- `task_progress`：`OPT-2 暗色修复+强调色 ✅（theme-smoke 11/11）；OPT-3 背景 ✅（14/14，含双模式/分区对比度色温/按图保存）；OPT-1 简报+锚点 ✅（7/7，默认关闭）；OPT-4 Shell 集成 ⏳ cargo check ✅ + 真实右键/双击 + tauri build 列 PO 本机验证`
+- `next_action`：`Sprint 6 收口（DoD 对照表已产出；等待全量回归最终确认 → commit + push GitHub；PO 本机验证 OPT-4 与完整打包）`
 
 ---
 
 ## 3. 当前阻塞与等待决策
 
 - `阻塞项`：无
-- `等待 PO`：PO 本地验证观察项（AI-1 真实流式 / mermaid 修复真实渲染 / 两文件对比入口 / Tauri 退出草稿清理）——非流程阻塞，验证结果如发现问题可随时回流
+- `等待 PO`：OPT-4 真实 Shell 集成验证（文件右键「用 aida-note 打开」/ 双击关联扩展名打开 / 启动 argv 多文件打开）+ `npm run tauri build` 完整打包（bundler 工具已缓存，PO 挂梯可跑）——非流程阻塞
 - `无其他阻塞`
 
 ---

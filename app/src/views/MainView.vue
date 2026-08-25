@@ -6,7 +6,7 @@
  * 附加：拖拽打开文件、窗口关闭 dirty 合并确认、全局快捷键（Ctrl+N/O/S/Shift+S）。
  */
 
-import { onMounted, onBeforeUnmount, provide, ref } from "vue";
+import { onMounted, onBeforeUnmount, provide, ref, computed, type CSSProperties } from "vue";
 import { useDialog, useMessage, NModal, NButton } from "naive-ui";
 import ToolBar from "../components/ToolBar.vue";
 import TabBar from "../components/TabBar.vue";
@@ -15,16 +15,46 @@ import StatusBar from "../components/StatusBar.vue";
 import CompareView from "../components/CompareView.vue";
 import RecentEmpty from "../components/RecentEmpty.vue";
 import AiPanel from "../components/AiPanel.vue";
+import BriefModal from "../components/BriefModal.vue";
 import { useTabsStore } from "../stores/tabsStore";
 import { useAiStore } from "../stores/aiStore";
+import { useSettingsStore } from "../stores/settingsStore";
 import { readFile, pickFiles, basename } from "../services/fileService";
 import { checkRecover, removeDraft, clearAllDrafts, type DraftRecord } from "../services/draftService";
 
 const tabsStore = useTabsStore();
 const aiStore = useAiStore();
+const settingsStore = useSettingsStore();
 const dialog = useDialog();
 const message = useMessage();
 const cursor = ref({ line: 1, col: 1 });
+
+// ---- SIS-OPT-3：背景渲染层（chrome 区 + 编辑区各一套对比度/色温）----
+/** 计算背景层样式：region=chrome(工具栏区) / editor(编辑区)。 */
+function bgLayerStyle(region: "chrome" | "editor"): CSSProperties {
+  const bg = settingsStore.background;
+  const img = bg.image;
+  const p = bg[region];
+  const dark = settingsStore.resolvedTheme === "dark";
+  // 对比度遮罩：暗主题用黑遮罩（保浅色文字），亮主题用白遮罩（保深色文字）
+  const overlay = dark ? `rgba(0, 0, 0, ${p.contrast})` : `rgba(255, 255, 255, ${p.contrast})`;
+  // 色温：t>0 暖（sepia+向红偏），t<0 冷（hue-rotate 向蓝偏）
+  const t = p.temperature;
+  const filter =
+    t >= 0
+      ? `sepia(${(t * 0.55).toFixed(3)}) hue-rotate(${(-t * 18).toFixed(1)}deg)`
+      : `hue-rotate(${(-t * 45).toFixed(1)}deg)`;
+  return {
+    backgroundImage: img ? `url("${img}")` : "none",
+    opacity: bg.opacity,
+    filter,
+    boxShadow: `inset 0 0 0 1000px ${overlay}`,
+    display: region === "editor" && bg.mode === "outside" ? "none" : undefined,
+  };
+}
+const bgChromeStyle = computed<CSSProperties>(() => bgLayerStyle("chrome"));
+const bgEditorStyle = computed<CSSProperties>(() => bgLayerStyle("editor"));
+const hasBg = computed(() => !!settingsStore.background.image);
 
 interface EditorApi {
   undo: () => void;
@@ -34,6 +64,7 @@ interface EditorApi {
   polish: (mode: "rewrite" | "polish" | "shorten" | "expand") => void;
   insertAtCursor: (text: string) => void;
   replaceRange: (from: number, to: number, text: string) => void;
+  scrollToLine: (line: number) => void;
 }
 const editorApi: EditorApi = {
   undo: () => undefined,
@@ -43,8 +74,15 @@ const editorApi: EditorApi = {
   polish: () => undefined,
   insertAtCursor: () => undefined,
   replaceRange: () => undefined,
+  scrollToLine: () => undefined,
 };
 provide<EditorApi>("editorApi", editorApi);
+
+/** SIS-OPT-1：大纲锚点点击 -> 编辑器滚动定位 + 关闭简报浮层。 */
+function onBriefLocate(line: number): void {
+  editorApi.scrollToLine(line);
+  aiStore.closeBrief();
+}
 
 // ---- AI 问答侧栏（SIS-AI-1：可折叠，ToolBar「AI 面板」开关）----
 const aiPanelOpen = ref(false);
@@ -245,7 +283,22 @@ onMounted(() => {
   void setupTauriEvents();
   void setupRecovery(); // 启动扫描崩溃残留草稿（SIS-FUNC-10）
   void aiStore.init(); // 加载 AI 配置（SIS-AI-1）
+  void openLaunchArgs(); // SIS-OPT-4：启动命令行文件参数 -> 打开为标签
 });
+
+/** SIS-OPT-4：Tauri 启动带文件参数时逐个打开为标签（复用 openPath 链路，去重/最近文件语义一致）。 */
+async function openLaunchArgs(): Promise<void> {
+  if (!isTauri()) return;
+  try {
+    const { invoke } = await import("@tauri-apps/api/core");
+    const paths = (await invoke("get_launch_args")) as string[];
+    for (const p of paths) {
+      await tabsStore.openPath(p);
+    }
+  } catch (e) {
+    console.error("open launch args failed:", e);
+  }
+}
 
 onBeforeUnmount(() => {
   window.removeEventListener("keydown", onKeydown);
@@ -255,7 +308,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="main-view">
+  <div class="main-view" :class="{ 'has-bg': hasBg }" :data-bg-mode="settingsStore.background.mode">
+    <!-- SIS-OPT-3：背景分层（chrome 顶/底 + 编辑区中；mode=outside 时编辑层隐藏） -->
+    <div class="bg-layer bg-top" :style="bgChromeStyle"></div>
+    <div class="bg-layer bg-mid" :style="bgEditorStyle"></div>
+    <div class="bg-layer bg-bot" :style="bgChromeStyle"></div>
     <ToolBar />
     <TabBar />
     <div class="editor-area">
@@ -271,11 +328,27 @@ onBeforeUnmount(() => {
         @apply="onCompareApply"
       />
       <RecentEmpty v-else-if="!tabsStore.activeTab" />
-      <EditorPane v-else @cursor="cursor = $event" @ready="editorApi.undo = $event.undo; editorApi.redo = $event.redo; editorApi.format = $event.format; editorApi.search = $event.search; editorApi.polish = $event.polish; editorApi.insertAtCursor = $event.insertAtCursor; editorApi.replaceRange = $event.replaceRange" />
+      <EditorPane
+        v-else
+        @cursor="cursor = $event"
+        @ready="
+          editorApi.undo = $event.undo;
+          editorApi.redo = $event.redo;
+          editorApi.format = $event.format;
+          editorApi.search = $event.search;
+          editorApi.polish = $event.polish;
+          editorApi.insertAtCursor = $event.insertAtCursor;
+          editorApi.replaceRange = $event.replaceRange;
+          editorApi.scrollToLine = $event.scrollToLine;
+        "
+      />
       <!-- SIS-AI-1：AI 问答侧栏（ToolBar「AI 面板」开关，可折叠） -->
-      <AiPanel v-if="aiPanelOpen" />
+    <AiPanel v-if="aiPanelOpen" />
     </div>
     <StatusBar :cursor="cursor" />
+
+    <!-- SIS-OPT-1：AI 文档简报 + 大纲锚点浮层 -->
+    <BriefModal @locate="onBriefLocate" />
 
     <!-- 对比源选择弹窗（SIS-FUNC-6） -->
     <n-modal v-model:show="compareModalOpen" preset="card" title="选择对比源" style="width: 420px">
@@ -312,12 +385,26 @@ onBeforeUnmount(() => {
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  position: relative;
+}
+/* SIS-OPT-3：背景层定位（toolbar 40 + tabbar 36 / 编辑区 / statusbar 26） */
+.bg-top {
+  top: 0;
+  height: 76px;
+}
+.bg-mid {
+  top: 76px;
+  bottom: 26px;
+}
+.bg-bot {
+  bottom: 0;
+  height: 26px;
 }
 .editor-area {
   flex: 1;
   min-height: 0;
   display: flex;
-  background: #fff;
+  background: var(--editor-bg, #fff);
 }
 .editor-area > :first-child {
   flex: 1;

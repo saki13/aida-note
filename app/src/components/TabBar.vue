@@ -118,7 +118,7 @@ function onCloseClick(tabId: number): void {
 .tab.active {
   background: var(--tab-active-bg, #fff);
   color: var(--tab-active-fg, #111);
-  box-shadow: inset 0 2px 0 #18a058;
+  box-shadow: inset 0 2px 0 var(--accent, #18a058);
 }
 .tab-title {
   flex: 1;
@@ -129,7 +129,7 @@ function onCloseClick(tabId: number): void {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #18a058;
+  background: var(--accent, #18a058);
   flex-shrink: 0;
 }
 .tab-close {

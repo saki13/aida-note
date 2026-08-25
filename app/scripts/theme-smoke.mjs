@@ -100,6 +100,28 @@ try {
   const purplePrimary = await page.locator(".tool-bar button", { hasText: /换行/ }).evaluate((el) => getComputedStyle(el).getPropertyValue("--n-ripple-color").trim());
   check("强调色切换（data-accent 绿/紫 + UI primary 变体不同）", (await rootAccent()) === "purple" && greenPrimary !== purplePrimary, `accent=${await rootAccent()} green=${greenPrimary} purple=${purplePrimary}`);
 
+  // ---- 6.5 OPT-2：强调色驱动自定义 UI（--accent CSS 变量，此前未定义）----
+  const accentVar = await page.locator(".app-root").evaluate((el) => getComputedStyle(el).getPropertyValue("--accent").trim());
+  check("强调色 CSS 变量生效（--accent = 紫色值）", accentVar === "#7c4dff" || accentVar === "rgb(124, 77, 255)", `accentVar=${accentVar}`);
+
+  // ---- 6.6 OPT-2：暗色工具栏修复（此前 var 未定义回退 #fafafa 白底白字）----
+  const parseRgb = (s) => {
+    const m = s.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    return m ? [+m[1], +m[2], +m[3]] : null;
+  };
+  await pickTheme("暗色");
+  await page.waitForFunction(() => document.querySelector(".app-root")?.getAttribute("data-theme") === "dark");
+  await page.waitForTimeout(300); // data-theme 先变，Naive 主题变量（--n-text-color）下一帧才更新，需等渲染稳定
+  const tbBg = await page.locator(".tool-bar").evaluate((el) => getComputedStyle(el).backgroundColor);
+  // 实际可见文字在 .n-button__content（按钮根元素 color 继承 body 黑色，非渲染文字色）
+  const tbBtnColor = await page.locator(".tool-bar .n-button__content").first().evaluate((el) => getComputedStyle(el).color);
+  const tbBgRgb = parseRgb(tbBg);
+  const tbBtnRgb = parseRgb(tbBtnColor);
+  check("暗色工具栏背景非白（--toolbar-bg 生效）", !!tbBgRgb && tbBgRgb[0] < 128 && tbBgRgb[1] < 128 && tbBgRgb[2] < 128, `bg=${tbBg}`);
+  check("暗色工具栏文字可读（浅色前景）", !!tbBtnRgb && tbBtnRgb[0] > 128 && tbBtnRgb[1] > 128 && tbBtnRgb[2] > 128, `color=${tbBtnColor}`);
+  await pickTheme("跟随系统"); // 还原，保证后续 reload 断言（system + light）成立
+  await page.waitForFunction(() => document.querySelector(".app-root")?.getAttribute("data-theme") === "light");
+
   // ---- 7. 重启记住（reload 后保持 theme=system + accent=purple）----
   await page.reload({ waitUntil: "networkidle" });
   // reload 后无标签显示空态（SIS-FUNC-11），用 data-accent 等待 init 完成

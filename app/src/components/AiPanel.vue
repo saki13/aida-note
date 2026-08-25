@@ -216,12 +216,12 @@ void aiStore.init();
   word-break: break-word;
 }
 .ai-msg-user .ai-msg-content {
-  background: #2080f0;
+  background: var(--primary-color, #2080f0);
   color: #fff;
 }
 .ai-msg-assistant .ai-msg-content {
-  background: #f4f4f5;
-  color: #333;
+  background: var(--floating-bg, #f4f4f5);
+  color: var(--text-color, #333);
 }
 .ai-msg-actions {
   margin-top: 2px;
@@ -236,20 +236,5 @@ void aiStore.init();
   padding: 8px 10px;
   border-top: 1px solid var(--border-color, #eee);
   align-items: flex-end;
-}
-@media (prefers-color-scheme: dark) {
-  .ai-panel {
-    background: #1e1e1e;
-    border-left-color: #333;
-  }
-  .ai-msg-assistant .ai-msg-content {
-    background: #2a2a2a;
-    color: #d4d4d4;
-  }
-  .ai-config-tip {
-    background: #3a2e1a;
-    color: #d8a14e;
-    border-bottom-color: #4a3a1e;
-  }
 }
 </style>

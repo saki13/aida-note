@@ -9,7 +9,7 @@
 
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { loadSettings, saveSettings, type AccentColor } from "../services/settingsService";
+import { loadSettings, saveSettings, type AccentColor, type BackgroundSettings, type BackgroundRegionParams } from "../services/settingsService";
 
 export type ThemePref = "light" | "dark" | "system";
 
@@ -47,6 +47,17 @@ export const useSettingsStore = defineStore("settings", () => {
   /** 系统当前明暗（仅 system 模式使用；matchMedia 监听实时更新） */
   const systemDark = ref(false);
 
+  /** 自定义背景（SIS-OPT-3）：当前生效设置 */
+  const background = ref<BackgroundSettings>({
+    image: null,
+    mode: "app",
+    opacity: 0.7,
+    chrome: { contrast: 0.35, temperature: 0 },
+    editor: { contrast: 0.55, temperature: 0 },
+  });
+  /** 按背景图保存的参数记录（key=图片标识；换图时加载对应参数） */
+  const backgrounds = ref<Record<string, { opacity: number; chrome: BackgroundRegionParams; editor: BackgroundRegionParams }>>({});
+
   /** 实际生效主题：system -> 跟随系统（FUNC-9 三态解析层，驱动全 UI） */
   const resolvedTheme = computed<"light" | "dark">(() =>
     theme.value === "system" ? (systemDark.value ? "dark" : "light") : theme.value,
@@ -62,6 +73,8 @@ export const useSettingsStore = defineStore("settings", () => {
     theme.value = s.theme;
     accentColor.value = s.accentColor;
     recentFiles.value = s.recentFiles;
+    background.value = s.background;
+    backgrounds.value = s.backgrounds;
     if (!mediaQuery) {
       mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       systemDark.value = mediaQuery.matches;
@@ -103,5 +116,62 @@ export const useSettingsStore = defineStore("settings", () => {
     await saveSettings({ wordWrap: v });
   }
 
-  return { wordWrap, theme, accentColor, recentFiles, systemDark, resolvedTheme, init, addRecentFile, removeRecentFile, setTheme, setAccentColor, setWordWrap };
+  // ---- SIS-OPT-3：自定义背景 actions ----
+
+  /** 持久化当前背景及按图参数记录（各背景 action 末尾统一调用）。 */
+  async function persistBg(): Promise<void> {
+    const key = background.value.image;
+    if (key) {
+      backgrounds.value = {
+        ...backgrounds.value,
+        [key]: {
+          opacity: background.value.opacity,
+          chrome: { ...background.value.chrome },
+          editor: { ...background.value.editor },
+        },
+      };
+    }
+    await saveSettings({ background: background.value, backgrounds: backgrounds.value });
+  }
+
+  /** 设置背景图（dataURL；null/空串 = 清除）。换图时：该图已有记录则加载记录参数，无记录则继承当前参数。 */
+  async function setBackgroundImage(image: string | null): Promise<void> {
+    if (!image) {
+      await clearBackground();
+      return;
+    }
+    const record = backgrounds.value[image];
+    if (record) {
+      background.value = { image, mode: background.value.mode, opacity: record.opacity, chrome: { ...record.chrome }, editor: { ...record.editor } };
+    } else {
+      background.value = { ...background.value, image };
+    }
+    await persistBg();
+  }
+
+  /** 清除背景图（保留按图记录，便于再次选择时恢复参数）。 */
+  async function clearBackground(): Promise<void> {
+    background.value = { ...background.value, image: null };
+    await persistBg();
+  }
+
+  /** 切换背景模式：全应用 / 仅编辑区外。 */
+  async function setBackgroundMode(mode: "app" | "outside"): Promise<void> {
+    background.value = { ...background.value, mode };
+    await persistBg();
+  }
+
+  /** 调整背景透明度（0-1）。 */
+  async function setBackgroundOpacity(v: number): Promise<void> {
+    background.value = { ...background.value, opacity: v };
+    await persistBg();
+  }
+
+  /** 调整分区（chrome/editor）对比度或色温。 */
+  async function setBackgroundRegion(region: "chrome" | "editor", patch: Partial<BackgroundRegionParams>): Promise<void> {
+    background.value = { ...background.value, [region]: { ...background.value[region], ...patch } };
+    await persistBg();
+  }
+
+  return { wordWrap, theme, accentColor, recentFiles, systemDark, resolvedTheme, background, backgrounds, init, addRecentFile, removeRecentFile, setTheme, setAccentColor, setWordWrap, setBackgroundImage, clearBackground, setBackgroundMode, setBackgroundOpacity, setBackgroundRegion };
 });

@@ -74,7 +74,7 @@ function selectLanguage(key: string | number): void {
   background: var(--statusbar-bg, #f0f0f0);
   border-top: 1px solid var(--border-color, #ddd);
   font-size: 12px;
-  color: #555;
+  color: var(--text-color, #555);
   user-select: none;
 }
 .spacer {

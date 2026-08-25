@@ -31,7 +31,7 @@ import type { LanguageId } from "../services/language";
 
 const emit = defineEmits<{
   (e: "cursor", c: { line: number; col: number }): void;
-  (e: "ready", api: { undo: () => void; redo: () => void; format: () => Promise<void>; search: () => void; polish: (mode: PolishMode) => void; insertAtCursor: (text: string) => void; replaceRange: (from: number, to: number, text: string) => void }): void;
+  (e: "ready", api: { undo: () => void; redo: () => void; format: () => Promise<void>; search: () => void; polish: (mode: PolishMode) => void; insertAtCursor: (text: string) => void; replaceRange: (from: number, to: number, text: string) => void; scrollToLine: (line: number) => void }): void;
 }>();
 
 const tabsStore = useTabsStore();
@@ -301,6 +301,19 @@ function insertAtCursor(text: string): void {
   view.focus();
 }
 
+/** SIS-OPT-1：大纲锚点定位——滚动到指定行并设置光标（编辑器 1-based 行号）。 */
+function scrollToLine(line: number): void {
+  if (!view) return;
+  const doc = view.state.doc;
+  if (line < 1 || line > doc.lines) return;
+  const pos = doc.line(line).from;
+  view.dispatch({
+    selection: { anchor: pos },
+    effects: EditorView.scrollIntoView(pos, { y: "center" }),
+  });
+  view.focus();
+}
+
 /** 指定范围替换（工具栏「修复 mermaid」等整块替换用；进撤销栈）。 */
 function replaceRange(from: number, to: number, text: string): void {
   if (!view) return;
@@ -355,6 +368,7 @@ onMounted(() => {
     polish: (mode) => startPolish(mode),
     insertAtCursor: (text) => insertAtCursor(text),
     replaceRange: (from, to, text) => replaceRange(from, to, text),
+    scrollToLine: (line) => scrollToLine(line),
   });
   window.addEventListener("click", onWindowClick); // 点击任意处关闭右键菜单
 });
@@ -485,17 +499,6 @@ watch(
 .editor-host :deep(.cm-search .cm-search-count-error) {
   color: #d03050;
 }
-@media (prefers-color-scheme: dark) {
-  .editor-host :deep(.cm-panels-top) {
-    background: var(--search-panel-bg, #1e1e1e);
-    border-color: #3c3c3c;
-  }
-  .editor-host :deep(.cm-search .cm-textfield) {
-    background: #252526;
-    color: #e0e0e0;
-    border-color: #3c3c3c;
-  }
-}
 /* ---- SIS-AI-1 §3：选区浮条 + 润色结果气泡 ---- */
 /* 注意：.editor-pane 必须为包含块（position:relative），否则浮条/气泡/右键菜单
  * 以视口为参照会覆盖到工具栏（PO 冒烟实测：气泡盖住「AI 面板」按钮）。 */
@@ -534,19 +537,6 @@ watch(
 .ctx-btn:hover {
   background: var(--primary-color, #2080f0);
   color: #fff;
-}
-@media (prefers-color-scheme: dark) {
-  .ctx-menu {
-    background: #252526;
-    border-color: #3c3c3c;
-  }
-  .ctx-btn {
-    color: #e0e0e0;
-  }
-  .ctx-title {
-    color: #888;
-    border-color: #3c3c3c;
-  }
 }
 .sel-bar {
   position: absolute;
@@ -668,33 +658,5 @@ watch(
 }
 .polish-btn.primary:hover {
   opacity: 0.9;
-}
-@media (prefers-color-scheme: dark) {
-  .sel-bar {
-    background: #252526;
-    border-color: #3c3c3c;
-  }
-  .sel-bar-text,
-  .sel-bar-btn,
-  .polish-title,
-  .polish-body {
-    color: #e0e0e0;
-  }
-  .sel-bar-btn,
-  .polish-btn {
-    background: #333;
-    border-color: #3c3c3c;
-  }
-  .polish-bubble {
-    background: #1e1e1e;
-    border-color: #3c3c3c;
-  }
-  .polish-head {
-    background: #252526;
-    border-color: #3c3c3c;
-  }
-  .polish-actions {
-    border-color: #3c3c3c;
-  }
 }
 </style>

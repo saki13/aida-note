@@ -6,12 +6,13 @@
  * 6-12 禁用占位（对应 FUNC-7/5/8/6/9/AI-1/设置，后续 Sprint 解锁），保持映射可见防对不齐。
  */
 
-import { inject, computed } from "vue";
-import { NTooltip, NButton, NDropdown, useMessage, type DropdownOption } from "naive-ui";
+import { inject, computed, ref } from "vue";
+import { NTooltip, NButton, NDropdown, NModal, NSlider, useMessage, type DropdownOption } from "naive-ui";
 import { useTabsStore } from "../stores/tabsStore";
 import { useSettingsStore, type ThemePref } from "../stores/settingsStore";
 import { useAiStore } from "../stores/aiStore";
 import { isFormatSupported } from "../services/formatService";
+import { isAiConfigured } from "../services/aiService";
 import { basename } from "../services/fileService";
 import type { AccentColor } from "../services/settingsService";
 
@@ -22,6 +23,7 @@ interface EditorApi {
   search: () => void;
   polish: (mode: "rewrite" | "polish" | "shorten" | "expand") => void;
   replaceRange: (from: number, to: number, text: string) => void;
+  scrollToLine: (line: number) => void;
 }
 
 const tabsStore = useTabsStore();
@@ -121,6 +123,106 @@ function onToggleAiPanel(): void {
   aiPanelApi?.toggle();
 }
 
+/** SIS-OPT-1：AI 文档简报入口（默认关闭：未配置 API 时点击提示）。 */
+function onBrief(): void {
+  const tab = tabsStore.activeTab;
+  if (!tab) return;
+  if (!isAiConfigured(aiStore.aiConfig)) {
+    message.warning("请先在 AI 面板配置 API 后使用 AI 简报");
+    return;
+  }
+  void aiStore.openBrief(tab.content);
+}
+
+// ---- SIS-OPT-3：自定义背景（工具栏「背景」下拉 + 参数弹窗） ----
+const bgModalOpen = ref(false);
+const bgFileInput = ref<HTMLInputElement | null>(null);
+
+function isTauri(): boolean {
+  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+}
+
+/** Uint8Array -> dataURL（分块防大文件栈溢出）。 */
+function bytesToDataUrl(bytes: Uint8Array, mime: string): string {
+  let bin = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return `data:${mime};base64,${btoa(bin)}`;
+}
+
+/** 选择/替换背景图：Tauri 走系统对话框读文件为 dataURL；浏览器走隐藏 file input。 */
+async function onBgPick(): Promise<void> {
+  if (isTauri()) {
+    try {
+      const { open } = await import("@tauri-apps/plugin-dialog");
+      const { readFile } = await import("@tauri-apps/plugin-fs");
+      const sel = await open({
+        multiple: false,
+        filters: [{ name: "图片", extensions: ["png", "jpg", "jpeg", "gif", "webp", "bmp"] }],
+      });
+      if (typeof sel !== "string") return;
+      const bytes = await readFile(sel);
+      const ext = sel.split(".").pop()?.toLowerCase() ?? "png";
+      const mime = ext === "jpg" ? "jpeg" : ext;
+      await settingsStore.setBackgroundImage(bytesToDataUrl(bytes, `image/${mime}`));
+      message.success("背景已设置");
+    } catch (e) {
+      message.error(`选择图片失败：${e instanceof Error ? e.message : String(e)}`);
+    }
+  } else {
+    bgFileInput.value?.click();
+  }
+}
+
+function onBgFileChange(e: Event): void {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    if (typeof reader.result === "string") {
+      void settingsStore.setBackgroundImage(reader.result).then(() => message.success("背景已设置"));
+    }
+  };
+  reader.readAsDataURL(file);
+  input.value = ""; // 允许再次选择同一文件（替换语义）
+}
+
+const bgOptions = computed<DropdownOption[]>(() => [
+  { label: "选择 / 替换图片", key: "bg-pick" },
+  { label: "清除背景", key: "bg-clear", disabled: !settingsStore.background.image },
+  { type: "divider" },
+  { label: "模式：全应用背景", key: "bg-mode-app" },
+  { label: "模式：仅编辑区外", key: "bg-mode-outside" },
+  { type: "divider" },
+  { label: "参数设置…", key: "bg-settings", disabled: !settingsStore.background.image },
+]);
+
+function onBgSelect(key: string): void {
+  switch (key) {
+    case "bg-pick":
+      void onBgPick();
+      break;
+    case "bg-clear":
+      void settingsStore.clearBackground();
+      message.info("背景已清除");
+      break;
+    case "bg-mode-app":
+      void settingsStore.setBackgroundMode("app");
+      message.success("已切换为全应用背景");
+      break;
+    case "bg-mode-outside":
+      void settingsStore.setBackgroundMode("outside");
+      message.success("已切换为仅编辑区外背景");
+      break;
+    case "bg-settings":
+      bgModalOpen.value = true;
+      break;
+  }
+}
+
 const polishOptions: DropdownOption[] = [
   { label: "改写", key: "rewrite" },
   { label: "润色", key: "polish" },
@@ -197,6 +299,11 @@ async function onFixMermaid(): Promise<void> {
     <span class="sep"></span>
 
     <n-tooltip trigger="hover"><template #trigger>
+      <n-dropdown :options="bgOptions" trigger="click" @select="onBgSelect">
+        <n-button size="small">背景</n-button>
+      </n-dropdown>
+    </template>自定义背景（Sprint 6：选图/替换/清除/模式/透明度/对比度/色温）</n-tooltip>
+    <n-tooltip trigger="hover"><template #trigger>
       <n-dropdown :options="themeOptions" :value="settingsStore.theme" trigger="click" @select="onThemeSelect">
         <n-button size="small">主题：{{ themeLabel }}</n-button>
       </n-dropdown>
@@ -210,10 +317,34 @@ async function onFixMermaid(): Promise<void> {
       <n-button size="small" :disabled="!hasActive" @click="onFixMermaid">修复 mermaid</n-button>
     </template>AI 修复 mermaid（AI-1，Sprint 4）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onToggleAiPanel">AI 面板</n-button></template>AI 问答侧栏（AI-1，Sprint 4，可折叠）</n-tooltip>
+    <n-tooltip trigger="hover"><template #trigger>
+      <n-button size="small" :disabled="!hasActive" @click="onBrief">AI 简报</n-button>
+    </template>AI 文档简报 + 大纲锚点（OPT-1，Sprint 6）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>设置</n-button></template>ARCH-2 settingsStore（Sprint 4）</n-tooltip>
 
     <span class="spacer"></span>
     <span class="dirty-count" v-if="dirtyCount > 0">{{ dirtyCount }} 个未保存</span>
+
+    <!-- SIS-OPT-3：隐藏文件选择（浏览器环境兜底） + 背景参数弹窗 -->
+    <input ref="bgFileInput" type="file" accept="image/*" class="bg-file-input" @change="onBgFileChange" />
+    <n-modal v-model:show="bgModalOpen" preset="card" title="背景参数" style="width: 480px">
+      <div class="bg-param-label">全局透明度（{{ Math.round(settingsStore.background.opacity * 100) }}%）</div>
+      <n-slider :value="Math.round(settingsStore.background.opacity * 100)" :min="0" :max="100" @update:value="(v: number) => void settingsStore.setBackgroundOpacity(v / 100)" />
+      <div class="bg-param-grid">
+        <div class="bg-param-col">
+          <div class="bg-param-label">工具栏区 · 对比度（{{ Math.round(settingsStore.background.chrome.contrast * 100) }}）</div>
+          <n-slider :value="Math.round(settingsStore.background.chrome.contrast * 100)" :min="0" :max="100" @update:value="(v: number) => void settingsStore.setBackgroundRegion('chrome', { contrast: v / 100 })" />
+          <div class="bg-param-label">工具栏区 · 色温（{{ settingsStore.background.chrome.temperature.toFixed(2) }}）</div>
+          <n-slider :value="settingsStore.background.chrome.temperature" :min="-1" :max="1" :step="0.05" @update:value="(v: number) => void settingsStore.setBackgroundRegion('chrome', { temperature: v })" />
+        </div>
+        <div class="bg-param-col">
+          <div class="bg-param-label">编辑区 · 对比度（{{ Math.round(settingsStore.background.editor.contrast * 100) }}）</div>
+          <n-slider :value="Math.round(settingsStore.background.editor.contrast * 100)" :min="0" :max="100" @update:value="(v: number) => void settingsStore.setBackgroundRegion('editor', { contrast: v / 100 })" />
+          <div class="bg-param-label">编辑区 · 色温（{{ settingsStore.background.editor.temperature.toFixed(2) }}）</div>
+          <n-slider :value="settingsStore.background.editor.temperature" :min="-1" :max="1" :step="0.05" @update:value="(v: number) => void settingsStore.setBackgroundRegion('editor', { temperature: v })" />
+        </div>
+      </div>
+    </n-modal>
   </div>
 </template>
 
@@ -239,5 +370,23 @@ async function onFixMermaid(): Promise<void> {
 .dirty-count {
   font-size: 12px;
   color: #999;
+}
+.bg-file-input {
+  display: none;
+}
+.bg-param-grid {
+  display: flex;
+  gap: 24px;
+  margin-top: 12px;
+}
+.bg-param-col {
+  flex: 1;
+  min-width: 0;
+}
+.bg-param-label {
+  font-size: 12px;
+  color: var(--text-color, #333);
+  margin: 8px 0 4px;
+  opacity: 0.85;
 }
 </style>

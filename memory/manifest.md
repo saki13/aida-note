@@ -2,7 +2,7 @@
 
 > 用途：新会话的统一恢复入口（L1 恢复清单）。
 > 版本：v0.1.0
-> 最后更新：2026-08-22
+> 最后更新：2026-08-25
 > 更新者：Aida v0.1.0
 
 ---
@@ -11,12 +11,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| `current_sprint` | `Sprint 5（已闭环：使用手册 + 安装包全交付，含 MSI/NSIS 安装包）` |
-| `current_stage` | `项目交付（阶段 11，PO 已确认交付；Sprint 5 追加收尾全部完成）` |
-| `current_theme` | `交付收尾（使用手册 + 安装包）→ 新一轮优化待开（AI 简报+大纲 / 暗色 UI 修复 / 自定义背景）` |
-| `current_task` | `Sprint 5：使用手册 + 安装包（收口完成）` |
-| `task_status` | `done` |
-| `task_progress` | `Sprint 1/2/3/4/5 全部闭环（decision-001~026）；Backlog 19/19 完成；Sprint 5：使用手册 5/5 ✅ + 绿色版 ZIP ✅ + release exe ✅ + MSI/NSIS ✅（bundle/nsis + msi 已产出）` |
+| `current_sprint` | `Sprint 6（优化：OPT-1 简报+锚点 / OPT-2 暗色修复+强调色 / OPT-3 自定义背景 / OPT-4 Shell 集成）` |
+| `current_stage` | `Sprint In Progress（阶段 4 执行；OPT-2/3/1 完成自测，OPT-4 代码完成待 PO 本机验证）` |
+| `current_theme` | `优化（AI 简报+大纲锚点 / 美化系统 / Windows Shell 集成）` |
+| `current_task` | `Sprint 6：OPT-4 Windows Shell 集成（收尾中）` |
+| `task_status` | `in_progress（OPT-1/2/3 done；OPT-4 代码完成）` |
+| `task_progress` | `OPT-2 ✅ theme-smoke 11/11；OPT-3 ✅ opt3-bg-smoke 14/14；OPT-1 ✅ opt1-brief-smoke 7/7；OPT-4 ⏳ cargo check ✅，真实右键/双击 + tauri build 列 PO 验证；全量回归 15 脚本全绿；vue-tsc 0 错误` |
 
 ---
 
@@ -98,5 +98,5 @@
 
 ## 待完善 / 下一步
 
-- **当前阶段**：项目交付（Backlog 19/19 燃尽；PO 确认交付；Sprint 5 追加「使用手册 + 安装包」全部交付完成：手册 5/5 ✅ + 绿色版 ZIP ✅ + MSI/NSIS ✅）
-- 下一步：PO 提出新一轮优化（① AI 文档简报+大纲锚点 ② 暗色模式 UI 修复/强调色 ③ 自定义背景+透明度）→ 开 Sprint 6；另余 4 项本地观察项复验
+- **当前阶段**：Sprint 6 执行中（OPT-1/2/3 完成自测全绿：opt3-bg-smoke 14/14、opt1-brief-smoke 7/7、theme-smoke 11/11；OPT-4 cargo check 通过）
+- 下一步：Sprint 6 收口（DoD 对照表已产出；commit + push GitHub）；PO 本机验证 OPT-4 真实 Shell 集成 + `npm run tauri build` 完整打包（bundler 工具已缓存，PO 挂梯可跑）

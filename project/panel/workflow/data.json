@@ -1,12 +1,12 @@
 {
-  "updated_at": "2026-08-22",
+  "updated_at": "2026-08-25",
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
-    "sprint": "Sprint 5（已闭环：使用手册 + 安装包全交付，含 MSI/NSIS）",
-    "stage": "项目交付（阶段 11，PO 已确认交付 + Sprint 5 追加收尾全部完成）",
-    "stage_main": "项目交付",
-    "status": "Sprint 5 全交付：使用手册 5/5 ✅ + 绿色版 ZIP ✅ + MSI/NSIS 正式安装包 ✅（bundle/nsis/aida-note_0.1.0_x64-setup.exe + msi/aida-note_0.1.0_x64_en-US.msi，PO 本地挂梯 npm run tauri build 产出）",
-    "next": "PO 提出新一轮优化（① AI 文档简报+大纲锚点 ② 暗色 UI 修复/强调色 ③ 自定义背景+透明度）→ 开 Sprint 6；另余 4 项本地观察项复验",
+    "sprint": "Sprint 6（执行中：OPT-1 简报+锚点 / OPT-2 暗色修复+强调色 / OPT-3 自定义背景 / OPT-4 Shell 集成）",
+    "stage": "Sprint In Progress（阶段 4 执行，OPT-1/2/3 自测全绿，OPT-4 代码完成待 PO 本机验证，收口中）",
+    "stage_main": "Sprint In Progress",
+    "status": "OPT-2 ✅ theme-smoke 11/11；OPT-3 ✅ opt3-bg-smoke 14/14（双模式/分区对比度色温/按图保存）；OPT-1 ✅ opt1-brief-smoke 7/7（默认关闭）；OPT-4 ⏳ cargo check ✅（HKCU 注册+argv 打开），真实右键/双击 + tauri build 列 PO 本机验证；全量回归 15 脚本全绿；vue-tsc 0 错误",
+    "next": "Sprint 6 收口（DoD 对照表已产出）→ commit + push GitHub；PO 本机验证 OPT-4 Shell 集成 + npm run tauri build 完整打包",
     "blocked": "无"
   },
   "backlog": [
@@ -142,6 +142,34 @@
       "category": "AI 接入",
       "priority": "P1",
       "status": "done"
+    },
+    {
+      "id": "OPT-1",
+      "title": "AI 文档简报 + 大纲锚点（默认关闭）",
+      "category": "优化",
+      "priority": "P1",
+      "status": "done"
+    },
+    {
+      "id": "OPT-2",
+      "title": "暗色模式 UI 修复 + 强调色生效",
+      "category": "优化",
+      "priority": "P1",
+      "status": "done"
+    },
+    {
+      "id": "OPT-3",
+      "title": "自定义背景图片 + 透明度/对比度/色温（双模式、分区调节）",
+      "category": "优化",
+      "priority": "P1",
+      "status": "done"
+    },
+    {
+      "id": "OPT-4",
+      "title": "Windows Shell 集成（右键打开 + 文件关联）",
+      "category": "优化",
+      "priority": "P1",
+      "status": "in_progress"
     }
   ],
   "sprints": [
@@ -194,6 +222,16 @@
       "items": [
         "使用手册",
         "安装包"
+      ]
+    },
+    {
+      "id": "Sprint 6",
+      "theme": "优化（AI 简报+锚点 / 暗色修复+强调色 / 自定义背景 / Shell 集成）",
+      "items": [
+        "OPT-1",
+        "OPT-2",
+        "OPT-3",
+        "OPT-4"
       ]
     }
   ],
@@ -514,6 +552,41 @@
       "type": "任务完成",
       "summary": "Sprint 5 收官：MSI/NSIS 正式安装包产出（PO 本地挂梯设 HTTPS_PROXY 后 npm run tauri build 成功）",
       "detail": "产物 bundle/nsis/aida-note_0.1.0_x64-setup.exe + bundle/msi/aida-note_0.1.0_x64_en-US.msi；WiX/NSIS 工具链已缓存 %LOCALAPPDATA%\\tauri\\，后续打包不再下载；Sprint 5 DoD 6/6 全过"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P1",
+      "type": "Sprint 启动",
+      "summary": "Sprint 6 启动收口完成（PO 确认 4 优化任务 + 各 SIS）：OPT-1 简报+锚点 / OPT-2 暗色修复+强调色 / OPT-3 自定义背景（双模式、分区参数）/ OPT-4 Shell 集成（右键+文件关联）",
+      "detail": "Planning 严格走 SIS 确认流程（PO 两次流程纠偏后）；OPT-4 范围确认为文件右键打开 + 文本扩展名关联双击打开；代码基线已推 GitHub（master @ 5028b0c）"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "OPT-2 暗色模式 UI 修复 + 强调色生效完成（theme-smoke 11/11，全量回归 13 脚本全绿）",
+      "detail": "根因=组件用 var(--toolbar-bg 等) 但变量从未定义回退亮色；App.vue 按 [data-theme]/[data-accent] 全局统一定义 + 移除组件 prefers-color-scheme；强调色=CSS 变量+Naive themeOverrides 三套 primary"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "OPT-3 自定义背景完成（opt3-bg-smoke 14/14）：选图/双模式（全应用/仅编辑区外）/透明度/工具栏区与编辑区分区对比度色温/按背景保存参数/替换/清除/重启记住",
+      "detail": "背景分层 .bg-layer（z-index 0）+ data-bg-mode；图片 dataURL 持久化（Tauri dialog+fs / 浏览器 FileReader）；排障三处实现遗漏：settingsStore 缺 5 个 action、ToolBar 缺 ref/NModal/NSlider import、MainView 模板漏渲染背景层（tsc unused 捕获）；NSlider 键盘 focus 不转移改 click handle+拖拽"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "OPT-1 AI 文档简报 + 大纲锚点完成（opt1-brief-smoke 7/7）：默认关闭（未配置提示）/AI 简报浮层/大纲本地解析（ATX+setext）/锚点点击真实滚动+光标/失败兜底",
+      "detail": "简报复用 streamChat 流式；parseOutline 本地解析不依赖 AI；EditorPane 新增 scrollToLine（dispatch selection + scrollIntoView y:center）经 ready api 暴露；入口 ToolBar「AI 简报」"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "OPT-4 Windows Shell 集成代码完成（cargo check 通过 2m38s）：HKCU 右键菜单 + 9 扩展名文件关联 + 启动 argv 打开",
+      "detail": "winreg 0.52 写 HKCU（*\\shell\\aida-note + aida-note.<ext> ProgID + .<ext> 默认值）；setup 自动注册幂等；get_launch_args command + MainView.openLaunchArgs 前端接线；真实右键/双击 + tauri build 列 PO 本机验证"
     }
   ],
   "checklist": {

@@ -11,6 +11,28 @@ import { load as loadStore } from "@tauri-apps/plugin-store";
 /** 强调色方案（SIS-FUNC-9：蓝/绿/紫，作用于 UI 主题色 primary） */
 export type AccentColor = "blue" | "green" | "purple";
 
+/** 背景分区参数（SIS-OPT-3：对比度/色温按工具栏区与编辑区分开调） */
+export interface BackgroundRegionParams {
+  /** 对比度：0-1，遮罩深浅（0=无遮罩，1=最深遮罩） */
+  contrast: number;
+  /** 色温：-1(冷) ~ 0(中性) ~ 1(暖) */
+  temperature: number;
+}
+
+/** 自定义背景设置（SIS-OPT-3） */
+export interface BackgroundSettings {
+  /** 背景图（绝对路径或 dataURL）；null=未设置（默认无背景） */
+  image: string | null;
+  /** 模式：app=全应用背景 / outside=仅编辑区外（文字范围纯色） */
+  mode: "app" | "outside";
+  /** 全局透明度：0-1 */
+  opacity: number;
+  /** 工具栏区参数（toolbar/tabbar/statusbar） */
+  chrome: BackgroundRegionParams;
+  /** 编辑区参数 */
+  editor: BackgroundRegionParams;
+}
+
 /** 设置结构（ARCH-2 §4.2 的 AppSettings，字段与 TS 接口一致） */
 export interface AppSettings {
   /** 主题：light / dark / system（FUNC-9 三态，默认 system） */
@@ -27,6 +49,10 @@ export interface AppSettings {
     apiKey: string;
     model: string;
   };
+  /** 自定义背景（SIS-OPT-3） */
+  background: BackgroundSettings;
+  /** 按背景图保存的参数记录（key=图片标识；换图时加载对应参数） */
+  backgrounds: Record<string, { opacity: number; chrome: BackgroundRegionParams; editor: BackgroundRegionParams }>;
 }
 
 /** 兜底默认值（ARCH-2 §4.2 DEFAULT_SETTINGS） */
@@ -36,6 +62,14 @@ export const DEFAULT_SETTINGS: AppSettings = {
   wordWrap: true,
   recentFiles: [],
   aiConfig: { baseURL: "", apiKey: "", model: "" },
+  background: {
+    image: null,
+    mode: "app",
+    opacity: 0.7,
+    chrome: { contrast: 0.35, temperature: 0 },
+    editor: { contrast: 0.55, temperature: 0 },
+  },
+  backgrounds: {},
 };
 
 const STORE_FILE = "settings.json";
@@ -74,6 +108,12 @@ export async function saveSettings(patch: Partial<AppSettings>): Promise<void> {
     ...current,
     ...patch,
     aiConfig: { ...current.aiConfig, ...(patch.aiConfig ?? {}) },
+    background: {
+      ...current.background,
+      ...(patch.background ?? {}),
+      chrome: { ...current.background.chrome, ...(patch.background?.chrome ?? {}) },
+      editor: { ...current.background.editor, ...(patch.background?.editor ?? {}) },
+    },
   };
   try {
     if (isTauri()) {

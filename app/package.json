@@ -21,7 +21,9 @@
     "test:recent": "node scripts/recent-smoke.mjs",
     "test:draft": "node scripts/draft-smoke.mjs",
     "test:ai": "node scripts/ai-smoke.mjs",
-    "test:ai-mermaid": "node scripts/ai-mermaid-smoke.mjs"
+    "test:ai-mermaid": "node scripts/ai-mermaid-smoke.mjs",
+    "test:opt3-bg": "node scripts/opt3-bg-smoke.mjs",
+    "test:opt1-brief": "node scripts/opt1-brief-smoke.mjs"
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.12",
