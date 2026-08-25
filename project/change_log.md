@@ -56,7 +56,7 @@
 | 评估结论 | ① 单实例合并：`tauri-plugin-single-instance = "2"` 注册（`filter_file_args` 过滤 argv → `app.emit("aida-open-files")`），第二实例不再新开窗口，主实例前端 `listen("aida-open-files")` → `openPath` 打开为标签（同路径自动去重激活，复用 OPT-4 的 `get_launch_args` 链路语义）。② 简报悬窗位置：`.brief-panel`/`.brief-mini` 由 `absolute` 改 `fixed`（top:84px right:12px，宽 380→320px，max-height 70vh→60vh，z-index 20→100），锁定视口右上角、不占编辑区、弱提醒形态 |
 | 批准人 | PO（反馈即批准；悬窗位置修复已确认，单实例合并窗口为「默认合并在一个窗口，拖标签出窗口才分窗」期望的收敛前提） |
 | 同步动作 | Cargo.toml（+single-instance）/ lib.rs（插件注册 + `use tauri::Emitter`）/ MainView.vue（listen + unlisten）/ BriefPanel.vue（fixed 定位）；本 CHG-004、memory/state.md、memory/decisions.md（decision-029）、project/panel/workflow/data.json |
-| 状态 | 已关闭（cargo check ✅ 32.90s；vue-tsc 0 错误；opt5-brief-smoke 13/13 ✅ 含「悬窗右上角」断言；真实多开合并行为列 PO 本机验证） |
+| 状态 | 已关闭（cargo check ✅ 11.84s；vue-tsc 0 错误；opt5-brief-smoke 13/13 ✅ 含真实位置断言 pos=(948,84) rightGap=12；第二版补 Teleport 挂 body + 单实例主窗口 unminimize/set_focus；真实多开合并行为列 PO 本机验证） |
 
 ---
 

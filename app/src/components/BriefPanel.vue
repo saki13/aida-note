@@ -56,42 +56,45 @@ function onGenerate(): void {
 </script>
 
 <template>
-  <!-- 收起态：右上角小胶囊图标（悬窗隐藏时也不渲染） -->
-  <div v-if="visible && minimized" class="brief-mini" title="AI 简报" @click="aiStore.toggleBriefMinimized()">
-    <span class="brief-mini-dot" :class="statusDot"></span>
-    <span>简报</span>
-  </div>
-
-  <!-- 展开态：右上角悬窗 -->
-  <div v-if="visible && !minimized" class="brief-panel">
-    <div class="brief-head">
-      <span class="brief-title">AI 简报</span>
-      <span class="brief-file" :title="activeTab?.filePath ?? ''">{{ fileName }}</span>
-      <div class="brief-head-actions">
-        <n-button size="tiny" quaternary title="重新生成" :disabled="!activeTab || activeRec?.status === 'loading'" @click="onRefresh">刷新</n-button>
-        <n-button size="tiny" quaternary title="收起为图标" @click="onMinimize">—</n-button>
-        <n-button size="tiny" quaternary title="关闭" @click="onClose">×</n-button>
-      </div>
+  <!-- SIS-OPT-5：悬窗挂到 body 层（Teleport），彻底脱离 .main-view 的 flex/overflow/背景层
+       等所有定位上下文，保证 fixed 相对视口、固定右上角 -->
+  <Teleport to="body">
+    <!-- 收起态：右上角小胶囊图标 -->
+    <div v-if="visible && minimized" class="brief-mini" title="AI 简报" @click="aiStore.toggleBriefMinimized()">
+      <span class="brief-mini-dot" :class="statusDot"></span>
+      <span>简报</span>
     </div>
-    <div class="brief-body">
-      <!-- loading -->
-      <div v-if="activeRec?.status === 'loading'" class="brief-tip brief-loading">正在生成简报…</div>
-      <!-- error -->
-      <div v-else-if="activeRec?.status === 'error'" class="brief-tip brief-error">{{ activeRec.error }}</div>
-      <!-- 无记录：空态 + 生成按钮 -->
-      <div v-else-if="!activeRec" class="brief-tip brief-empty">
-        <div>当前文件还没有简报</div>
-        <n-button size="small" type="primary" :disabled="!activeTab" @click="onGenerate">生成简报</n-button>
-      </div>
-      <!-- done：简报 + 大纲 -->
-      <template v-else>
-        <div class="brief-section">
-          <div class="brief-section-title">简报</div>
-          <div class="brief-summary">{{ activeRec.summary }}</div>
+
+    <!-- 展开态：右上角悬窗 -->
+    <div v-if="visible && !minimized" class="brief-panel">
+      <div class="brief-head">
+        <span class="brief-title">AI 简报</span>
+        <span class="brief-file" :title="activeTab?.filePath ?? ''">{{ fileName }}</span>
+        <div class="brief-head-actions">
+          <n-button size="tiny" quaternary title="重新生成" :disabled="!activeTab || activeRec?.status === 'loading'" @click="onRefresh">刷新</n-button>
+          <n-button size="tiny" quaternary title="收起为图标" @click="onMinimize">—</n-button>
+          <n-button size="tiny" quaternary title="关闭" @click="onClose">×</n-button>
         </div>
-        <div class="brief-section">
-          <div class="brief-section-title">大纲（点击定位）</div>
-          <div v-if="activeRec.outline.length === 0" class="brief-tip">未检测到标题结构</div>
+      </div>
+      <div class="brief-body">
+        <!-- loading -->
+        <div v-if="activeRec?.status === 'loading'" class="brief-tip brief-loading">正在生成简报…</div>
+        <!-- error -->
+        <div v-else-if="activeRec?.status === 'error'" class="brief-tip brief-error">{{ activeRec.error }}</div>
+        <!-- 无记录：空态 + 生成按钮 -->
+        <div v-else-if="!activeRec" class="brief-tip brief-empty">
+          <div>当前文件还没有简报</div>
+          <n-button size="small" type="primary" :disabled="!activeTab" @click="onGenerate">生成简报</n-button>
+        </div>
+        <!-- done：简报 + 大纲 -->
+        <template v-else>
+          <div class="brief-section">
+            <div class="brief-section-title">简报</div>
+            <div class="brief-summary">{{ activeRec.summary }}</div>
+          </div>
+          <div class="brief-section">
+            <div class="brief-section-title">大纲（点击定位）</div>
+            <div v-if="activeRec.outline.length === 0" class="brief-tip">未检测到标题结构</div>
           <div v-else class="brief-outline">
             <div
               v-for="o in activeRec.outline"
@@ -108,7 +111,8 @@ function onGenerate(): void {
         </div>
       </template>
     </div>
-  </div>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>

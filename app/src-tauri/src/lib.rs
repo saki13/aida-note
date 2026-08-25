@@ -7,7 +7,7 @@
 
 use std::path::Path;
 
-use tauri::Emitter;
+use tauri::{Emitter, Manager};
 
 /// 关联的文本扩展名清单（双击直接用 aida-note 打开）。
 const EXTENSIONS: &[&str] = &["md", "txt", "log", "json", "yaml", "yml", "ini", "toml", "csv"];
@@ -80,11 +80,16 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         // OPT-4-FIX：单实例合并窗口。第二实例不再新开窗口，而是把 argv 转交主实例，
-        // 主实例以「aida-open-files」事件推给前端 -> openPath 打开为标签（同路径自动去重激活）。
+        // 主实例以「aida-open-files」事件推给前端 -> openPath 打开为标签（同路径自动去重激活）；
+        // 同时把主窗口最小化还原 + 置前，确保 aida-note 回到桌面最前。
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             let files = filter_file_args(&argv);
             if !files.is_empty() {
                 let _ = app.emit("aida-open-files", files);
+            }
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.unminimize();
+                let _ = window.set_focus();
             }
         }))
         .invoke_handler(tauri::generate_handler![get_launch_args])

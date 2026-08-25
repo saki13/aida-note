@@ -128,7 +128,13 @@ try {
   await page.locator(".tool-bar button", { hasText: "AI 简报" }).click();
   await page.waitForSelector(".brief-panel", { timeout: 8000 });
   await page.waitForFunction(() => (document.querySelector(".brief-summary")?.textContent ?? "").includes("模拟的简报摘要"), undefined, { timeout: 10000 });
-  check("悬窗展示在右上角且生成简报内容可见", apiCalls === 1 && (await page.locator(".brief-summary").textContent()).includes("第 1 次生成"), `calls=${apiCalls}`);
+  // 真实位置断言：面板必须位于视口右上角（fixed 相对视口），且不遮挡编辑区主区域
+  const vp = page.viewportSize();
+  const panelBox = await page.locator(".brief-panel").boundingBox();
+  const rightGap = vp.width - (panelBox.x + panelBox.width);
+  const topOk = panelBox.y >= 60 && panelBox.y <= 120;
+  const rightOk = rightGap >= 0 && rightGap <= 40;
+  check("悬窗展示在右上角且生成简报内容可见", apiCalls === 1 && (await page.locator(".brief-summary").textContent()).includes("第 1 次生成") && topOk && rightOk, `calls=${apiCalls} pos=(${Math.round(panelBox.x)},${Math.round(panelBox.y)}) rightGap=${Math.round(rightGap)}`);
   const isModal = await page.locator(".n-modal").count();
   check("悬窗非 n-modal 弹窗（右上角面板）", isModal === 0 && (await page.locator(".brief-panel").count()) === 1, `modal=${isModal}`);
   const fileNameText = (await page.locator(".brief-file").textContent()) ?? "";
