@@ -630,6 +630,13 @@
       "type": "任务完成",
       "summary": "OPT-6 上次文件标签恢复完成（opt6-session-smoke 7/7）：正常退出写快照 / 启动弹「恢复上次会话」/ 已保存重开+未保存回填置脏",
       "detail": "sessionService.ts 新建（Tauri appDataDir/session/session.json + 浏览器 localStorage aida-note-session）；退出钩子（beforeunload/onCloseRequested destroy 前）写快照；启动快照优先弹恢复确认，无快照走草稿恢复；恢复后清快照；sessionStorage 标记 aida-session-handled 隔离同页 reload 不误弹；已保存路径不存在跳过提示；全量回归 16 脚本全绿"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P1",
+      "type": "Sprint 收口",
+      "summary": "Sprint 7 收口完成：DoD 对照表 + CHG-003 + decision-028 + 四边同步，commit 9a1ed09 + push GitHub（master）",
+      "detail": "OPT-5 10/10 ✅（opt5-brief-smoke 13/13）+ OPT-6 7/7 ✅（opt6-session-smoke 7/7）；全量回归 16 脚本全绿；vue-tsc 0 错误；npm run build 通过（49.90s）；PO 本机验证：OPT-6 已保存文件真实重开 + Tauri 真实退出快照写入；OPT-4 遗留验证（真实右键/双击 + tauri build 完整打包）继续挂账"
     }
   ],
   "checklist": {
