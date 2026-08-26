@@ -8,6 +8,23 @@
 
 ## 记录列表
 
+### 2026-08-25 · Sprint 收口 · Sprint 8（OPT-8a 背景图 ACL 修复 / OPT-8b AI 工具整合下拉 / OPT-8c AI 翻译双屏对比）收口回填（轻量 Retrospective，随收口合并）
+
+- **背景**：Sprint 7 收口后 PO 提出「AI 翻译双屏对比 + 鼠标移动同时高亮两边文字」「AI 工具整合成下拉不要再堆按钮」「固定译中文」「按语义断句对应（拒绝按行丢上下文）」；同时背景图上传报 `fs/read_file not allowed by ACL`。Planning（Sprint_8_启动收口 + SIS-OPT-8）经 NotifyUser 确认后执行。
+- **关联 decision**：decision-030（Sprint 8 三任务）
+- **影响范围**：capabilities/default.json（fs:allow-read-file/mkdir）、ToolBar.vue（AI 工具分组下拉 + 删未用 onToggleAiPanel/polishOptions）、aiService.ts（buildTranslateMessages/parseTranslatePairs/TRANSLATE_MAX_CHARS）、aiStore.ts（translate 状态 + startTranslate/translateStop/translateClear）、sentenceService.ts（新，语义断句）、TranslateView.vue（新，双屏 + hover 双向高亮 + 滚动联动；收口期修复布局 height:100%/overflow:hidden + translate-body flex 链 + 字符串 ref 改函数 ref）、MainView.vue（translateOpen/openTranslate/onTranslateClose/translateApi）；scripts（opt8-translate-smoke 新且 DOC/译句加长修滚动联动，run-all-smoke 扩至 17 项 + 退出码兜底修复，ai/ai-mermaid/opt5 适配 AI 工具下拉，ai-mermaid 过滤 syncPosition 良性竞态）；package.json（test:opt8-translate）；Sprint_8_DoD对照表.md；change_log CHG-005
+- **过程数据**：vue-tsc 0 错误；opt8-translate-smoke 12/12（整合/未配置提示/双屏/断句 11 句/双向高亮/滚动联动/关闭无损+状态重置/无 JS 错误）；全量回归 17 脚本全绿（15/17 直接 =0，opt6/opt8 因 dev server 中途被沙箱压崩单独重跑 7/7、12/12 验证）；vite build 通过（20.14s）
+- **经验与教训（Sprint 8 专项）**：
+  1. **Tauri 2 fs 插件是「命令级 ACL」而非「目录级」**：capabilities 里只给了 read/write-text-file，背景图的二进制 `readFile` 走的是另一个权限标识 `fs:allow-read-file` → `not allowed by ACL`。排查入口：报错串 `plugin:fs/read_file` 直接对应 permission identifier；文本读取一直正常 ≠ 二进制读取有权限。
+  2. **「语义断句」≠「按行」**：PO 明确指出按行翻译丢换行上下文。落地折中——前端断句只服务左栏展示与 hover 索引对齐（段落优先+终止符+排除小数点+换行不强制断），翻译请求传**完整原文（保留换行）**让 LLM 内部语义翻译，返回 JSON 句数组按序索引对齐。断句精度交给宽松规则 + 长度下限，不做 NLP。
+  3. **Playwright 脚本自写 report 文件时，运行命令禁止把 stdout 重定向到同名文件**：`node xxx.mjs 2>&1 | Out-File scripts/opt8-report.txt` 与脚本内 writeFileSync 同名 → EBUSY 假失败（还叠加 uncaughtException 双写）。规范：stdout 重定向到独立 console 文件，report 由脚本独占写；另外 `waitUntil:"networkidle"` 在 SPA 有长连接时可能永不满足，改 `"load"` 可显著缩短（也规避沙箱前台长命令超时）。
+  4. **滚动联动测试「右栏内容不足一屏」会让 scrollTop 被 clamp 恒 0**：opt8 滚动联动自测反复 FAIL，探测发现左栏 sh=615>583 可滚动但右栏 rsh=583=583 不可滚——mock 译句太短（11 行≈330px<视口）。设 scrollTop 对不可滚动元素无效。修复：mock 译句加长至每句 70+ 字（rsh=770>583）。**排查手法**：直接在 evaluate 里设 `right.scrollTop=x` 读回，若读回 0 说明该栏不可滚动，先修测试数据再怀疑组件。
+  5. **调试中发现的真实组件 bug（随收口修复）**：① TranslateView 双栏缺少 `height:100% + overflow:hidden`（.translate-view）与 `.translate-body` 的 `flex:1 + min-height:0` 约束 → 双栏高度被内容撑开，**内容永不产生滚动条**（CompareView 有正确 flex 链对照）；② `.t-pane` 上的**字符串 ref 在 `<template v-else-if="status==='done'">` 分支下未绑定**（setupState.value 为 null）→ 改函数 ref + let 变量后绑定成功。滚动联动功能最终可用，但根因一半在测试数据、一半在组件布局。
+  6. **全量回归中途 dev server 崩溃 + 退出码统计错乱（沙箱环境限制）**：连续 17 个 msedge headless 顺序跑，vite dev server 中途 `ERR_CONNECTION_REFUSED`（疑似资源压崩），此后脚本 goto/reload 全失败，且 run-all 的 `$LASTEXITCODE` 在该场景下统计错乱（log 段 PASS 而 summary=1 或反之）。**判断「本轮回归是否真绿」不能只看 regression-summary**，要结合「dev server 存活检查 + 失败脚本单独重跑」。本轮 15/17 直接 =0，opt6/opt8 因 dev server 挂掉单独重跑 7/7、12/12 验证通过。
+- **改进项清单（回流方向）**：
+  1. PO 本机验证清单（Sprint 8）：背景图真实上传（Tauri 打包环境，capabilities 已修）；AI 翻译真实 API key 实测翻译质量与 JSON 返回；AI 工具下拉窗口观感
+  2. 翻译后续候选：断句/对齐精度提升（语义段落对齐）、译文可编辑/写回、翻译语言可选（当前固定中文）
+
 ### 2026-08-25 · Sprint 收口 · Sprint 7（OPT-5 AI 简报悬窗+会话缓存 / OPT-6 上次文件标签恢复）收口回填（轻量 Retrospective，随收口合并）
 
 - **背景**：Sprint 6 收口后 PO 反馈简报体验问题（弹窗随时关闭、无缓存、每次点开重调 API）与 notepad++ 式会话恢复诉求；Sprint 7 启动收口经三轮 Planning 确认（简报缓存仅当次会话 + 按文件各存一份；恢复=已保存+未保存合并）后执行。OPT-5/6 均完成自测与全量回归，收口中。

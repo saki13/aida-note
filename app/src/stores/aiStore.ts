@@ -14,12 +14,16 @@ import {
   buildAskMessages,
   buildFixMermaidMessages,
   buildBriefMessages,
+  buildTranslateMessages,
+  parseTranslatePairs,
+  TRANSLATE_MAX_CHARS,
   parseOutline,
   isAiConfigured,
   type AiConfig,
   type ChatMsg,
   type OutlineItem,
 } from "../services/aiService";
+import { splitSentences, type Sentence } from "../services/sentenceService";
 
 export type PolishMode = "rewrite" | "polish" | "shorten" | "expand";
 
@@ -43,6 +47,19 @@ export interface PolishState {
   error: string;
 }
 
+/** SIS-OPT-8c：AI 翻译状态（双屏对比，固定译简体中文）。 */
+export interface TranslateState {
+  status: "idle" | "loading" | "done" | "error";
+  /** 左栏：原文语义句（前端断句） */
+  src: Sentence[];
+  /** 右栏：LLM 返回的译文句（按序索引对齐；缺失补「（未对齐）」占位） */
+  tgt: string[];
+  error: string;
+  /** 所属文件 key（同简报 key 规则） */
+  key: string;
+  ts: number;
+}
+
 export const useAiStore = defineStore("ai", () => {
   /** API 配置（settings.aiConfig 的运行时镜像） */
   const aiConfig = ref<AiConfig>({ baseURL: "", apiKey: "", model: "" });
@@ -63,9 +80,13 @@ export const useAiStore = defineStore("ai", () => {
   /** 悬窗当前绑定的文件 key（切换标签时跟随当前文件）。 */
   const briefActiveKey = ref<string | null>(null);
 
+  // ---- SIS-OPT-8c：AI 翻译（双屏对比） ----
+  const translate = ref<TranslateState>({ status: "idle", src: [], tgt: [], error: "", key: "", ts: 0 });
+
   let qaController: AbortController | null = null;
   let polishController: AbortController | null = null;
   let briefController: AbortController | null = null;
+  let translateController: AbortController | null = null;
 
   async function init(): Promise<void> {
     const s = await loadSettings();
@@ -248,6 +269,63 @@ export const useAiStore = defineStore("ai", () => {
     }
   }
 
+  // ---- SIS-OPT-8c：AI 翻译 ----
+
+  /** 发起翻译（对当前文件全文，固定译简体中文；语义断句对齐）。 */
+  async function startTranslate(tab: { filePath?: string | null; id: number; content: string }): Promise<void> {
+    const cfg = aiConfig.value;
+    const key = briefKeyOf(tab.filePath, tab.id);
+    if (!isAiConfigured(cfg)) {
+      translate.value = { status: "error", src: [], tgt: [], error: "未配置 API（请先在 AI 面板配置 baseURL/key/model）", key, ts: Date.now() };
+      return;
+    }
+    if (tab.content.length > TRANSLATE_MAX_CHARS) {
+      translate.value = { status: "error", src: [], tgt: [], error: `文档过长（${tab.content.length} 字符，上限 ${TRANSLATE_MAX_CHARS}），请分段翻译`, key, ts: Date.now() };
+      return;
+    }
+    const src = splitSentences(tab.content);
+    if (src.length === 0) {
+      translate.value = { status: "error", src: [], tgt: [], error: "未检测到可翻译的句子", key, ts: Date.now() };
+      return;
+    }
+    translateController?.abort();
+    translate.value = { status: "loading", src, tgt: [], error: "", key, ts: Date.now() };
+    translateController = new AbortController();
+    let raw = "";
+    try {
+      await streamChat(cfg, buildTranslateMessages(tab.content), {
+        onDelta: (t) => { raw += t; },
+      }, translateController.signal);
+      const tgt = parseTranslatePairs(raw);
+      if (!tgt) {
+        translate.value = { ...translate.value, status: "error", error: "翻译结果解析失败（AI 未返回有效 JSON），请重试", ts: Date.now() };
+        return;
+      }
+      translate.value = { ...translate.value, status: "done", tgt, ts: Date.now() };
+    } catch (e) {
+      if ((e as Error).name === "AbortError") return;
+      translate.value = { ...translate.value, status: "error", error: e instanceof Error ? e.message : String(e), ts: Date.now() };
+    } finally {
+      translateController = null;
+    }
+  }
+
+  /** 停止翻译（取消进行中请求）。 */
+  function translateStop(): void {
+    translateController?.abort();
+    translateController = null;
+    if (translate.value.status === "loading") {
+      translate.value = { ...translate.value, status: "error", error: "已取消", ts: Date.now() };
+    }
+  }
+
+  /** 清空翻译状态（关闭视图时）。 */
+  function translateClear(): void {
+    translateController?.abort();
+    translateController = null;
+    translate.value = { status: "idle", src: [], tgt: [], error: "", key: "", ts: 0 };
+  }
+
   return {
     aiConfig,
     session,
@@ -258,6 +336,7 @@ export const useAiStore = defineStore("ai", () => {
     briefCache,
     briefUi,
     briefActiveKey,
+    translate,
     init,
     saveConfig,
     ask,
@@ -272,5 +351,8 @@ export const useAiStore = defineStore("ai", () => {
     updateActiveKey,
     closeBrief,
     toggleBriefMinimized,
+    startTranslate,
+    translateStop,
+    translateClear,
   };
 });

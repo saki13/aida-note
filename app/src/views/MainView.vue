@@ -6,13 +6,14 @@
  * 附加：拖拽打开文件、窗口关闭 dirty 合并确认、全局快捷键（Ctrl+N/O/S/Shift+S）。
  */
 
-import { onMounted, onBeforeUnmount, provide, ref, computed, type CSSProperties } from "vue";
+import { onMounted, onBeforeUnmount, provide, ref, computed, nextTick, type CSSProperties } from "vue";
 import { useDialog, useMessage, NModal, NButton } from "naive-ui";
 import ToolBar from "../components/ToolBar.vue";
 import TabBar from "../components/TabBar.vue";
 import EditorPane from "../components/EditorPane.vue";
 import StatusBar from "../components/StatusBar.vue";
 import CompareView from "../components/CompareView.vue";
+import TranslateView from "../components/TranslateView.vue";
 import RecentEmpty from "../components/RecentEmpty.vue";
 import AiPanel from "../components/AiPanel.vue";
 import BriefPanel from "../components/BriefPanel.vue";
@@ -87,6 +88,27 @@ function onBriefLocate(line: number): void {
 // ---- AI 问答侧栏（SIS-AI-1：可折叠，ToolBar「AI 面板」开关）----
 const aiPanelOpen = ref(false);
 provide("aiPanelApi", { toggle: () => { aiPanelOpen.value = !aiPanelOpen.value; } });
+
+// ---- AI 翻译双屏对比（SIS-OPT-8c：ToolBar「AI 工具」下拉触发）----
+const translateOpen = ref(false);
+const translateViewRef = ref<InstanceType<typeof TranslateView> | null>(null);
+
+/** 对当前活动标签发起翻译并打开双屏视图（重试复用同一入口）。 */
+async function openTranslate(): Promise<void> {
+  const tab = tabsStore.activeTab;
+  if (!tab) return;
+  translateOpen.value = true;
+  await nextTick();
+  translateViewRef.value?.setRetry(() => void openTranslate());
+  await aiStore.startTranslate(tab);
+}
+provide("translateApi", { open: () => void openTranslate() });
+
+/** 关闭翻译视图：清状态（中断进行中请求），不写文件、不置脏。 */
+function onTranslateClose(): void {
+  translateOpen.value = false;
+  aiStore.translateClear();
+}
 
 // ---- 文件对比（SIS-FUNC-6）----
 interface CompareState {
@@ -394,8 +416,15 @@ onBeforeUnmount(() => {
     <ToolBar />
     <TabBar />
     <div class="editor-area">
+      <!-- SIS-OPT-8c：AI 翻译双屏对比（与文件对比/编辑器互斥显示） -->
+      <TranslateView
+        v-if="translateOpen"
+        ref="translateViewRef"
+        :title="tabsStore.activeTab?.title ?? ''"
+        @close="onTranslateClose"
+      />
       <CompareView
-        v-if="compareState"
+        v-else-if="compareState"
         :left-title="compareState.leftTitle"
         :right-title="compareState.rightTitle"
         :left-text="compareState.leftText"

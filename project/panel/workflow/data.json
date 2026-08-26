@@ -2,11 +2,11 @@
   "updated_at": "2026-08-25",
   "data_source": "AidaPulse 看板数据源（建设资产实例）。由 Aida 在每次状态变更时按 AS-Panel 规则同步更新。",
   "current": {
-    "sprint": "Sprint 7（收口后修复批次：OPT-4-FIX 单实例合并窗口 + 简报悬窗位置）",
-    "stage": "Sprint In Progress（OPT-5/6 已收口 9a1ed09；OPT-4-FIX 完成自测待提交）",
+    "sprint": "Sprint 8（OPT-8a 背景图 ACL 修复 / OPT-8b AI 工具整合下拉 / OPT-8c AI 翻译双屏对比）",
+    "stage": "Sprint In Progress（OPT-8 三项全量回归 17/17 通过，build 通过，commit + push 收口中）",
     "stage_main": "Sprint In Progress",
-    "status": "OPT-4-FIX ✅ cargo check 32.90s + vue-tsc 0 错误 + opt5-brief-smoke 13/13（含悬窗右上角断言）；真实多开合并行为列 PO 本机验证",
-    "next": "commit + push GitHub；PO 本机验证：真实多开合并（第二个文件右键/双击合入同一窗口标签）+ OPT-6 真实退出/重开 + OPT-4 tauri build 完整打包",
+    "status": "OPT-8 ✅ vue-tsc 0 错误 + opt8-translate-smoke 12/12（整合/未配置提示/双屏/断句 11 句/双向高亮/滚动联动/关闭无损+状态重置/无 JS 错误）；全量回归 17/17（opt6/opt8 因 dev server 中途被沙箱压崩单独重跑验证）；vite build 通过；OPT-4-FIX 已收口 1227544",
+    "next": "commit + push GitHub；PO 本机验证：背景图真实上传（Tauri 打包）+ AI 翻译真实 API + 下拉视觉",
     "blocked": "无"
   },
   "backlog": [
@@ -191,6 +191,27 @@
       "category": "优化",
       "priority": "P2",
       "status": "todo"
+    },
+    {
+      "id": "OPT-8a",
+      "title": "背景图上传 ACL 修复（fs:allow-read-file）",
+      "category": "Bug 修复",
+      "priority": "P1",
+      "status": "done"
+    },
+    {
+      "id": "OPT-8b",
+      "title": "AI 工具整合下拉（问答面板/简报/修复 mermaid/润色/翻译）",
+      "category": "优化",
+      "priority": "P1",
+      "status": "done"
+    },
+    {
+      "id": "OPT-8c",
+      "title": "AI 翻译双屏对比（语义断句 + hover 双向高亮 + 滚动联动）",
+      "category": "新功能",
+      "priority": "P1",
+      "status": "done"
     }
   ],
   "sprints": [
@@ -261,6 +282,15 @@
       "items": [
         "OPT-5",
         "OPT-6"
+      ]
+    },
+    {
+      "id": "Sprint 8",
+      "theme": "AI 翻译双屏对比 + AI 工具整合 + 背景图 ACL 修复",
+      "items": [
+        "OPT-8a",
+        "OPT-8b",
+        "OPT-8c"
       ]
     }
   ],
@@ -651,6 +681,41 @@
       "type": "任务完成",
       "summary": "OPT-4-FIX 单实例合并窗口 + 简报悬窗位置修复完成（CHG-004 / decision-029）：第二实例不再开新窗口，argv 转交主实例以标签打开；悬窗改 fixed 右上角弱提醒",
       "detail": "tauri-plugin-single-instance=2 注册（filter_file_args → app.emit('aida-open-files')）；前端 listen → openPath（同路径去重激活）；BriefPanel .brief-panel/.brief-mini absolute→fixed（top:84px right:12px，宽 380→320px，max-height 60vh，z-index 100）；cargo check ✅ 32.90s；vue-tsc 0 错误；opt5-brief-smoke 13/13（含悬窗右上角断言）；真实多开合并行为列 PO 本机验证"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P1",
+      "type": "Sprint 启动",
+      "summary": "Sprint 8 启动（OPT-8a 背景图 ACL 修复 / OPT-8b AI 工具整合下拉 / OPT-8c AI 翻译双屏对比），SIS-OPT-8 PO 确认",
+      "detail": "PO 需求：AI 翻译双屏对比 + hover 两边高亮；背景图上传报 fs/read_file ACL 拒绝；AI 工具整合成下拉不再堆按钮；固定译中文；按语义断句对应（拒绝按行丢上下文）"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "OPT-8a 背景图 ACL 修复完成：capabilities 补 fs:allow-read-file + fs:allow-mkdir（scope **），背景图二进制读取不再被 ACL 拒绝",
+      "detail": "根因：capabilities/default.json 仅含 read/write-text-file，缺二进制 read-file；ToolBar onBgPick 用 plugin-fs readFile 被拒。真实上传（Tauri 打包）列 PO 本机验证"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P2",
+      "type": "任务完成",
+      "summary": "OPT-8b AI 工具整合下拉完成：ToolBar「AI 润色/修复 mermaid/AI 面板/AI 简报」四入口收敛为单一「AI 工具」分组下拉",
+      "detail": "组「问答/生成」：问答面板/简报/修复 mermaid；组「文本处理」：润色子菜单（改写/润色/缩短/扩写）+ AI 翻译；N-Dropdown group + children"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P1",
+      "type": "任务完成",
+      "summary": "OPT-8c AI 翻译双屏对比完成（sentenceService 语义断句 + aiStore translate + TranslateView 双屏 + MainView 接线）",
+      "detail": "断句：段落优先+终止符+排除小数点+换行不强制断；请求传完整原文（保上下文）LLM 返回 JSON 句数组按索引对齐；双屏左原文右中文译文，hover 双向高亮 + 滚动联动 + 关闭无损（translateClear 不写文件）；上限 20000 字符；vue-tsc 0 错误；opt8-translate-smoke 12/12"
+    },
+    {
+      "date": "2026-08-25",
+      "level": "P1",
+      "type": "Sprint 收口",
+      "summary": "Sprint 8 收口：DoD 对照表 10/10 + CHG-005 + decision-030 + 四边同步（全量回归 17 脚本 + build 通过后 commit + push）",
+      "detail": "opt8-translate-smoke 12/12（整合/未配置提示/双屏/断句/双向高亮/滚动联动/关闭无损/状态重置/无 JS 错误）；PO 本机验证：背景图真实上传（Tauri 打包）+ AI 翻译真实 API + 下拉视觉"
     }
   ],
   "checklist": {

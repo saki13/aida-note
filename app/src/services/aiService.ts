@@ -126,6 +126,42 @@ export function buildBriefMessages(content: string): ChatMsg[] {
   ];
 }
 
+// ---- SIS-OPT-8c：AI 翻译（双屏对比，固定译简体中文） ----
+
+/** 翻译字符上限（超过提示不请求）。 */
+export const TRANSLATE_MAX_CHARS = 20000;
+
+/**
+ * 翻译 prompt：传完整原文（保留换行，保证跨行语义上下文），
+ * 要求逐句译成简体中文、保持句子顺序、仅返回 JSON 字符串数组。
+ */
+export function buildTranslateMessages(content: string): ChatMsg[] {
+  return [
+    {
+      role: "user",
+      content: `请将以下文档逐句翻译成简体中文。要求：
+1) 保持句子顺序，不遗漏、不合并、不拆分句子；
+2) 保留原文的段落与换行所表达的上下文语义，翻译要通顺准确；
+3) 只输出一个 JSON 字符串数组（每个元素 = 原文一个句子的中文翻译，顺序一致），不要任何解释、不要 markdown 代码围栏。\n\n原文：\n"""\n${content.slice(0, TRANSLATE_MAX_CHARS)}\n"""`,
+    },
+  ];
+}
+
+/**
+ * 解析翻译响应为译文句数组。失败（非 JSON 数组）返回 null，由调用方置 error。
+ */
+export function parseTranslatePairs(raw: string): string[] | null {
+  const m = raw.match(/\[[\s\S]*\]/);
+  if (!m) return null;
+  try {
+    const arr: unknown = JSON.parse(m[0]);
+    if (!Array.isArray(arr)) return null;
+    return arr.map((x) => String(x));
+  } catch {
+    return null;
+  }
+}
+
 /** 大纲项：文档标题结构（锚点定位用）。line 为编辑器 1-based 行号。 */
 export interface OutlineItem {
   line: number;

@@ -60,4 +60,17 @@
 
 ---
 
+### CHG-005 · 2026-08-25 · Sprint 8 三任务（OPT-8a 背景图 ACL 修复 / OPT-8b AI 工具整合下拉 / OPT-8c AI 翻译双屏对比）
+
+| 字段 | 内容 |
+|------|------|
+| 发起人 | PO（「再添加一个 ai 翻译功能，双屏对比 + 鼠标移动同时高亮两边文字」+「背景图上传报错 ACL」+「AI 工具整合成下拉，不要再堆按钮」+「固定译中文」+「按语义断句对应」） |
+| 风险等级 | 中（OPT-8c 新增翻译视图与 store 状态，复用 streamChat 无新依赖；OPT-8a 为权限修复；OPT-8b 为 UI 重构） |
+| 评估结论 | ① OPT-8a：capabilities/default.json 缺 `fs:allow-read-file`（二进制读）→ 背景图 `readFile` 被 ACL 拒；补 `fs:allow-read-file` + `fs:allow-mkdir`（scope `**`）。② OPT-8b：ToolBar「AI 润色/修复 mermaid/AI 面板/AI 简报」四个并列入口整合为单一「AI 工具」分组下拉（问答面板/简报/修复 mermaid/润色子菜单/翻译）。③ OPT-8c：sentenceService 语义断句（段落优先+终止符+排除小数点+换行不强制断）；aiStore 增 translate 状态（loading/done/error + abort + clear，上限 20000 字符）；TranslateView 双屏（左原文/右中文译文，hover 双向高亮 + 滚动联动 + 关闭无损）；prompt 传完整原文保上下文，LLM 返回 JSON 句数组按序索引对齐 |
+| 批准人 | PO（Sprint 8 Planning SIS-OPT-8 确认，NotifyUser 批准） |
+| 同步动作 | capabilities/default.json、ToolBar.vue、aiService.ts（buildTranslateMessages/parseTranslatePairs/TRANSLATE_MAX_CHARS）、aiStore.ts（translate + startTranslate/translateStop/translateClear）、sentenceService.ts（新增）、TranslateView.vue（新增）、MainView.vue（translateOpen/openTranslate/onTranslateClose/translateApi）、package.json（test:opt8-translate）、run-all-smoke.ps1（17 脚本）；本 CHG-005、Sprint_8_DoD对照表、memory/state.md、memory/decisions.md（decision-030）、project/panel/workflow/data.json、evolution_log |
+| 状态 | 已关闭（vue-tsc 0 错误；opt8-translate-smoke 12/12 ✅；全量回归 17 脚本全绿；vite build 通过；背景图真实上传（Tauri 打包）列 PO 本机验证） |
+
+---
+
 *文件创建：（项目初始化） | Aida v0.1.0*

@@ -119,9 +119,6 @@ async function onOpenRecent(path: string): Promise<void> {
 
 /** ---- AI-1 入口（SIS-AI-1 §2/§4：AI 面板开关 + 润色四选 + 修复 mermaid） ---- */
 const aiPanelApi = inject<{ toggle: () => void } | null>("aiPanelApi", null);
-function onToggleAiPanel(): void {
-  aiPanelApi?.toggle();
-}
 
 /** SIS-OPT-5：AI 简报悬窗入口（默认关闭：未配置 API 时点击提示；配置后打开悬窗，命中缓存不重复生成）。 */
 function onBrief(): void {
@@ -223,12 +220,6 @@ function onBgSelect(key: string): void {
   }
 }
 
-const polishOptions: DropdownOption[] = [
-  { label: "改写", key: "rewrite" },
-  { label: "润色", key: "polish" },
-  { label: "缩短", key: "shorten" },
-  { label: "扩写", key: "expand" },
-];
 function onPolishSelect(key: string): void {
   if (!tabsStore.activeTab) {
     message.warning("当前没有活动文件");
@@ -236,7 +227,6 @@ function onPolishSelect(key: string): void {
   }
   editorApi?.polish(key as "rewrite" | "polish" | "shorten" | "expand");
 }
-
 /** 提取文档第一个 mermaid 围栏块（```mermaid 或 ~~~mermaid，含围栏），供工具栏修复。 */
 function firstMermaidBlock(content: string): { code: string; start: number; end: number } | null {
   const re = /(?:```|~~~)\s*mermaid\s*\n([\s\S]*?)(?:```|~~~)/;
@@ -266,6 +256,71 @@ async function onFixMermaid(): Promise<void> {
     message.success("mermaid 已修复");
   } catch (e) {
     message.error(e instanceof Error ? e.message : String(e));
+  }
+}
+
+// ---- SIS-OPT-8b：AI 工具整合为单一下拉（不再并列堆按钮） ----
+
+/** AI 翻译入口（MainView 注入：open 对当前文件开双屏翻译）。 */
+const translateApi = inject<{ open: () => void } | null>("translateApi", null);
+
+const aiMenuOptions: DropdownOption[] = [
+  {
+    type: "group",
+    label: "问答 / 生成",
+    key: "g-qa",
+    children: [
+      { label: "AI 问答面板", key: "ai-panel" },
+      { label: "AI 简报", key: "ai-brief" },
+      { label: "修复 mermaid", key: "ai-fix-mermaid" },
+    ],
+  },
+  {
+    type: "group",
+    label: "文本处理",
+    key: "g-text",
+    children: [
+      {
+        label: "AI 润色",
+        key: "ai-polish",
+        children: [
+          { label: "改写", key: "rewrite" },
+          { label: "润色", key: "polish" },
+          { label: "缩短", key: "shorten" },
+          { label: "扩写", key: "expand" },
+        ],
+      },
+      { label: "AI 翻译", key: "ai-translate" },
+    ],
+  },
+];
+
+function onAiSelect(key: string): void {
+  switch (key) {
+    case "ai-panel":
+      aiPanelApi?.toggle();
+      return;
+    case "ai-brief":
+      onBrief();
+      return;
+    case "ai-fix-mermaid":
+      void onFixMermaid();
+      return;
+    case "ai-translate": {
+      const tab = tabsStore.activeTab;
+      if (!tab) {
+        message.warning("当前没有活动文件");
+        return;
+      }
+      if (!isAiConfigured(aiStore.aiConfig)) {
+        message.warning("请先在 AI 面板配置 API 后使用 AI 翻译");
+        return;
+      }
+      translateApi?.open();
+      return;
+    }
+    default:
+      onPolishSelect(key); // rewrite/polish/shorten/expand 叶子项
   }
 }
 </script>
@@ -308,18 +363,12 @@ async function onFixMermaid(): Promise<void> {
         <n-button size="small">主题：{{ themeLabel }}</n-button>
       </n-dropdown>
     </template>主题切换（FUNC-9，Sprint 4：亮/暗/跟随系统 + 强调色）</n-tooltip>
+    <!-- SIS-OPT-8b：AI 工具整合下拉（问答面板/简报/修复 mermaid/润色/翻译） -->
     <n-tooltip trigger="hover"><template #trigger>
-      <n-dropdown :options="polishOptions" trigger="click" @select="onPolishSelect">
-        <n-button size="small" :disabled="!hasActive">AI 润色</n-button>
+      <n-dropdown :options="aiMenuOptions" trigger="click" @select="onAiSelect">
+        <n-button size="small" :disabled="!hasActive">AI 工具</n-button>
       </n-dropdown>
-    </template>AI 润色（AI-1，Sprint 4：选中文本改写/润色/缩短/扩写）</n-tooltip>
-    <n-tooltip trigger="hover"><template #trigger>
-      <n-button size="small" :disabled="!hasActive" @click="onFixMermaid">修复 mermaid</n-button>
-    </template>AI 修复 mermaid（AI-1，Sprint 4）</n-tooltip>
-    <n-tooltip trigger="hover"><template #trigger><n-button size="small" @click="onToggleAiPanel">AI 面板</n-button></template>AI 问答侧栏（AI-1，Sprint 4，可折叠）</n-tooltip>
-    <n-tooltip trigger="hover"><template #trigger>
-      <n-button size="small" :disabled="!hasActive" @click="onBrief">AI 简报</n-button>
-    </template>AI 简报悬窗（OPT-5，Sprint 7：右上角悬窗 + 按文件缓存 + 刷新）</n-tooltip>
+    </template>AI 工具（Sprint 8：问答面板/简报/修复 mermaid/润色/翻译，整合下拉）</n-tooltip>
     <n-tooltip trigger="hover"><template #trigger><n-button size="small" disabled>设置</n-button></template>ARCH-2 settingsStore（Sprint 4）</n-tooltip>
 
     <span class="spacer"></span>

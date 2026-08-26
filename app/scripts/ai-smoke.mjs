@@ -110,7 +110,10 @@ try {
   check("未配置 key 时润色提示「未配置 API」不崩溃", errTip.includes("未配置 API"), errTip.slice(0, 40));
 
   // ---- 2. 配置 API 并持久化（key 明文存 settings.json）----
-  await page.locator(".tool-bar button", { hasText: "AI 面板" }).click();
+  // OPT-8b：AI 入口整合为「AI 工具」下拉 -> 问答 / 生成 -> AI 问答面板
+  await page.locator('.tool-bar button:has-text("AI 工具")').click();
+  await page.waitForSelector(".n-dropdown-menu", { timeout: 5000 });
+  await page.locator('.n-dropdown-menu :text-is("AI 问答面板")').click();
   await page.waitForSelector(".ai-panel", { timeout: 5000 });
   await page.locator(".ai-config-tip button", { hasText: "去设置" }).click();
   await page.waitForSelector(".ai-config-form", { timeout: 5000 });
@@ -135,9 +138,11 @@ try {
   // ---- 3. 无选中文本：工具栏润色提示先选中（不带全文）----
   await page.locator(".cm-content").click();
   await page.keyboard.press("End");
-  await page.locator(".tool-bar button", { hasText: "AI 润色" }).click();
+  // OPT-8b：AI 工具下拉 -> 文本处理 -> AI 润色（子菜单）-> 润色
+  await page.locator('.tool-bar button:has-text("AI 工具")').click();
   await page.waitForSelector(".n-dropdown-menu", { timeout: 5000 });
-  await page.locator(".n-dropdown-option", { hasText: "润色" }).click();
+  await page.locator('.n-dropdown-menu :text("AI 润色")').hover();
+  await page.locator(':text-is("润色")').click();
   await msgShown("请先在编辑器中选中文本");
 
   // ---- 4. 选中文本 -> 选区浮条四动作 ----

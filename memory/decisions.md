@@ -6,6 +6,18 @@
 
 ## 决策记录
 
+### decision-030 · 2026-08-25 · Sprint 8 三任务（OPT-8a 背景图 ACL 修复 / OPT-8b AI 工具整合下拉 / OPT-8c AI 翻译双屏对比）
+
+- **背景**：PO 提出「AI 翻译双屏对比 + hover 两边高亮」新功能；背景图上传报 `fs/read_file not allowed by ACL`；AI 按钮堆砌过多要求整合成下拉。
+- **决策**：
+  1. **OPT-8a 权限**：capabilities/default.json 补 `fs:allow-read-file`（scope `**`）解决背景图二进制读取 ACL 拒绝，顺带补 `fs:allow-mkdir`（草稿目录幂等）。scope `**` 与 read/write-text-file 既有策略一致（本地文本编辑器，文件任意位置读取属核心语义）。
+  2. **OPT-8b 整合**：ToolBar 四 AI 入口（润色/修复 mermaid/AI 面板/AI 简报）收敛为单一「AI 工具」分组下拉（N-Dropdown group + children 子菜单）。
+  3. **OPT-8c 翻译对齐方案（PO 拍板「按语义断句」）**：前端 `splitSentences` 语义断句（段落优先、终止符、排除小数点、**换行不强制断**以保留跨行上下文）用于左栏展示；翻译请求传**完整原文（保留换行）**给 LLM，LLM 内部语义翻译并返回 JSON 句数组，前端按索引对齐渲染。不采用机械按行（PO 明确拒绝，丢上下文）。hover 双向高亮按索引；滚动联动复用 CompareView 模式；关闭视图 translateClear 不写文件不置脏。
+- **依据**：vue-tsc 0 错误；opt8-translate-smoke 12/12（整合/未配置提示/双屏/断句 7 句/双向高亮/滚动联动/关闭无损+状态重置/无 JS 错误）；全量回归 17 脚本全绿；vite build 通过。
+- **影响范围**：capabilities/default.json、ToolBar.vue、aiService.ts、aiStore.ts、sentenceService.ts（新增）、TranslateView.vue（新增）、MainView.vue、package.json、run-all-smoke.ps1；CHG-005、state.md、data.json。
+
+---
+
 ### decision-029 · 2026-08-25 · OPT-4-FIX 单实例合并窗口 + 简报悬窗位置修复（Sprint 7 收口后 PO 反馈）
 
 - **背景**：Sprint 7 收口（commit 9a1ed09）后 PO 反馈：① 多次打开文件都是默认开不同窗口（OPT-4 的 `"exe" "%1"` 每次都拉起全新实例），期望合并到同一窗口、仅「拖标签出窗口」才分窗；② 简报悬窗出现在左下角且挤占编辑区，期望右上角弱提醒。

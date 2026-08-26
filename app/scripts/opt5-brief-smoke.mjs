@@ -107,7 +107,10 @@ try {
     });
 
   // ---- 1. 未配置 AI：点击提示、悬窗不出现 ----
-  await page.locator(".tool-bar button", { hasText: "AI 简报" }).click();
+  // OPT-8b：AI 入口整合为「AI 工具」下拉 -> 问答 / 生成 -> AI 简报
+  await page.locator('.tool-bar button:has-text("AI 工具")').click();
+  await page.waitForSelector(".n-dropdown-menu", { timeout: 5000 });
+  await page.locator('.n-dropdown-menu :text-is("AI 简报")').click();
   await msgShown("请先");
   const brief0 = await getStore();
   check("未配置 AI 时点击提示配置且悬窗不打开", brief0.briefUi.visible === false, `visible=${brief0.briefUi.visible}`);
@@ -125,7 +128,9 @@ try {
     CFG,
   );
   await page.waitForTimeout(200);
-  await page.locator(".tool-bar button", { hasText: "AI 简报" }).click();
+  await page.locator('.tool-bar button:has-text("AI 工具")').click();
+  await page.waitForSelector(".n-dropdown-menu", { timeout: 5000 });
+  await page.locator('.n-dropdown-menu :text-is("AI 简报")').click();
   await page.waitForSelector(".brief-panel", { timeout: 8000 });
   await page.waitForFunction(() => (document.querySelector(".brief-summary")?.textContent ?? "").includes("模拟的简报摘要"), undefined, { timeout: 10000 });
   // 真实位置断言：面板必须位于视口右上角（fixed 相对视口），且不遮挡编辑区主区域
@@ -151,7 +156,9 @@ try {
   // ---- 4. 关闭悬窗 -> 入口重开 -> 命中缓存（API 计数仍 1） ----
   await page.locator(".brief-head button", { hasText: "×" }).click();
   await page.waitForFunction(() => !document.querySelector(".brief-panel") && !document.querySelector(".brief-mini"));
-  await page.locator(".tool-bar button", { hasText: "AI 简报" }).click();
+  await page.locator('.tool-bar button:has-text("AI 工具")').click();
+  await page.waitForSelector(".n-dropdown-menu", { timeout: 5000 });
+  await page.locator('.n-dropdown-menu :text-is("AI 简报")').click();
   await page.waitForSelector(".brief-panel", { timeout: 5000 });
   await page.waitForTimeout(400);
   check("关闭后重开悬窗：直接展示缓存不重复调 API", apiCalls === 1, `calls=${apiCalls}`);
@@ -166,7 +173,9 @@ try {
   await page.waitForFunction(() => document.querySelector(".brief-loading") !== null, undefined, { timeout: 5000 });
   await page.locator(".brief-head button", { hasText: "×" }).click(); // 生成中关闭
   await page.waitForTimeout(1200); // 等 mock 流式完成
-  await page.locator(".tool-bar button", { hasText: "AI 简报" }).click();
+  await page.locator('.tool-bar button:has-text("AI 工具")').click();
+  await page.waitForSelector(".n-dropdown-menu", { timeout: 5000 });
+  await page.locator('.n-dropdown-menu :text-is("AI 简报")').click();
   await page.waitForSelector(".brief-panel", { timeout: 5000 });
   await page.waitForFunction(() => (document.querySelector(".brief-summary")?.textContent ?? "").includes("第 3 次生成"), undefined, { timeout: 8000 });
   check("生成中关闭：后台完成，重开悬窗展示缓存", apiCalls === 3 && (await page.locator(".brief-summary").textContent()).includes("第 3 次生成"), `calls=${apiCalls}`);

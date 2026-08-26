@@ -11,12 +11,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| `current_sprint` | `Sprint 7（OPT-5 AI 简报悬窗+会话缓存 / OPT-6 上次文件标签恢复）` |
-| `current_stage` | `Sprint In Progress（阶段 4 执行：OPT-5/6 完成自测+全量回归+收口同步，待 commit）` |
-| `current_theme` | `体验优化（简报悬窗+按文件缓存+刷新+后台生成 / notepad++ 式会话恢复）` |
-| `current_task` | `Sprint 7 收口（DoD 对照表已产出；四边同步中）` |
-| `task_status` | `in_progress（OPT-5/6 done）` |
-| `task_progress` | `OPT-5 ✅ opt5-brief-smoke 13/13；OPT-6 ✅ opt6-session-smoke 7/7；全量回归 16 脚本全绿；vue-tsc 0 错误；build ✅（49.90s）` |
+| `current_sprint` | `Sprint 8（OPT-8a 背景图 ACL 修复 / OPT-8b AI 工具整合下拉 / OPT-8c AI 翻译双屏对比）` |
+| `current_stage` | `Sprint In Progress（阶段 4 执行：OPT-8 三项全量回归 17/17 通过，build 通过，commit + push 收口中）` |
+| `current_theme` | `AI 翻译双屏对比（语义断句/hover 双向高亮）+ AI 工具整合下拉 + 背景图 ACL 修复` |
+| `current_task` | `Sprint 8 收口（DoD 对照表已产出；全量回归 17/17 ✅；build ✅；commit + push 进行中）` |
+| `task_status` | `in_progress（OPT-8a/8b/8c done）` |
+| `task_progress` | `OPT-8a ✅ capabilities 补 fs:allow-read-file/mkdir；OPT-8b ✅「AI 工具」分组下拉；OPT-8c ✅ sentenceService 断句 + aiStore translate + TranslateView 双屏 + MainView 接线；收口期修复 TranslateView 双栏布局/ref + 脚本适配；opt8-translate-smoke 12/12；vue-tsc 0 错误；全量回归 17/17；vite build 通过` |
 
 ---
 

@@ -24,7 +24,8 @@
     "test:ai-mermaid": "node scripts/ai-mermaid-smoke.mjs",
     "test:opt3-bg": "node scripts/opt3-bg-smoke.mjs",
     "test:opt5-brief": "node scripts/opt5-brief-smoke.mjs",
-    "test:opt6-session": "node scripts/opt6-session-smoke.mjs"
+    "test:opt6-session": "node scripts/opt6-session-smoke.mjs",
+    "test:opt8-translate": "node scripts/opt8-translate-smoke.mjs"
   },
   "dependencies": {
     "@codemirror/lang-html": "^6.4.12",
